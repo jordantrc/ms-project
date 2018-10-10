@@ -224,7 +224,7 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly):
 
 def print_help():
     """prints a help message"""
-    print("Usage:\ntfrecord-gen.py <Dataset> <root directory>")
+    print("Usage:\ntfrecord-gen.py <Dataset> <root directory> <tfrecord output directory>")
 
 
 if __name__ == "__main__":
