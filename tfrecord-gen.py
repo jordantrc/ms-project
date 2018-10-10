@@ -14,9 +14,11 @@
 from __future__ import print_function
 
 import cv2
+import numpy as np
 import os
 import random
 import sys
+import tensorflow as tf
 
 
 def main():
@@ -32,6 +34,14 @@ def main():
 
     if dataset_name == "UCF101":
         ucf101_dataset(root_directory, output_directory)
+
+
+def _int64_feature(value):
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
+
+def _bytes_feature(value):
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
 def ucf101_dataset(root, output):
@@ -66,7 +76,7 @@ def ucf101_dataset(root, output):
         class_name = classes[k][0]
         class_directory = os.path.join(video_directory, class_name)
         videos = os.listdir(class_directory)
-        videos = [ os.path.join(class_directory, v) for v in videos ]
+        videos = [os.path.join(class_directory, v) for v in videos]
 
         if smallest_class is None:
             smallest_class_num = len(videos)
@@ -86,71 +96,130 @@ def ucf101_dataset(root, output):
         class_name = classes[k][0]
         videos = classes[k][1]
         for v in videos:
-            video_sample = sample_video(v, num_samples, sample_length, sample_randomly)
+            print("######\nProcessing %s:\n" % v)
+            features = {}
+            output_path = os.path.join(output, v + ".tfrecord")
+            print("output_path = %s" % output_path)
+            writer = tf.python_io.TFRecordWriter(output_path)
+            assert writer is not None
+
+            # get video data from the video
+            video_data = video_file_to_ndarray(v, num_samples, sample_length, sample_randomly)
+            image_width = video_data[1]
+            image_height = video_data[2]
+            images_raw = video_data[3].tostring()
+
+            features[v] = _bytes_feature(images_raw)
+            features['height'] = _int64_feature(image_height)
+            features['width'] = _int64_feature(image_width)
+            example = tf.train.Example(features=tf.train.Features(feature=features))
+            writer.write(example.SerializeToString())
+            print("done writing data to tfrecord file")
 
 
-def sample_video(path, num_samples, sample_length, sample_randomly):
-    """samples a video given function arguments, returns a numpy array
-    containing all three color channels, audio, and optical flow channel"""
-    assert os.path.isfile(path), "unable to open %s" % (path)
-
-    # sample the video
-    v = video_file_to_ndarray(path, num_samples, sample_length, sample_randomly)
+def video_class(path):
+    """returns the class of the video given the path"""
+    filename = os.path.basename(path)
+    parts = filename.split('_')
+    classname = parts[1]
+    return classname
 
 
 def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly):
     """returns an ndarray of samples from a video"""
+    assert os.path.isfile(path), "unable to open %s" % (path)
     cap = cv2.VideoCapture(path)
     assert cap is not None, "Video capture failed for %s" % (path)
 
+    # get class information for the video
+    video_class_name = video_class(path)
+
     # get metadata of video
     if hasattr(cv2, 'cv'):
+        print("using cv2.cv for meta")
         frame_count = int(cap.get(cv2.cv.CAP_PROP_FRAME_COUNT))
         height = int(cap.get(cv2.cv.CAP_PROP_FRAME_HEIGHT))
         width = int(cap.get(cv2.cv.CAP_PROP_FRAME_WIDTH))
         fps = float(cap.get(cv2.cv.CAP_PROP_FPS))
     else:
+        print("using cv2 for meta")
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         fps = float(cap.get(cv2.CAP_PROP_FPS))
 
-    length = frame_count / fps
-    print("%s length = %s" % (path, length))
-    
-    video_seconds = list(range(0, int(length)))
-    if sample_randomly:
-        sample_start_times = random_sample_start_times(video_seconds, num_samples, sample_length)
-    else:
-        for n in range(0, num_samples):
-            sample_start_times.append(n * sample_length)
+    print("video metadata:")
+    print("frame_count = %d" % (frame_count))
+    print("height = %d" % (height))
+    print("width = %d" % (width))
+    print("fps = %d" % (fps))
+    print("length = %f" % (frame_count / fps))
 
-    print("%s - start times: %s" % (path, sample_start_times))
+    video_seconds = list(range(0, int(frame_count / fps)))
+    sample_times = []
+    oversample = False
 
-    # capture the video frames in 
-    
-
-def random_sample_start_times(seconds, num, length):
-    """samples the seconds list randomly, if the list is smaller
-    than the number of samples compounded by length, the list is
-    samples sequentially, looping back around to the beginning"""
-
-    start_times = []
-
-    if len(seconds[0::length]) > num:
-        # generate a sample from the sample_seconds list
-        start_times = random.sample(seconds[0::length], num)
-        start_times.sort()
+    if len(video_seconds[::sample_length]) > num_samples:
+        sample_times = random.sample(video_seconds[::sample_length], num_samples)
+        add_times = []
+        for s in sample_times:
+            for i in range(1, sample_length):
+                add_times.append(s + i)
+        sample_times.extend(add_times)
+        sample_times.sort()
     else:
         # oversampling is needed
+        oversample = True
         index = 0
-        while len(start_times) < num:
-            start_times.append(seconds[index])
+        while len(sample_times) < (num_samples * sample_length):
+            sample_times.append(video_seconds[index])
             index += 1
-            if index == len(seconds):
+            if index == len(video_seconds):
                 index = 0
 
-    return start_times
+    print("sample_times = %s" % (sample_times))
+    success, image = cap.read()
+
+    buf = np.empty((int(fps * sample_length * num_samples), height, width, 3), np.dtype('uint8'))
+    in_second = 0
+    count = 0
+    sequence = 0
+    while success:
+        if in_second in sample_times:
+            # image transformations - resize to 224x224, convert to float
+            image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_CUBIC)
+            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = image.astype(np.float32)
+
+            if oversample:
+                num_samples = sample_times.count(in_second)
+                indices = [i for i, x in enumerate(sample_times) if x == in_second]
+            else:
+                num_samples = 1
+
+            if num_samples == 1:
+                # cv2.imwrite("./frames/frame%d-%d.jpg" % (sequence, count), image)
+                buf[sequence] = image
+                sequence += 1
+            else:
+                for s in range(num_samples):
+                    index = indices[s]
+                    sequence = int((fps * index) + (count % fps))
+                    buf[sequence] = image
+                    # print("index = %s sequence = %s" % (index, sequence))
+                    # print("frame index = %s" % frame_index)
+                    # cv2.imwrite("./frames/frame%d-%d.jpg" % (sequence, count), image)
+
+        success, image = cap.read()
+        # print('read new frame: ', success)
+        count += 1
+        in_second = int(count / fps)
+
+    print("np buffer shape, sample data:")
+    print(buf.shape)
+    print(buf[0])
+
+    return [video_class_name, width, height, buf]
 
 
 def print_help():
