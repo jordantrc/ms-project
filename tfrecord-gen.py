@@ -107,8 +107,8 @@ def ucf101_dataset(root, output):
     for k in classes.keys():
         class_name = classes[k][0]
         videos = classes[k][1]
-        for v in videos:
-            print("######\nProcessing %s:\n" % v)
+        for i, v in enumerate(videos):
+            print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
             features = {}
             video_filename = os.path.basename(v)
             output_path = os.path.join(output, video_filename + ".tfrecord")
