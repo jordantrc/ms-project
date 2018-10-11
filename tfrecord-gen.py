@@ -32,6 +32,11 @@ def main():
     root_directory = sys.argv[2]
     output_directory = sys.argv[3]
 
+    print("#####\nGot arguments:")
+    print("dataset_name = %s" % dataset_name)
+    print("root_directory = %s" % root_directory)
+    print("output_directory = %s" % output_directory)
+
     if dataset_name == "UCF101":
         ucf101_dataset(root_directory, output_directory)
 
@@ -105,7 +110,8 @@ def ucf101_dataset(root, output):
         for v in videos:
             print("######\nProcessing %s:\n" % v)
             features = {}
-            output_path = os.path.join(output, v + ".tfrecord")
+            video_filename = os.path.basename(v)
+            output_path = os.path.join(output, video_filename + ".tfrecord")
             print("output_path = %s" % output_path)
             writer = tf.python_io.TFRecordWriter(output_path)
             assert writer is not None
