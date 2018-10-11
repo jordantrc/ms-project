@@ -52,6 +52,14 @@ def ucf101_dataset(root, output):
     num_samples = 5
     sample_length = 2
 
+    # image resizing settings
+    flip_horizontally = 0.5
+    resize_height = 128 
+    resize_width = 171
+    crop_height = 112 
+    crop_width = 112
+
+
     assert os.path.isdir(root) and os.path.isdir(output)
     class_index_file = os.path.join(root, "classInd.txt")
     video_directory = os.path.join(root, "UCF-101")
