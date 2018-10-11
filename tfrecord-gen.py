@@ -193,7 +193,7 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
     print("sample_times = %s" % (sample_times))
     success, image = cap.read()
 
-    buf = np.empty((int(fps * sample_length * num_samples), height, width, 3), np.dtype('uint8'))
+    buf = np.empty((int(fps * sample_length * num_samples), resize_height, resize_width, 3), np.dtype('uint8'))
     in_second = 0
     count = 0
     sequence = 0
