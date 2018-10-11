@@ -54,11 +54,10 @@ def ucf101_dataset(root, output):
 
     # image resizing settings
     flip_horizontally = 0.5
-    resize_height = 128 
+    resize_height = 128
     resize_width = 171
-    crop_height = 112 
-    crop_width = 112
-
+    # crop_height = 112
+    # crop_width = 112
 
     assert os.path.isdir(root) and os.path.isdir(output)
     class_index_file = os.path.join(root, "classInd.txt")
@@ -112,7 +111,8 @@ def ucf101_dataset(root, output):
             assert writer is not None
 
             # get video data from the video
-            video_data = video_file_to_ndarray(v, num_samples, sample_length, sample_randomly)
+            video_data = video_file_to_ndarray(v, num_samples, sample_length, sample_randomly, flip_horizontally,
+                                               resize_height, resize_width)
             image_width = video_data[1]
             image_height = video_data[2]
             images_raw = video_data[3].tostring()
@@ -133,7 +133,7 @@ def video_class(path):
     return classname
 
 
-def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly):
+def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, flip, resize_height, resize_width):
     """returns an ndarray of samples from a video"""
     assert os.path.isfile(path), "unable to open %s" % (path)
     cap = cv2.VideoCapture(path)
@@ -141,6 +141,11 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly):
 
     # get class information for the video
     video_class_name = video_class(path)
+
+    # determine if video should be flipped
+    flip_video = False
+    if random.random() <= flip:
+        flip_video = True
 
     # get metadata of video
     if hasattr(cv2, 'cv'):
@@ -195,7 +200,9 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly):
     while success:
         if in_second in sample_times:
             # image transformations - resize to 224x224, convert to float
-            image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_CUBIC)
+            image = cv2.resize(image, (resize_width, resize_height), interpolation=cv2.INTER_CUBIC)
+            if flip_video:
+                image = cv2.flip(image, 0)
             # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = image.astype(np.float32)
 
