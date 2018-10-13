@@ -59,8 +59,8 @@ def ucf101_dataset(root, output):
 
     # image resizing settings
     flip_horizontally = 0.5
-    resize_height = 128
-    resize_width = 171
+    resize_height = 112
+    resize_width = 112
     # crop_height = 112
     # crop_width = 112
 
