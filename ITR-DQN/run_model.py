@@ -1,5 +1,5 @@
-import tensorflow as tf 
-import numpy as np 
+import tensorflow as tf
+import numpy as np
 
 from file_io import read_files_in_dir, generate_model_input
 import c3d
@@ -10,16 +10,17 @@ from thresholding_methods import thresholding
 C3D_NETWORK_VARIABLE_FILE = "../../../C3D-tensorflow/sports1m_finetuning_ucf101.model"
 CHKPT_NAME = ""
 
+
 def threshold_activation_map(ph_values, placeholders, information_values, activation_map, thresholding_approach="norm"):
     '''
-    Applies the specified thresholding method to the provided activation map and 
+    Applies the specified thresholding method to the provided activation map and
     stores the result in the ITR input placeholder.
         - ph_values: a dictionary containing the placeholders
         -placeholders: the list of placeholders used by the network
         -information_values: a dictionary containing extraenous information about
                 the input
         -activation_map: the C3D activation map
-        -thresholding_approach: the thresholding method to use a string that is 
+        -thresholding_approach: the thresholding method to use a string that is
                 either "mean", "histogram", "entropy", or "norm"
     '''
 
@@ -28,19 +29,20 @@ def threshold_activation_map(ph_values, placeholders, information_values, activa
 
     # multiply values by 255 to match the scale of values being used by the Audio network
     thresholded_map *= 255
-    thresholded_map = np.reshape(thresholded_map, 
-                                                [1, thresholded_map.shape[0], thresholded_map.shape[1], 1])
+    thresholded_map = np.reshape(thresholded_map,
+                                 [1, thresholded_map.shape[0], thresholded_map.shape[1], 1])
 
-    ph_values[placeholders["itr_in"]] =  thresholded_map
+    ph_values[placeholders["itr_in"]] = thresholded_map
     return ph_values
+
 
 def obtain_IAD_input(placeholders, tf_records, sess, c3d_model, thresholding_approach):
     '''
     Provides the training input for the ITR network by generating an IAD from the
     activation map of the C3D network. Outputs two dictionaries. The first contains
-    the placeholders that will be used when evaluating the full ITR model. The second 
+    the placeholders that will be used when evaluating the full ITR model. The second
     contains information about the observation being read (ie. true labels, number of
-    prompts, file name, etc). 
+    prompts, file name, etc).
         -placeholders: the list of placeholders used by the network
         -tf_records: the TFRecord data source to read from
         -sess: the tensorflow Session
@@ -53,6 +55,7 @@ def obtain_IAD_input(placeholders, tf_records, sess, c3d_model, thresholding_app
 
     # Perform thresholding on C3D activation map
     return threshold_activation_map(ph_values, placeholders, info_values, c3d_activation_map, thresholding_approach), info_values
+
 
 def train(placeholders, tf_records, sess, c3d_model, thresholding_approach, optimizer):
     # Optimize variables in the rest of the network

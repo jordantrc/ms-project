@@ -239,10 +239,10 @@ if __name__ == '__main__':
     run_model(num_train_iterations=3,
               c3d_depth=0,
               thresholding_approach="norm",
-              training_dir="~/datasets/UCF-101/tfrecords",
+              training_dir="/home/jordanc/datasets/UCF-101/tfrecords",
               training_dir_dataset_limit=0,
               validate_dir='',
-              testing_dir="~/datasets/UCF-101/tfrecords",
+              testing_dir="/home/jordanc/datasets/UCF-101/tfrecords",
               train_print_freq=0,
               validation_freq=0,
               save_freq=0)
