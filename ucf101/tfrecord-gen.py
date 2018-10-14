@@ -13,6 +13,8 @@
 
 from __future__ import print_function
 
+from .. import tfrecord_io
+
 import cv2
 import numpy as np
 import os
@@ -103,6 +105,10 @@ def ucf101_dataset(root, output):
 
     print("smallest class = %s (%s videos)" % (smallest_class, smallest_class_num))
 
+    output_path = os.path.join(output, "train.tfrecords")
+    writer = tf.python_io.TFRecordWriter(output_path)
+    assert writer is not None
+
     # open each video and sample frames
     for k in classes.keys():
         class_name = classes[k][0]
@@ -110,11 +116,6 @@ def ucf101_dataset(root, output):
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
             features = {}
-            video_filename = os.path.basename(v)
-            output_path = os.path.join(output, video_filename + ".tfrecord")
-            print("output_path = %s" % output_path)
-            writer = tf.python_io.TFRecordWriter(output_path)
-            assert writer is not None
 
             # get video data from the video
             video_data = video_file_to_ndarray(v, num_samples, sample_length, sample_randomly, flip_horizontally,
@@ -125,12 +126,14 @@ def ucf101_dataset(root, output):
 
             # TODO - write train/test splits to individual files - train.tfrecords, test.tfrecords
 
-            features[v] = _bytes_feature(images_raw)
-            features['height'] = _int64_feature(image_height)
-            features['width'] = _int64_feature(image_width)
+            features[v] = tfrecord_io._bytes_feature(images_raw)
+            features['height'] = tfrecord_io._int64_feature(image_height)
+            features['width'] = tfrecord_io._int64_feature(image_width)
             example = tf.train.Example(features=tf.train.Features(feature=features))
             writer.write(example.SerializeToString())
             print("done writing data to tfrecord file")
+
+    writer.close()
 
 
 def video_class(path):
