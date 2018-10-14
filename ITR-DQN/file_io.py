@@ -214,5 +214,6 @@ def read_files_in_dir(directory, randomize=False, limit_dataset=0, recursive=Tru
         random.shuffle(all_files)
 
     all_files = all_files[:3]
+    print("all_files = %s" % all_files)
 
     return input_pipeline(all_files, randomize=randomize), len(all_files)
