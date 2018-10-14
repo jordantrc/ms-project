@@ -204,6 +204,8 @@ def read_files_in_dir(directory, randomize=False, limit_dataset=0, recursive=Tru
     else:
         folders = [directory]
 
+    print("folders = %s" % folders)
+
     # identify all of the files in all of the folders
     all_files = []
     for folder in folders:
