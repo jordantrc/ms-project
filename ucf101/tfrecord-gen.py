@@ -123,6 +123,8 @@ def ucf101_dataset(root, output):
             image_height = video_data[2]
             images_raw = video_data[3].tostring()
 
+            # TODO - write train/test splits to individual files - train.tfrecords, test.tfrecords
+
             features[v] = _bytes_feature(images_raw)
             features['height'] = _int64_feature(image_height)
             features['width'] = _int64_feature(image_width)

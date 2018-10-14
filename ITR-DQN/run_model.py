@@ -228,7 +228,6 @@ def run_model(
         coord.join(threads)
 
 
-
 if __name__ == '__main__':
 
     run_model(  
