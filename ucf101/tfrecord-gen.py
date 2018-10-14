@@ -123,12 +123,13 @@ def ucf101_dataset(root, output):
             image_width = video_data[1]
             image_height = video_data[2]
             images_raw = video_data[3].tostring()
+            label = v.split('_')[1]
 
             # TODO - write train/test splits to individual files - train.tfrecords, test.tfrecords
-
-            features[v] = tfrecord_io._bytes_feature(images_raw)
-            features['height'] = tfrecord_io._int64_feature(image_height)
-            features['width'] = tfrecord_io._int64_feature(image_width)
+            features['label'] = _bytes_feature(label)
+            features['img_raw'] = _bytes_feature(images_raw)
+            features['height'] = _int64_feature(image_height)
+            features['width'] = _int64_feature(image_width)
             example = tf.train.Example(features=tf.train.Features(feature=features))
             writer.write(example.SerializeToString())
             print("done writing data to tfrecord file")
