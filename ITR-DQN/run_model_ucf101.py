@@ -132,7 +132,8 @@ def run_model(num_train_iterations=10,
               testing_dir='',
               train_print_freq=0,
               validation_freq=0,
-              save_freq=0):
+              save_freq=0,
+              recursive=False):
 
     # ----------  setup variables ------------
 
@@ -159,11 +160,11 @@ def run_model(num_train_iterations=10,
         if(training_dir != ''):
             training_records, _ = read_files_in_dir(training_dir, randomize=True,
                                                     limit_dataset=training_dir_dataset_limit,
-                                                    recursive=True)
+                                                    recursive=recursive)
         if(testing_dir != ''):
-            testing_records, test_iter = read_files_in_dir(testing_dir, randomize=False, recursive=True)
+            testing_records, test_iter = read_files_in_dir(testing_dir, randomize=False, recursive=recursive)
         if(validate_dir != ''):
-            validate_records, valid_iter = read_files_in_dir(validate_dir, randomize=False, recursive=False)
+            validate_records, valid_iter = read_files_in_dir(validate_dir, randomize=False, recursive=recursive)
 
         # ----------  restore variables (update) ------------
 
