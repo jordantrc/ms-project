@@ -194,6 +194,8 @@ def read_files_in_dir(directory, randomize=False, limit_dataset=0, recursive=Tru
         -recursive: a bool indicating whether the directory contains other directories
     '''
 
+    print("directory = %s" % directory)
+
     # identify which folders contain files
     folders = []
     if(recursive):
