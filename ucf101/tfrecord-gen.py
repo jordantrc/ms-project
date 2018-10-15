@@ -52,7 +52,7 @@ def _bytes_feature(value):
 
 
 def integer_label(classes, label):
-    print("integer_label: label = %s, classes = %s" % (label, classes))
+    # print("integer_label: label = %s, classes = %s" % (label, classes))
     int_label = -1
     for k, v in classes.items():
         print("k = %s, v = %s" % (k, v))
@@ -118,7 +118,7 @@ def ucf101_dataset(root, output):
 
     print("smallest class = %s (%s videos)" % (smallest_class, smallest_class_num))
 
-    output_path = os.path.join(output, "train.tfrecords")
+    output_path = os.path.join(output, "train.tfrecord")
     writer = tf.python_io.TFRecordWriter(output_path)
     assert writer is not None
 

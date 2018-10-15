@@ -9,7 +9,7 @@ import tensorflow as tf
 
 
 def conv3d(name, l_input, w, b):
-    return tf.nn.bias.add(
+    return tf.nn.bias_add(
         tf.nn.conv3d(l_input, w, strides=[1, 1, 1, 1, 1], padding='SAME'),
         b)
 

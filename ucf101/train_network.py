@@ -80,3 +80,4 @@ with tf.Session() as sess:
         sess.run(iterator.initializer)
         sess.run(train_op)
 
+    print("end training epochs")
