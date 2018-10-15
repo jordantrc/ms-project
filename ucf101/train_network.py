@@ -58,7 +58,7 @@ with tf.Session() as sess:
     y_true_class = tf.argmax(y_true, axis=1)
 
     # debugging info
-    print("x shape = %s" (x.get_shape()))
+    print("x = %s" % x)
 
     weight, biases = c3d.get_variables()
     logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weight, biases)
