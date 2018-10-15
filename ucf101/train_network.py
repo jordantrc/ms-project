@@ -57,8 +57,10 @@ with tf.Session() as sess:
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true_class = tf.argmax(y_true, axis=1)
 
-    weight, biases = c3d.get_variables()
+    # debugging info
+    print("x shape = %s" (x.get_shape()))
 
+    weight, biases = c3d.get_variables()
     logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weight, biases)
 
     y_pred = tf.nn.softmax(logits)
