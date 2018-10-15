@@ -84,6 +84,7 @@ def ucf101_dataset(root, output):
     # read class index file to get the class
     # index information
     classes = {}
+    class_indexes = {}
     with open(CLASS_INDEX_FILE) as class_index_file_fd:
         print("Opening %s" % (CLASS_INDEX_FILE))
         lines = class_index_file_fd.read().split('\n')
@@ -92,6 +93,7 @@ def ucf101_dataset(root, output):
             if len(l) > 0:
                 i, c = l.split(" ")
                 classes[i] = [c]
+                class_indexes[i] = c
     assert len(classes) > 0
 
     # get count of each class
@@ -136,7 +138,7 @@ def ucf101_dataset(root, output):
             images_raw = video_data[3].tostring()
             label = v.split('_')[1]
 
-            label_int = integer_label(classes, label)
+            label_int = integer_label(class_indexes, label)
             assert label_int >= 0
 
             # TODO - write train/test splits to individual files - train.tfrecords, test.tfrecords
