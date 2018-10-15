@@ -6,7 +6,7 @@ import numpy as np
 NUM_EPOCHS = 1
 TRAIN_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/train.tfrecords"
 
-with tf.Sessions() as sess:
+with tf.Session() as sess:
 
     # setup video features
     feature = {}
@@ -23,5 +23,8 @@ with tf.Sessions() as sess:
 
     # decode the record
     features = tf.parse_single_example(serialized_example, features=feature)
+    print("features = %s" % features)
     image = tf.decode_raw(features['raw_img'], tf.uint8)
     label = tf.cast(features['label'], tf.string)
+
+    print("image [%s, %s]:\n%s" % (type(image), len(image), image[0:5]))
