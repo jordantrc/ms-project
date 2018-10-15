@@ -7,8 +7,6 @@
 
 import tensorflow as tf
 
-NUM_CLASSES = 101
-
 
 def conv3d(name, l_input, w, b):
     return tf.nn.bias.add(
