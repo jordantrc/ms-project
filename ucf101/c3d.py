@@ -43,7 +43,7 @@ def get_variables(num_classes):
             'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512]),
             'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512]),
             'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512]),
-            'wd1': weight_variable('wd1', [8192, 4096]),
+            'wd1': weight_variable('wd1', [4096, 4096]),
             'wd2': weight_variable('wd2', [4096, 4096]),
             'out': weight_variable('wdout', [num_classes]),
         }
