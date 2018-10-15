@@ -32,7 +32,6 @@ def _parse_function(example_proto):
 with tf.Session() as sess:
 
     # placeholders
-    images_placeholder = c3d.get_input_placeholder(BATCH_SIZE)
     y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
 
     # using tf.data.TFRecordDataset iterator
@@ -43,6 +42,9 @@ with tf.Session() as sess:
     dataset = dataset.batch(BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
+
+    # convert x to float
+    x = tf.cast(x, tf.float32)
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
