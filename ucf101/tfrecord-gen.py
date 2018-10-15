@@ -20,6 +20,8 @@ import random
 import sys
 import tensorflow as tf
 
+CLASS_INDEX_FILE = "UCF101-class-index.txt"
+
 
 def main():
     # parse arguments
@@ -49,6 +51,15 @@ def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
+def integer_label(classes, label):
+    int_label = -1
+    for k, v in classes.items():
+        if v == label:
+            int_label = int(k)
+
+    return int_label
+
+
 def ucf101_dataset(root, output):
     """generates tfrecords for the ucf101 dataset"""
     # sampling information - number of samples of sample_length
@@ -65,14 +76,13 @@ def ucf101_dataset(root, output):
     # crop_width = 112
 
     assert os.path.isdir(root) and os.path.isdir(output)
-    class_index_file = os.path.join(root, "classInd.txt")
     video_directory = os.path.join(root, "UCF-101")
 
     # read class index file to get the class
     # index information
     classes = {}
-    with open(class_index_file) as class_index_file_fd:
-        print("Opening %s" % (class_index_file))
+    with open(CLASS_INDEX_FILE) as class_index_file_fd:
+        print("Opening %s" % (CLASS_INDEX_FILE))
         lines = class_index_file_fd.read().split('\n')
         # print(lines)
         for l in lines:
@@ -123,8 +133,11 @@ def ucf101_dataset(root, output):
             images_raw = video_data[3].tostring()
             label = v.split('_')[1]
 
+            label_int = integer_label(classes, label)
+            assert label_int >= 0
+
             # TODO - write train/test splits to individual files - train.tfrecords, test.tfrecords
-            features['label'] = _bytes_feature(label)
+            features['label'] = _int64_feature(label_int)
             features['img_raw'] = _bytes_feature(images_raw)
             features['height'] = _int64_feature(image_height)
             features['width'] = _int64_feature(image_width)
