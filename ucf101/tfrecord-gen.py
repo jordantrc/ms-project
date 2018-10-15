@@ -13,8 +13,6 @@
 
 from __future__ import print_function
 
-from .. import tfrecord_io
-
 import cv2
 import numpy as np
 import os
