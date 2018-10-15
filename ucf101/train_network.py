@@ -52,6 +52,7 @@ with tf.Session() as sess:
                           c3d.INPUT_DATA_SIZE['w'],
                           c3d.INPUT_DATA_SIZE['c']
                           ])
+    print("x_5d = %s" % x_5d)
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -63,9 +64,6 @@ with tf.Session() as sess:
     # placeholders
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true_class = tf.argmax(y_true, axis=1)
-
-    # debugging info
-    print("x = %s" % x)
 
     weight, biases = c3d.get_variables()
     logits = c3d_model.inference_3d(x_5d, DROPOUT, BATCH_SIZE, weight, biases)

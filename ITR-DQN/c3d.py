@@ -22,7 +22,7 @@ def get_output_placeholder(batch_size):
                           name="c3d_label_ph")
 
 
-def get_variables():
+def get_variables(num_classes):
     '''Define all of the variables for the convolutional layers of the C3D model.
     We ommit the FC layers as these layers are used to perform reasoning and do
     not contain feature information '''
@@ -41,7 +41,10 @@ def get_variables():
             'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512]),
             'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512]),
             'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512]),
-            'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512])
+            'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512]),
+            'wd1': weight_variable('wd1', [8192, 4096]),
+            'wd2': weight_variable('wd2', [4096, 4096]),
+            'out': weight_variable('out', [num_classes]),
         }
         biases = {
             'bc1': weight_variable('bc1', [64]),
@@ -51,7 +54,10 @@ def get_variables():
             'bc4a': weight_variable('bc4a', [512]),
             'bc4b': weight_variable('bc4b', [512]),
             'bc5a': weight_variable('bc5a', [512]),
-            'bc5b': weight_variable('bc5b', [512])
+            'bc5b': weight_variable('bc5b', [512]),
+            'bd1': weight_variable('bd1', [4096]),
+            'bd2': weight_variable('bd2', [4096]),
+            'out': weight_variable('out', [num_classes]),
         }
     return weights, biases
 
