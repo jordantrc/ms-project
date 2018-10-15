@@ -4,7 +4,9 @@ import tensorflow as tf
 import numpy as np
 
 NUM_EPOCHS = 1
+NUM_CLASSES = 101
 TRAIN_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/train.tfrecords"
+
 
 with tf.Session() as sess:
 
@@ -26,5 +28,17 @@ with tf.Session() as sess:
     print("features = %s" % features)
     image = tf.decode_raw(features['img_raw'], tf.uint8)
     label = tf.cast(features['label'], tf.string)
+    width = tf.cast(features['width'], tf.uint8)
+    height = tf.cast(features['height'], tf.uint8)
+    num_features = 3 * width * height
 
-    print("image [%s, %s]:\n%s" % (type(image), len(image), image[0:5]))
+    # init variables
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    sess.run(init_op)
+
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
+
+    x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
+    y_pred = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_pred')
+    y_pred_class = tf.argmax(y_pred axis=1)
