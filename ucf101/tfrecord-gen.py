@@ -52,6 +52,7 @@ def _bytes_feature(value):
 
 
 def integer_label(classes, label):
+    print("integer_label: label = %s" % label)
     int_label = -1
     for k, v in classes.items():
         if v == label:
