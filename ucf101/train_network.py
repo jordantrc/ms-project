@@ -22,8 +22,8 @@ def _parse_function(example_proto):
     """parse map function for video data"""
     features = {"label": tf.FixedLenFeature((), tf.int64, default_value=0),
                 "img_raw": tf.FixedLenFeature((), tf.string, default_value=""),
-                "height": tf.FixedLenFeature((), tf.int64, default_value=0),
-                "width": tf.FixedLenFeature((), tf.int64, default_value=0)
+                # "height": tf.FixedLenFeature((), tf.int64, default_value=0),
+                # "width": tf.FixedLenFeature((), tf.int64, default_value=0)
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
     return parsed_features["img_raw"], parsed_features["label"]

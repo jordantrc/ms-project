@@ -144,8 +144,8 @@ def ucf101_dataset(root, output):
             # TODO - write train/test splits to individual files - train.tfrecords, test.tfrecords
             features['label'] = _int64_feature(label_int)
             features['img_raw'] = _bytes_feature(images_raw)
-            features['height'] = _int64_feature(image_height)
-            features['width'] = _int64_feature(image_width)
+            # features['height'] = _int64_feature(image_height)
+            # features['width'] = _int64_feature(image_width)
             example = tf.train.Example(features=tf.train.Features(feature=features))
             writer.write(example.SerializeToString())
             print("done writing data to tfrecord file")
