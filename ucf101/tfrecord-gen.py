@@ -52,11 +52,13 @@ def _bytes_feature(value):
 
 
 def integer_label(classes, label):
-    print("integer_label: label = %s" % label)
+    print("integer_label: label = %s, classes = %s" % (label, classes))
     int_label = -1
     for k, v in classes.items():
+        print("k = %s, v = %s" % (k, v))
         if v == label:
             int_label = int(k)
+            break
 
     return int_label
 
