@@ -24,7 +24,7 @@ with tf.Session() as sess:
     # decode the record
     features = tf.parse_single_example(serialized_example, features=feature)
     print("features = %s" % features)
-    image = tf.decode_raw(features['raw_img'], tf.uint8)
+    image = tf.decode_raw(features['img_raw'], tf.uint8)
     label = tf.cast(features['label'], tf.string)
 
     print("image [%s, %s]:\n%s" % (type(image), len(image), image[0:5]))
