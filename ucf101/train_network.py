@@ -14,6 +14,7 @@ NUM_EPOCHS = 1
 TRAIN_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/train.tfrecord"
 TEST_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/test.tfrecord"
 DROPOUT = 0.5
+FRAMES_PER_VIDEO = 250
 BATCH_SIZE = 1
 LEARNING_RATE = 1e-3
 
@@ -43,8 +44,14 @@ with tf.Session() as sess:
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
-    # convert x to float
+    # convert x to float, reshape to 5d
     x = tf.cast(x, tf.float32)
+    x_5d = tf.reshape(x, [BATCH_SIZE,
+                          c3d.INPUT_DATA_SIZE['t'],
+                          c3d.INPUT_DATA_SIZE['h'],
+                          c3d.INPUT_DATA_SIZE['w'],
+                          c3d.INPUT_DATA_SIZE['c']
+                          ])
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -61,7 +68,7 @@ with tf.Session() as sess:
     print("x = %s" % x)
 
     weight, biases = c3d.get_variables()
-    logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weight, biases)
+    logits = c3d_model.inference_3d(x_5d, DROPOUT, BATCH_SIZE, weight, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
