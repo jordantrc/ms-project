@@ -44,7 +44,7 @@ with tf.Session() as sess:
     x, y_true = iterator.get_next()
 
     # convert x to float
-    tf.cast(x, tf.float32)
+    x = tf.cast(x, tf.float32)
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
