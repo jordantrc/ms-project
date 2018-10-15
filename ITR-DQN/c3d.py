@@ -22,7 +22,7 @@ def get_output_placeholder(batch_size):
                           name="c3d_label_ph")
 
 
-def get_variables(num_classes):
+def get_variables():
     '''Define all of the variables for the convolutional layers of the C3D model.
     We ommit the FC layers as these layers are used to perform reasoning and do
     not contain feature information '''
