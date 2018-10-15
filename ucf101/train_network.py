@@ -31,8 +31,9 @@ def _parse_function(example_proto):
 
 with tf.Session() as sess:
 
-    # images placeholder
+    # placeholders
     images_placeholder = c3d.get_input_placeholder(BATCH_SIZE)
+    y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
 
     # using tf.data.TFRecordDataset iterator
     filenames = tf.placeholder(tf.string, shape=[None])
@@ -41,7 +42,7 @@ with tf.Session() as sess:
     dataset = dataset.repeat(NUM_EPOCHS)
     dataset = dataset.batch(BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
-    next_element = iterator.get_next()
+    x, y_true = iterator.get_next()
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -52,12 +53,11 @@ with tf.Session() as sess:
 
     # placeholders
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
-    y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
     y_true_class = tf.argmax(y_true, axis=1)
 
     weight, biases = c3d.get_variables()
 
-    logits = c3d_model.inference_3d(next_element, DROPOUT, BATCH_SIZE, weight, biases)
+    logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weight, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
