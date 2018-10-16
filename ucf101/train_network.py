@@ -61,9 +61,9 @@ def _parse_function(example_proto):
                        ])
     # sample 16 random frames from the stack of frames, maintain temporal
     # order
-    clip = _clip_image(image, FRAMES_PER_CLIP, True)
+    # image = _clip_image(image, FRAMES_PER_CLIP, True)
 
-    return clip, parsed_features["label"]
+    return image, parsed_features["label"]
 
 
 with tf.Session() as sess:
