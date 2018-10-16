@@ -10,12 +10,12 @@ import c3d_model
 import c3d
 
 NUM_CLASSES = 101
-NUM_EPOCHS = 1
 TRAIN_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/train.tfrecord"
 TEST_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/test.tfrecord"
 DROPOUT = 0.5
 FRAMES_PER_VIDEO = 250
 BATCH_SIZE = 1
+NUM_EPOCHS = 1
 LEARNING_RATE = 1e-3
 
 

@@ -20,6 +20,8 @@ def max_pool(name, l_input, k):
 
 def inference_3d(_X, _dropout, batch_size, _weights, _biases):
 
+    print("_X = %s" % _X)
+
     # Convolution layer
     conv1 = conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
     conv1 = tf.nn.relu(conv1, 'relu1')
