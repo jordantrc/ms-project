@@ -6,6 +6,7 @@
 
 import tensorflow as tf
 import numpy as np
+import random
 import c3d_model
 import c3d
 
@@ -14,9 +15,33 @@ TRAIN_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/train.tfrecord"
 TEST_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/test.tfrecord"
 DROPOUT = 0.5
 FRAMES_PER_VIDEO = 250
+FRAMES_PER_CLIP = 16
 BATCH_SIZE = 1
 NUM_EPOCHS = 1
 LEARNING_RATE = 1e-3
+
+
+def _clip_image(image, num_frames, randomly=True):
+    '''clips an image'''
+
+    first_d = image.get_shape().as_list()[0]
+    indexes = range(first_d)
+
+    if randomly:
+        sampled_indexes = random.sample(indexes, num_frames)
+        sampled_indexes.sort()
+    else:
+        sampled_indexes = indexes
+
+    clip = None
+    for i in sampled_indexes:
+        if clip is None:
+            clip = image[i]
+        else:
+            clip = tf.stack([clip, image[i]])
+    print("clip = %s" % clip)
+
+    return clip
 
 
 def _parse_function(example_proto):
@@ -27,10 +52,24 @@ def _parse_function(example_proto):
                 # "width": tf.FixedLenFeature((), tf.int64, default_value=0)
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
-    return parsed_features["img_raw"], parsed_features["label"]
+    image = tf.reshape(parsed_features['img_raw'],
+                       [
+                       c3d.INPUT_DATA_SIZE['t'],  # frames per sample
+                       c3d.INPUT_DATA_SIZE['h'],
+                       c3d.INPUT_DATA_SIZE['w'],
+                       c3d.INPUT_DATA_SIZE['c']
+                       ])
+    # sample 16 random frames from the stack of frames, maintain temporal
+    # order
+    clip = _clip_image(image, FRAMES_PER_CLIP, True)
+
+    return clip, parsed_features["label"]
 
 
 with tf.Session() as sess:
+
+    # repeatable randomness during development
+    tf.set_random_seed(1234)
 
     # placeholders
     y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
