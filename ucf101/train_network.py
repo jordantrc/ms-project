@@ -78,7 +78,8 @@ with tf.Session() as sess:
 
     print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     # convert x to float, reshape to 5d
-    #x = tf.cast(x, tf.float32)
+    x = tf.cast(x, tf.float32)
+    print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     #x_5d = tf.reshape(x, [BATCH_SIZE,
     #                      c3d.INPUT_DATA_SIZE['t'],  # frames per sample
     #                      c3d.INPUT_DATA_SIZE['h'],
