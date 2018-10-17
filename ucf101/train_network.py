@@ -52,6 +52,7 @@ def _parse_function(example_proto):
                 # "width": tf.FixedLenFeature((), tf.int64, default_value=0)
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
+    print("img_raw = %s" % parsed_features['img_raw'])
     image = tf.reshape(parsed_features['img_raw'],
                        [
                        c3d.INPUT_DATA_SIZE['t'],  # frames per sample
