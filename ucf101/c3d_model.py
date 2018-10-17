@@ -56,7 +56,7 @@ def inference_3d(_X, _dropout, batch_size, _weights, _biases):
     # Fully connected layer
     pool5 = tf.transpose(pool5, perm=[0, 1, 4, 2, 3])
     # Reshape conv3 output to fit dense layer input
-    print("pool5 = %s" % pool5)
+    print("pool5 = %s, shape = %s" % (pool5, pool5.get_shape().as_list()))
     dense1 = tf.reshape(pool5, [batch_size, _weights['wd1'].get_shape().as_list()[0]])
     dense1 = tf.matmul(dense1, _weights['wd1']) + _biases['bd1']
 
