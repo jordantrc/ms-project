@@ -21,27 +21,17 @@ NUM_EPOCHS = 1
 LEARNING_RATE = 1e-3
 
 
-def _clip_image(image, num_frames, randomly=True):
-    '''clips an image'''
+def _clip_image_batch(image_batch, num_frames, randomly=True):
+    '''generates a clip for each video in the batch'''
 
-    first_d = image.get_shape().as_list()[0]
-    indexes = range(first_d)
+    batch_size = image_batch.get_shape().as_list()[0]
 
-    if randomly:
-        sampled_indexes = random.sample(indexes, num_frames)
-        sampled_indexes.sort()
-    else:
-        sampled_indexes = indexes
+    # sample frames for each video
+    for i in range(batch_size):
+        video = image_batch[i]
+        
+    
 
-    clip = None
-    for i in sampled_indexes:
-        if clip is None:
-            clip = image[i]
-        else:
-            clip = tf.stack([clip, image[i]])
-    print("clip = %s" % clip)
-
-    return clip
 
 
 def _parse_function(example_proto):
@@ -52,9 +42,6 @@ def _parse_function(example_proto):
                 # "width": tf.FixedLenFeature((), tf.int64, default_value=0)
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
-    # sample 16 random frames from the stack of frames, maintain temporal
-    # order
-    # image = _clip_image(image, FRAMES_PER_CLIP, True)
 
     return parsed_features['img_raw'], parsed_features['label']
 
@@ -76,10 +63,10 @@ with tf.Session() as sess:
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
-    print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
+    # print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     # convert x to float, reshape to 5d
     x = tf.cast(x, tf.float32)
-    print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
+    print("reshaping x")
     x = tf.reshape(x,
                    [BATCH_SIZE,
                     c3d.INPUT_DATA_SIZE['t'],  # frames per sample
@@ -87,6 +74,11 @@ with tf.Session() as sess:
                     c3d.INPUT_DATA_SIZE['w'],
                     c3d.INPUT_DATA_SIZE['c']
                     ])
+    print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
+
+    # generate clips for each video in the batch
+    print("generating clips from x")
+    x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
