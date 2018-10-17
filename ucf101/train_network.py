@@ -53,6 +53,8 @@ def _parse_function(example_proto):
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
     print("img_raw = %s" % parsed_features['img_raw'])
+    image = parsed_features['img_raw']
+    image = tf.cast(image, tf.float32)
     image = tf.reshape(parsed_features['img_raw'],
                        [
                        c3d.INPUT_DATA_SIZE['t'],  # frames per sample
@@ -85,14 +87,14 @@ with tf.Session() as sess:
     x, y_true = iterator.get_next()
 
     # convert x to float, reshape to 5d
-    x = tf.cast(x, tf.float32)
-    x_5d = tf.reshape(x, [BATCH_SIZE,
-                          c3d.INPUT_DATA_SIZE['t'],  # frames per sample
-                          c3d.INPUT_DATA_SIZE['h'],
-                          c3d.INPUT_DATA_SIZE['w'],
-                          c3d.INPUT_DATA_SIZE['c']
-                          ])
-    print("x_5d = %s" % x_5d)
+    #x = tf.cast(x, tf.float32)
+    #x_5d = tf.reshape(x, [BATCH_SIZE,
+    #                      c3d.INPUT_DATA_SIZE['t'],  # frames per sample
+    #                      c3d.INPUT_DATA_SIZE['h'],
+    #                      c3d.INPUT_DATA_SIZE['w'],
+    #                      c3d.INPUT_DATA_SIZE['c']
+    #                      ])
+    print("x = %s" % x)
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -106,7 +108,7 @@ with tf.Session() as sess:
     y_true_class = tf.argmax(y_true, axis=1)
 
     weights, biases = c3d.get_variables(NUM_CLASSES)
-    logits = c3d_model.inference_3d(x_5d, DROPOUT, BATCH_SIZE, weights, biases)
+    logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
@@ -127,7 +129,7 @@ with tf.Session() as sess:
 
     for i in range(NUM_EPOCHS):
         sess.run(iterator.initializer)
-        sess.eval(x_5d)
+        sess.eval(x)
         sess.run(train_op)
 
     print("end training epochs")
