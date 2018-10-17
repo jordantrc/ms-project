@@ -52,22 +52,11 @@ def _parse_function(example_proto):
                 # "width": tf.FixedLenFeature((), tf.int64, default_value=0)
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
-    image = parsed_features['img_raw']
-    print("image = %s, shape = %s" % (image, image.get_shape().as_list()))
-    image = tf.cast(image, tf.float32)
-    print("image = %s, shape = %s" % (image, image.get_shape().as_list()))
-    image = tf.reshape(parsed_features['img_raw'],
-                       [
-                       c3d.INPUT_DATA_SIZE['t'],  # frames per sample
-                       c3d.INPUT_DATA_SIZE['h'],
-                       c3d.INPUT_DATA_SIZE['w'],
-                       c3d.INPUT_DATA_SIZE['c']
-                       ])
     # sample 16 random frames from the stack of frames, maintain temporal
     # order
     # image = _clip_image(image, FRAMES_PER_CLIP, True)
 
-    return image, parsed_features["label"]
+    return parsed_features['img_raw'], parsed_features['label']
 
 
 with tf.Session() as sess:
@@ -87,6 +76,7 @@ with tf.Session() as sess:
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
+    print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     # convert x to float, reshape to 5d
     #x = tf.cast(x, tf.float32)
     #x_5d = tf.reshape(x, [BATCH_SIZE,
@@ -95,7 +85,6 @@ with tf.Session() as sess:
     #                      c3d.INPUT_DATA_SIZE['w'],
     #                      c3d.INPUT_DATA_SIZE['c']
     #                      ])
-    print("x = %s" % x)
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
