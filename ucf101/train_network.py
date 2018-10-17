@@ -81,7 +81,8 @@ with tf.Session() as sess:
     x = tf.cast(x, tf.float32)
     print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     x = tf.reshape(x,
-                   [c3d.INPUT_DATA_SIZE['t'],  # frames per sample
+                   [BATCH_SIZE,
+                    c3d.INPUT_DATA_SIZE['t'],  # frames per sample
                     c3d.INPUT_DATA_SIZE['h'],
                     c3d.INPUT_DATA_SIZE['w'],
                     c3d.INPUT_DATA_SIZE['c']
