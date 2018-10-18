@@ -24,14 +24,35 @@ LEARNING_RATE = 1e-3
 def _clip_image_batch(image_batch, num_frames, randomly=True):
     '''generates a clip for each video in the batch'''
 
-    batch_size = image_batch.get_shape().as_list()[0]
+    dimensions = image_batch.get_shape().as_list()
+    batch_size = dimensions[0]
+    num_frames_in_video = dimensions[1]
+    height = dimensions[2]
+    width = dimensions[3]
+    channels = dimensions[4]
 
     # sample frames for each video
+    clip = None
+    clip_batch = None
     for i in range(batch_size):
         video = image_batch[i]
-        
-    
+        # randomly sample frames
+        sample_indexes = random.sample(list(range(num_frames_in_video)), num_frames)
+        sample_indexes.sort()
 
+        for j in sample_indexes:
+            if clip is None:
+                clip = video[j]
+            else:
+                tf.stack([clip, video[j]])
+
+        # clip is finished, add to the clip_batch
+        if clip_batch is None:
+            clip_batch = clip
+        else:
+            tf.stack(clip_batch, clip)
+    
+    return clip_batch
 
 
 def _parse_function(example_proto):
@@ -74,11 +95,13 @@ with tf.Session() as sess:
                     c3d.INPUT_DATA_SIZE['w'],
                     c3d.INPUT_DATA_SIZE['c']
                     ])
-    print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
+    print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
     # generate clips for each video in the batch
     print("generating clips from x")
     x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
+
+    print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
