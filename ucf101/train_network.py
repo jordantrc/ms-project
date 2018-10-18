@@ -55,7 +55,7 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
         if clip_batch is None:
             clip_batch = clip
         else:
-            clip_batch = tf.stack(clip_batch, clip)
+            clip_batch = tf.stack([clip_batch, clip])
         print("clip_batch = %s, shape = %s" % (clip_batch, clip_batch.get_shape().as_list()))
 
     return clip_batch
