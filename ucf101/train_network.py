@@ -40,6 +40,8 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
         sample_indexes = random.sample(list(range(num_frames_in_video)), num_frames)
         sample_indexes.sort()
 
+        print("sample indexes = %s" % sample_indexes)
+
         for j in sample_indexes:
             if clip is None:
                 clip = video[j]
