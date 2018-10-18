@@ -60,14 +60,16 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
 
 def _parse_function(example_proto):
     """parse map function for video data"""
-    features = {"label": tf.FixedLenFeature((), tf.int64, default_value=0),
-                "img_raw": tf.FixedLenFeature((), tf.string, default_value=""),
+    features = {'label': tf.FixedLenFeature((), tf.int64, default_value=0),
+                'img_raw': tf.FixedLenFeature((), tf.string, default_value=""),
                 # "height": tf.FixedLenFeature((), tf.int64, default_value=0),
                 # "width": tf.FixedLenFeature((), tf.int64, default_value=0)
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
+    videos = tf.decode_raw(parsed_features['img_raw'], tf.float32)
+    label = tf.cast(features['label'], tf.int32)
 
-    return parsed_features['img_raw'], parsed_features['label']
+    return videos, label
 
 
 with tf.Session() as sess:
@@ -96,7 +98,7 @@ with tf.Session() as sess:
 
     # print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     # convert x to float, reshape to 5d
-    x = tf.cast(x, tf.float32)
+    # x = tf.cast(x, tf.float32)
     print("reshaping x")
     x = tf.reshape(x,
                    [BATCH_SIZE,
