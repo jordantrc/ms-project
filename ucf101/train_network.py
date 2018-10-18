@@ -124,7 +124,7 @@ with tf.Session() as sess:
     y_pred_class = tf.argmax(y_pred, axis=1)
 
     # loss and optimizer
-    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entroy_with_logits(logits=logits, labels=y_true))
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
 
     train_op = optimizer.minimize(loss_op)
