@@ -45,7 +45,7 @@ def get_variables(num_classes):
             'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512]),
             'wd1': weight_variable('wd1', [8192, 4096]),
             'wd2': weight_variable('wd2', [4096, 4096]),
-            'out': weight_variable('wdout', [num_classes]),
+            'out': weight_variable('wdout', [4096, num_classes]),
         }
         biases = {
             'bc1': weight_variable('bc1', [64]),
