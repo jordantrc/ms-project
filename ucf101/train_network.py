@@ -36,6 +36,7 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
     clip_batch = None
     for i in range(batch_size):
         video = image_batch[i]
+        print("video = %s, shape = %s" % (video, video.get_shape().as_list()))
         # randomly sample frames
         sample_indexes = random.sample(list(range(num_frames_in_video)), num_frames)
         sample_indexes.sort()
@@ -53,7 +54,7 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
             clip_batch = clip
         else:
             tf.stack(clip_batch, clip)
-    
+
     return clip_batch
 
 
