@@ -49,8 +49,8 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
                 clip = tf.reshape(clip, [1, height, width, channels])
                 print("clip (init) = %s, shape = %s" % (clip, clip.get_shape().as_list()))
             else:
-                video_4d = tf.reshape(video[j], [1, height, width, channels])
-                clip = tf.stack([clip, video_4d])
+                # video_4d = tf.reshape(video[j], [1, height, width, channels])
+                clip = tf.stack([clip, video[j]])
                 print("clip (stack) = %s, shape = %s" % (clip, clip.get_shape().as_list()))
 
         # clip is finished, add to the clip_batch
