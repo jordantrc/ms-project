@@ -46,7 +46,7 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
         for j in sample_indexes:
             if clip is None:
                 clip = video[j]
-                clip = tf.reshape(clip, [1, height, width, channels])
+                # clip = tf.reshape(clip, [1, height, width, channels])
                 print("clip (init) = %s, shape = %s" % (clip, clip.get_shape().as_list()))
             else:
                 # video_4d = tf.reshape(video[j], [1, height, width, channels])
