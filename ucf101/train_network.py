@@ -46,14 +46,17 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
         for j in sample_indexes:
             if clip is None:
                 clip = video[j]
+                print("clip (init) = %s, shape = %s" % (clip, clip.get_shape().as_list()))
             else:
                 tf.stack([clip, video[j]])
+                print("clip (stack) = %s, shape = %s" % (clip, clip.get_shape().as_list()))
 
         # clip is finished, add to the clip_batch
         if clip_batch is None:
             clip_batch = clip
         else:
             tf.stack(clip_batch, clip)
+        print("clip_batch = %s, shape = %s" % (clip_batch, clip_batch.get_shape().as_list()))
 
     return clip_batch
 
