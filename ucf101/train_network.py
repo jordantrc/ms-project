@@ -72,6 +72,13 @@ def _parse_function(example_proto):
 
 with tf.Session() as sess:
 
+    # init variables
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    sess.run(init_op)
+
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
+
     # repeatable randomness during development
     tf.set_random_seed(1234)
 
@@ -79,8 +86,8 @@ with tf.Session() as sess:
     y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
 
     # using tf.data.TFRecordDataset iterator
-    filenames = tf.placeholder(tf.string, shape=[None])
-    dataset = tf.data.TFRecordDataset(filenames)
+    train_filenames = tf.placeholder(tf.string, shape=[None])
+    dataset = tf.data.TFRecordDataset(train_filenames)
     dataset = dataset.map(_parse_function)
     dataset = dataset.repeat(NUM_EPOCHS)
     dataset = dataset.batch(BATCH_SIZE)
@@ -105,13 +112,6 @@ with tf.Session() as sess:
     x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-
-    # init variables
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-    sess.run(init_op)
-
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(coord=coord)
 
     # placeholders
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
@@ -138,8 +138,11 @@ with tf.Session() as sess:
     print("Beginning training epochs")
 
     for i in range(NUM_EPOCHS):
-        sess.run(iterator.initializer)
-        sess.eval(x)
+        print("EPOCH %s" % i)
+        sess.run(iterator.initializer,
+                 feed_dict={
+                     train_filenames: [TRAIN_FILE],
+                     })
         sess.run(train_op)
 
     print("end training epochs")
