@@ -85,7 +85,7 @@ with tf.Session() as sess:
     tf.set_random_seed(1234)
 
     # placeholders
-    y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
+    # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
 
     # using tf.data.TFRecordDataset iterator
     train_filenames = tf.placeholder(tf.string, shape=[None])
@@ -146,5 +146,8 @@ with tf.Session() as sess:
                      train_filenames: [TRAIN_FILE],
                      })
         sess.run(train_op)
-
     print("end training epochs")
+
+    coord.request_stop()
+    coord.join(threads)
+    sess.close()
