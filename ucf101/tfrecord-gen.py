@@ -77,7 +77,7 @@ def split_file_list(filepath):
             if len(l) > 0:
                 space_split = l.split(' ')
                 video = space_split[0]
-                print("video = %s" % video)
+                # print("video = %s" % video)
                 video = video.split('/')[1]
                 videos.append(video)
 
@@ -121,6 +121,7 @@ def ucf101_dataset(root, output):
     # and test samples
     train_files = split_file_list(TRAIN_SET_FILE)
     test_files = split_file_list(TEST_SET_FILE)
+    assert len(train_files) > 0 and len(test_files) > 0, "test/train file zero length"
 
     # get count of each class
     smallest_class = None
