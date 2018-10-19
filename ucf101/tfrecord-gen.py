@@ -74,11 +74,12 @@ def split_file_list(filepath):
         lines = text.split('\n')
 
         for l in lines:
-            space_split = l.split(' ')
-            video = space_split[0]
-            print("video = %s" % video)
-            video = video.split('/')[1]
-            videos.append(video)
+            if len(l) > 0:
+                space_split = l.split(' ')
+                video = space_split[0]
+                print("video = %s" % video)
+                video = video.split('/')[1]
+                videos.append(video)
 
     return videos
 
