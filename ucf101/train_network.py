@@ -141,7 +141,7 @@ with tf.Session() as sess:
         sess.run(iterator.initializer, feed_dict={train_filenames: [TRAIN_FILE]})
         while True:
             try:
-                sess.run(train_op)
+                sess.run(train_op, feed_dict={train_filenames: [TRAIN_FILE]})
             except tf.errors.OutOfRangeError:
                 break
     print("end training epochs")
