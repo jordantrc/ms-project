@@ -21,6 +21,8 @@ import sys
 import tensorflow as tf
 
 CLASS_INDEX_FILE = "UCF101-class-index.txt"
+TRAIN_SET_FILE = "train-test-splits/trainlist01.txt"
+TEST_SET_FILE = "train-test-splits/testlist01.txt"
 
 
 def main():
@@ -55,12 +57,29 @@ def integer_label(classes, label):
     # print("integer_label: label = %s, classes = %s" % (label, classes))
     int_label = -1
     for k, v in classes.items():
-        print("k = %s, v = %s" % (k, v))
+        # print("k = %s, v = %s" % (k, v))
         if v == label:
             int_label = int(k)
             break
 
     return int_label
+
+
+def split_file_list(filepath):
+    '''returns a list of the splits contained in the filepath file'''
+
+    videos = []
+    with open(filepath) as fd:
+        text = fd.read()
+        lines = text.split('\n')
+
+        for l in lines:
+            space_split = l.split(' ')
+            video = space_split[0]
+            video = video.split('/')[1]
+            videos.append(video)
+
+    return videos
 
 
 def ucf101_dataset(root, output):
@@ -96,6 +115,11 @@ def ucf101_dataset(root, output):
                 class_indexes[i] = c
     assert len(classes) > 0
 
+    # read the training and test list files to get the list of training
+    # and test samples
+    train_files = split_file_list(TRAIN_SET_FILE)
+    test_files = split_file_list(TEST_SET_FILE)
+
     # get count of each class
     smallest_class = None
     smallest_class_num = -1
@@ -118,9 +142,11 @@ def ucf101_dataset(root, output):
 
     print("smallest class = %s (%s videos)" % (smallest_class, smallest_class_num))
 
-    output_path = os.path.join(output, "train.tfrecord")
-    writer = tf.python_io.TFRecordWriter(output_path)
-    assert writer is not None
+    train_output_path = os.path.join(output, "train.tfrecord")
+    test_output_path = os.path.join(output, "test.tfrecord")
+    train_writer = tf.python_io.TFRecordWriter(train_output_path)
+    test_writer = tf.python_io.TFRecordWriter(test_output_path)
+    assert train_writer is not None and test_writer is not None
 
     # open each video and sample frames
     for k in classes.keys():
@@ -128,6 +154,7 @@ def ucf101_dataset(root, output):
         videos = classes[k][1]
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
+            video_file_name = os.path.basename(v)
             features = {}
 
             # get video data from the video
@@ -139,8 +166,6 @@ def ucf101_dataset(root, output):
                                                                              resize_height,
                                                                              resize_width)
             images = images / 255.0
-
-            print("images shape: %s written to tfrecord file %s" % (images.shape, output_path))
             images_raw = images.tostring()
 
             label_int = integer_label(class_indexes, label)
@@ -152,10 +177,18 @@ def ucf101_dataset(root, output):
             # features['height'] = _int64_feature(image_height)
             # features['width'] = _int64_feature(image_width)
             example = tf.train.Example(features=tf.train.Features(feature=features))
-            writer.write(example.SerializeToString())
-            print("done writing data to tfrecord file")
+            if video_file_name in train_files:
+                train_writer.write(example.SerializeToString())
+                print("images shape: %s written to tfrecord file %s" % (images.shape, train_output_path))
+            elif video_file_name in test_files:
+                test_writer.write(example.SerializeToString())
+                print("images shape: %s written to tfrecord file %s" % (images.shape, test_output_path))
+            else:
+                # error condition
+                assert False, "video_file_name %s not found in test or train sets" % video_file_name
 
-    writer.close()
+    train_writer.close()
+    test_writer.close()
 
 
 def video_class(path):
