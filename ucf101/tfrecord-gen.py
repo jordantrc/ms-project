@@ -257,7 +257,8 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
                 for s in range(num_samples):
                     index = indices[s]
                     sequence = int((fps * index) + (count % fps))
-                    buf[sequence] = image
+                    if sequence <= max_sequence:
+                        buf[sequence] = image
                     # print("index = %s sequence = %s" % (index, sequence))
                     # print("frame index = %s" % frame_index)
                     # cv2.imwrite("./frames/frame%d-%d.jpg" % (sequence, count), image)
