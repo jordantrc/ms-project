@@ -140,9 +140,7 @@ def ucf101_dataset(root, output):
                                                                              resize_width)
             images = images / 255.0
 
-            print("images buffer shape, sample data:")
-            print(images.shape)
-            print(images[0])
+            print("images shape: %s written to tfrecord file %s" % (images.shape, output_path))
             images_raw = images.tostring()
 
             label_int = integer_label(class_indexes, label)
