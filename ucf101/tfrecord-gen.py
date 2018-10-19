@@ -79,7 +79,7 @@ def split_file_list(filepath):
                 video = space_split[0]
                 # print("video = %s" % video)
                 video = video.split('/')[1]
-                videos.append(video)
+                videos.append(video.strip())
 
     return videos
 
