@@ -77,6 +77,7 @@ with tf.Session() as sess:
     # init variables
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     sess.run(init_op)
+    weights, biases = c3d.get_variables(NUM_CLASSES)
 
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
@@ -120,7 +121,6 @@ with tf.Session() as sess:
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true_class = tf.argmax(y_true, axis=1)
 
-    weights, biases = c3d.get_variables(NUM_CLASSES)
     logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
