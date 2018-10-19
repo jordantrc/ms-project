@@ -142,6 +142,7 @@ with tf.Session() as sess:
 
     for i in range(NUM_EPOCHS):
         print("EPOCH %s" % i)
+        sess.run(init_op)
         sess.run(iterator.initializer,
                  feed_dict={
                      train_filenames: [TRAIN_FILE],
