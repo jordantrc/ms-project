@@ -139,6 +139,10 @@ def ucf101_dataset(root, output):
                                                                              resize_height,
                                                                              resize_width)
             images = images / 255.0
+
+            print("images buffer shape, sample data:")
+            print(images.shape)
+            print(images[0])
             images_raw = images.tostring()
 
             label_int = integer_label(class_indexes, label)
@@ -260,10 +264,6 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
         # print('read new frame: ', success)
         count += 1
         in_second = int(count / fps)
-
-    print("np buffer shape, sample data:")
-    print(buf.shape)
-    print(buf[0])
 
     return video_class_name, width, height, buf
 
