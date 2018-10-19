@@ -123,6 +123,8 @@ def ucf101_dataset(root, output):
     test_files = split_file_list(TEST_SET_FILE)
     assert len(train_files) > 0 and len(test_files) > 0, "test/train file zero length"
 
+    print("train files: [%s]\n\ntest_files[%s]" % (train_files, test_files))
+
     # get count of each class
     smallest_class = None
     smallest_class_num = -1
@@ -174,7 +176,6 @@ def ucf101_dataset(root, output):
             label_int = integer_label(class_indexes, label)
             assert label_int >= 0
 
-            # TODO - write train/test splits to individual files - train.tfrecords, test.tfrecords
             features['label'] = _int64_feature(label_int)
             features['img_raw'] = _bytes_feature(images_raw)
             # features['height'] = _int64_feature(image_height)
