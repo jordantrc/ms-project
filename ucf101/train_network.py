@@ -78,9 +78,6 @@ with tf.Session() as sess:
     tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-    sess.run(init_op)
     weights, biases = c3d.get_variables(NUM_CLASSES)
 
     # placeholders
@@ -134,13 +131,14 @@ with tf.Session() as sess:
     correct_pred = tf.equal(y_pred_class, y_true_class)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     sess.run(init_op)
 
     print("Beginning training epochs")
 
     for i in range(NUM_EPOCHS):
         print("EPOCH %s" % i)
-        sess.run(iterator.initializer)
+        #sess.run(iterator.initializer)
         sess.run(train_op, 
                  feed_dict={
                      train_filenames: [TRAIN_FILE],
