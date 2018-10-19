@@ -232,6 +232,7 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
     in_second = 0
     count = 0
     sequence = 0
+    max_sequence = (fps * sample_length * num_samples) - 1
     while success:
         if in_second in sample_times:
             # image transformations - resize to 224x224, convert to float
@@ -247,7 +248,7 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
             else:
                 num_samples = 1
 
-            if num_samples == 1:
+            if num_samples == 1 and sequence <= max_sequence:
                 # cv2.imwrite("./frames/frame%d-%d.jpg" % (sequence, count), image)
                 print("image = %s, shape = %s" % (image, image.shape))
                 buf[sequence] = image
