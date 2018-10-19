@@ -131,18 +131,19 @@ with tf.Session() as sess:
     correct_pred = tf.equal(y_pred_class, y_true_class)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer(), iterator.initializer)
     sess.run(init_op)
 
     print("Beginning training epochs")
 
     for i in range(NUM_EPOCHS):
         print("EPOCH %s" % i)
-        #sess.run(iterator.initializer)
-        sess.run(train_op, 
-                 feed_dict={
-                     train_filenames: [TRAIN_FILE],
-                     })
+        sess.run(iterator.initializer, feed_dict={train_filenames: [TRAIN_FILE]})
+        while True:
+            try:
+                sess.run(train_op)
+            except tf.errors.OutOfRangeError:
+                break
     print("end training epochs")
 
     coord.request_stop()
