@@ -188,7 +188,7 @@ def ucf101_dataset(root, output):
                 print("images shape: %s written to tfrecord file %s" % (images.shape, test_output_path))
             else:
                 # error condition
-                assert False, "video_file_name %s not found in test or train sets" % video_file_name
+                assert False, "video_file_name [%s] not found in test or train sets" % video_file_name
 
     train_writer.close()
     test_writer.close()
