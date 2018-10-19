@@ -75,15 +75,13 @@ def _parse_function(example_proto):
 with tf.Session() as sess:
 
     # init variables
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-    sess.run(init_op)
-    weights, biases = c3d.get_variables(NUM_CLASSES)
-
+    tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
 
-    # repeatable randomness during development
-    tf.set_random_seed(1234)
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    sess.run(init_op)
+    weights, biases = c3d.get_variables(NUM_CLASSES)
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
@@ -142,12 +140,11 @@ with tf.Session() as sess:
 
     for i in range(NUM_EPOCHS):
         print("EPOCH %s" % i)
-        sess.run(init_op)
-        sess.run(iterator.initializer,
+        sess.run(iterator.initializer)
+        sess.run(train_op, 
                  feed_dict={
                      train_filenames: [TRAIN_FILE],
                      })
-        sess.run(train_op)
     print("end training epochs")
 
     coord.request_stop()
