@@ -131,12 +131,15 @@ def ucf101_dataset(root, output):
             features = {}
 
             # get video data from the video
-            video_data = video_file_to_ndarray(v, num_samples, sample_length, sample_randomly, flip_horizontally,
-                                               resize_height, resize_width)
-            image_width = video_data[1]
-            image_height = video_data[2]
-            images_raw = video_data[3].tostring()
-            label = v.split('_')[1]
+            label, image_width, image_height, images = video_file_to_ndarray(v,
+                                                                             num_samples,
+                                                                             sample_length,
+                                                                             sample_randomly,
+                                                                             flip_horizontally,
+                                                                             resize_height,
+                                                                             resize_width)
+            images = images / 255.0
+            images_raw = images.tostring()
 
             label_int = integer_label(class_indexes, label)
             assert label_int >= 0
@@ -262,7 +265,7 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
     print(buf.shape)
     print(buf[0])
 
-    return [video_class_name, width, height, buf]
+    return video_class_name, width, height, buf
 
 
 def print_help():
