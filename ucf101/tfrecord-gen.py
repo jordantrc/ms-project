@@ -246,10 +246,11 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
             else:
                 num_samples = 1
 
-            if num_samples == 1 and sequence <= max_sequence:
+            if num_samples == 1:
                 # cv2.imwrite("./frames/frame%d-%d.jpg" % (sequence, count), image)
-                print("image = %s, shape = %s" % (image, image.shape))
-                buf[sequence] = image
+                # print("image = %s, shape = %s" % (image, image.shape))
+                if sequence <= max_sequence:
+                    buf[sequence] = image
                 sequence += 1
             else:
                 for s in range(num_samples):

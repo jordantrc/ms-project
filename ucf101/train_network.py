@@ -95,8 +95,10 @@ with tf.Session() as sess:
     # print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     # convert x to float, reshape to 5d
     # x = tf.cast(x, tf.float32)
-    print("reshaping x")
-    print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
+    # print("reshaping x")
+    # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
+    # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
+    sess.run(x.eval())
     x = tf.reshape(x,
                    [BATCH_SIZE,
                     c3d.INPUT_DATA_SIZE['t'],  # frames per sample
@@ -104,10 +106,8 @@ with tf.Session() as sess:
                     c3d.INPUT_DATA_SIZE['w'],
                     c3d.INPUT_DATA_SIZE['c']
                     ])
-    print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
     # generate clips for each video in the batch
-    print("generating clips from x")
     x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
