@@ -67,7 +67,7 @@ def _parse_function(example_proto):
                 }
     parsed_features = tf.parse_single_example(example_proto, features)
     videos = tf.decode_raw(parsed_features['img_raw'], tf.float32)
-    label = tf.cast(features['label'], tf.int64)
+    label = tf.cast(parsed_features['label'], tf.int64)
 
     return videos, label
 
