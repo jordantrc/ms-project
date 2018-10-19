@@ -100,6 +100,7 @@ with tf.Session() as sess:
     # convert x to float, reshape to 5d
     # x = tf.cast(x, tf.float32)
     print("reshaping x")
+    print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     x = tf.reshape(x,
                    [BATCH_SIZE,
                     c3d.INPUT_DATA_SIZE['t'],  # frames per sample
