@@ -82,9 +82,10 @@ with tf.Session() as sess:
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
+    train_filenames = tf.placeholder(tf.string, shape=[None])
+    test_filenames = tf.placeholder(tf.string, shape=[None])
 
     # using tf.data.TFRecordDataset iterator
-    train_filenames = tf.placeholder(tf.string, shape=[None])
     dataset = tf.data.TFRecordDataset(train_filenames)
     dataset = dataset.map(_parse_function)
     dataset = dataset.repeat(NUM_EPOCHS)
@@ -137,7 +138,7 @@ with tf.Session() as sess:
 
     for i in range(NUM_EPOCHS):
         print("EPOCH %s" % i)
-        sess.run(iterator.initializer, feed_dict={train_filenames: [TRAIN_FILE]})
+        sess.run(iterator.initializer, feed_dict={train_filenames: [TRAIN_FILE], test_filenames: [TEST_FILE]})
         while True:
             try:
                 sess.run(train_op)
