@@ -100,7 +100,7 @@ with tf.Session() as sess:
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
     x = tf.reshape(x,
-                   [BATCH_SIZE,
+                   [-1,
                     c3d.INPUT_DATA_SIZE['t'],  # frames per sample
                     c3d.INPUT_DATA_SIZE['h'],
                     c3d.INPUT_DATA_SIZE['w'],
