@@ -59,7 +59,7 @@ def integer_label(classes, label):
     int_label = -1
     for k, v in classes.items():
         # print("k = %s, v = %s" % (k, v))
-        if v == label:
+        if v.lower() == label.lower():
             int_label = int(k)
             break
 
@@ -124,7 +124,7 @@ def ucf101_dataset(root, output):
     test_files = split_file_list(TEST_SET_FILE)
     assert len(train_files) > 0 and len(test_files) > 0, "test/train file zero length"
 
-    print("train files: [%s]\n\ntest_files[%s]" % (train_files, test_files))
+    # print("train files: [%s]\n\ntest_files[%s]" % (train_files, test_files))
 
     # get count of each class
     smallest_class = None
