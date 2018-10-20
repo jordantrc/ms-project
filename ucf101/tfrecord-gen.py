@@ -23,6 +23,7 @@ import tensorflow as tf
 CLASS_INDEX_FILE = "UCF101-class-index.txt"
 TRAIN_SET_FILE = "train-test-splits/trainlist01.txt"
 TEST_SET_FILE = "train-test-splits/testlist01.txt"
+DATA_SAMPLE = 0.05
 
 
 def main():
@@ -157,6 +158,10 @@ def ucf101_dataset(root, output):
     for k in classes.keys():
         class_name = classes[k][0]
         videos = classes[k][1]
+
+        # sample videos based on DATA_SAMPLE
+        videos = random.sample(videos, len(videos) * DATA_SAMPLE)
+
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
             video_file_name = os.path.basename(v)
