@@ -25,6 +25,7 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
     '''generates a clip for each video in the batch'''
 
     dimensions = image_batch.get_shape().as_list()
+    print("dimensions = %s" % dimensions)
     batch_size = dimensions[0]
     num_frames_in_video = dimensions[1]
     height = dimensions[2]
