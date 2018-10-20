@@ -98,7 +98,6 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    sess.run(x.eval())
     x = tf.reshape(x,
                    [BATCH_SIZE,
                     c3d.INPUT_DATA_SIZE['t'],  # frames per sample
