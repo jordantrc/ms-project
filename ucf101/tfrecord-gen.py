@@ -160,7 +160,7 @@ def ucf101_dataset(root, output):
         videos = classes[k][1]
 
         # sample videos based on DATA_SAMPLE
-        videos = random.sample(videos, len(videos) * DATA_SAMPLE)
+        videos = random.sample(videos, int(len(videos) * DATA_SAMPLE))
 
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
