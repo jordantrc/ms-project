@@ -99,13 +99,7 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    x = tf.reshape(x,
-                   [-1,
-                    c3d.INPUT_DATA_SIZE['t'],  # frames per sample
-                    c3d.INPUT_DATA_SIZE['h'],
-                    c3d.INPUT_DATA_SIZE['w'],
-                    c3d.INPUT_DATA_SIZE['c']
-                    ])
+    # x = tf.reshape(x, [BATCH_SIZE, 250, 112, 112, 3])
 
     # generate clips for each video in the batch
     x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
