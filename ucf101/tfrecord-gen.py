@@ -148,8 +148,8 @@ def ucf101_dataset(root, output):
 
     print("smallest class = %s (%s videos)" % (smallest_class, smallest_class_num))
 
-    train_output_path = os.path.join(output, "train.tfrecord")
-    test_output_path = os.path.join(output, "test.tfrecord")
+    train_output_path = os.path.join(output, "train")
+    test_output_path = os.path.join(output, "test")
     train_writer = tf.python_io.TFRecordWriter(train_output_path)
     test_writer = tf.python_io.TFRecordWriter(test_output_path)
     assert train_writer is not None and test_writer is not None
@@ -165,7 +165,19 @@ def ucf101_dataset(root, output):
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
             video_file_name = os.path.basename(v)
-            features = {}
+
+            # determine where to write the tfrecord
+            if video_file_name in train_files:
+                tfrecord_output_path = os.path.join(train_output_path, video_file_name, ".tfrecord")
+            elif video_file_name in test_files:
+                tfrecord_output_path = os.path.join(test_output_path, video_file_name, ".tfrecord")
+            else:
+                # error condition
+                assert False, "video_file_name [%s] not found in test or train sets" % video_file_name
+
+            tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
+
+            features = dict()
 
             # get video data from the video
             label, image_width, image_height, images = video_file_to_ndarray(v,
@@ -175,29 +187,24 @@ def ucf101_dataset(root, output):
                                                                              flip_horizontally,
                                                                              resize_height,
                                                                              resize_width)
-            images = images / 255.0
-            images_raw = images.tostring()
-
             label_int = integer_label(class_indexes, label)
             assert label_int >= 0
 
             features['label'] = _int64_feature(label_int)
-            features['img_raw'] = _bytes_feature(images_raw)
-            # features['height'] = _int64_feature(image_height)
-            # features['width'] = _int64_feature(image_width)
-            example = tf.train.Example(features=tf.train.Features(feature=features))
-            if video_file_name in train_files:
-                train_writer.write(example.SerializeToString())
-                print("images shape: %s written to tfrecord file %s" % (images.shape, train_output_path))
-            elif video_file_name in test_files:
-                test_writer.write(example.SerializeToString())
-                print("images shape: %s written to tfrecord file %s" % (images.shape, test_output_path))
-            else:
-                # error condition
-                assert False, "video_file_name [%s] not found in test or train sets" % video_file_name
 
-    train_writer.close()
-    test_writer.close()
+            # package up the frames from the video
+            for i in range(images.shape[0]):
+                frame = images[i]
+                frame = tf.image.encode_jpeg(frame, quality=100)
+                frame_raw = frame.tostring()
+
+                features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
+
+            example = tf.train.Example(features=tf.train.Features(feature=features))
+
+            tfrecord_writer.write(example.SerializeToString())
+            tfrecord_writer.close()
+            print("images shape: %s written to tfrecord file %s" % (images.shape, tfrecord_output_path))
 
 
 def video_class(path):

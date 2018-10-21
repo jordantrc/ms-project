@@ -61,16 +61,30 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
 
 def _parse_function(example_proto):
     """parse map function for video data"""
-    features = {'label': tf.FixedLenFeature((), tf.int64, default_value=0),
-                'img_raw': tf.FixedLenFeature((), tf.string, default_value=""),
-                # "height": tf.FixedLenFeature((), tf.int64, default_value=0),
-                # "width": tf.FixedLenFeature((), tf.int64, default_value=0)
-                }
+    features = dict()
+    features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+
+    for i in range(FRAMES_PER_VIDEO):
+        features['frames/{:04d}'.format(i)] = tf.FixedLenFeature((), tf.string)
+
+    # parse the features
     parsed_features = tf.parse_single_example(example_proto, features)
-    videos = tf.decode_raw(parsed_features['img_raw'], tf.float32)
+
+    # decode the encoded jpegs
+    images = []
+    for i in range(FRAMES_PER_VIDEO):
+        frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
+
+        # normalization
+        frame = tf.cast(frame, tf.float32) * (1. / 255.) - 0.5
+        images.append(frame)
+
+    # pack the individual frames into a tensor
+    images = tf.stack(images)
+
     label = tf.cast(parsed_features['label'], tf.int64)
 
-    return videos, label
+    return images, label
 
 
 with tf.Session() as sess:
@@ -100,7 +114,7 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    # x = tf.reshape(x, [BATCH_SIZE, 250, 112, 112, 3])
+    x = tf.reshape(x, [BATCH_SIZE, 250, 112, 112, 3])
 
     # generate clips for each video in the batch
     x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
