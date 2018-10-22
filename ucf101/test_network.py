@@ -15,23 +15,18 @@ TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
 MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 
 tf.reset_default_graph()
-saver = tf.train.Saver()
 
 test_files = os.listdir(TEST_DIR)
 
-with tf.Session() as sess:
+# generate list of model checkpoints, get the latest
+models = os.listdir(MODEL_DIR)
+models.sort()
+latest_model = models[-1]
+latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 
+with tf.Session() as sess:
     # variables
     weights, biases = c3d.get_variables(NUM_CLASSES)
-
-    # generate list of model checkpoints, get the latest
-    models = os.listdir(MODEL_DIR)
-    models.sort()
-    latest_model = models[-1]
-    latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
-
-    saver.restore(latest_model)
-    print("Restored model %s" % latest_model)
 
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
@@ -58,6 +53,11 @@ with tf.Session() as sess:
     # evaluate the model
     correct_pred = tf.equal(y_pred_class, y_true_class)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+    # load the last model checkpoint
+    saver = tf.train.Saver()
+    saver.restore(latest_model)
+    print("Restored model %s" % latest_model)
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     sess.run(init_op)
