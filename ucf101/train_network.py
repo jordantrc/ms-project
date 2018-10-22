@@ -13,7 +13,6 @@ import datetime
 
 NUM_EPOCHS = 10
 
-
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
@@ -37,7 +36,7 @@ with tf.Session() as sess:
     # using tf.data.TFRecordDataset iterator
     dataset = tf.data.TFRecordDataset(train_filenames)
     dataset = dataset.map(c3d_model._parse_function)
-    dataset = dataset.repeat(c3d_model.NUM_EPOCHS)
+    dataset = dataset.repeat(NUM_EPOCHS)
     dataset = dataset.batch(c3d_model.BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
