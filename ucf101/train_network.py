@@ -6,52 +6,12 @@
 
 import os
 import tensorflow as tf
-import numpy as np
-import random
 import c3d_model
 import c3d
 import time
 import datetime
 
 NUM_EPOCHS = 10
-
-
-def _clip_image_batch(image_batch, num_frames, randomly=True):
-    '''generates a clip for each video in the batch'''
-
-    dimensions = image_batch.get_shape().as_list()
-    print("dimensions = %s" % dimensions)
-    batch_size = dimensions[0]
-    num_frames_in_video = dimensions[1]
-    height = dimensions[2]
-    width = dimensions[3]
-    channels = dimensions[4]
-
-    # sample frames for each video
-    clip_batch = []
-    for i in range(batch_size):
-        clips = []
-        video = image_batch[i]
-        print("video = %s, shape = %s" % (video, video.get_shape().as_list()))
-        # randomly sample frames
-        sample_indexes = random.sample(list(range(num_frames_in_video)), num_frames)
-        sample_indexes.sort()
-
-        print("sample indexes = %s" % sample_indexes)
-
-        for j in sample_indexes:
-            clips.append(video[j])
-
-        # turn clips list into a tensor
-        clips = tf.stack(clips)
-
-        clip_batch.append(clips)
-
-    # turn clip_batch into tensor
-    clip_batch = tf.stack(clip_batch)
-    print("clip_batch = %s, shape = %s" % (clip_batch, clip_batch.get_shape().as_list()))
-
-    return clip_batch
 
 
 # get the list of files for train and test
@@ -89,7 +49,7 @@ with tf.Session() as sess:
     x = tf.reshape(x, [c3d_model.BATCH_SIZE, 250, 112, 112, 3])
 
     # generate clips for each video in the batch
-    x = _clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
+    x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 

@@ -37,6 +37,11 @@ with tf.Session() as sess:
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
+    x = tf.reshape(x, [c3d_model.BATCH_SIZE, 250, 112, 112, 3])
+
+    # generate clips for each video in the batch
+    x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
+
     y_true_class = tf.argmax(y_true, axis=1)
 
     logits = c3d_model.inference_3d(x, DROPOUT, c3d_model.BATCH_SIZE, weights, biases)

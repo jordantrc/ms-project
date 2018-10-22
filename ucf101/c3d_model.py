@@ -6,6 +6,7 @@
 # https://github.com/hx173149/C3D-tensorflow/blob/master/c3d_model.py
 
 import tensorflow as tf
+import random
 
 
 NUM_CLASSES = 101
@@ -17,6 +18,41 @@ FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-3
+
+
+def _clip_image_batch(image_batch, num_frames, randomly=True):
+    '''generates a clip for each video in the batch'''
+
+    dimensions = image_batch.get_shape().as_list()
+    print("dimensions = %s" % dimensions)
+    batch_size = dimensions[0]
+    num_frames_in_video = dimensions[1]
+
+    # sample frames for each video
+    clip_batch = []
+    for i in range(batch_size):
+        clips = []
+        video = image_batch[i]
+        print("video = %s, shape = %s" % (video, video.get_shape().as_list()))
+        # randomly sample frames
+        sample_indexes = random.sample(list(range(num_frames_in_video)), num_frames)
+        sample_indexes.sort()
+
+        print("sample indexes = %s" % sample_indexes)
+
+        for j in sample_indexes:
+            clips.append(video[j])
+
+        # turn clips list into a tensor
+        clips = tf.stack(clips)
+
+        clip_batch.append(clips)
+
+    # turn clip_batch into tensor
+    clip_batch = tf.stack(clip_batch)
+    print("clip_batch = %s, shape = %s" % (clip_batch, clip_batch.get_shape().as_list()))
+
+    return clip_batch
 
 
 def _parse_function(example_proto):
