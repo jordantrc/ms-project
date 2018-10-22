@@ -9,7 +9,7 @@ import tensorflow as tf
 import c3d
 import c3d_model
 
-DROPOUT = 0.0
+DROPOUT = 1.0
 NUM_CLASSES = 101
 TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
 MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
