@@ -195,9 +195,8 @@ def ucf101_dataset(root, output):
             for i in range(images.shape[0]):
                 frame = images[i]
                 # frame = tf.image.encode_jpeg(frame, quality=100)
-                frame_raw = frame.tostring()
-
-                features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
+                # frame_raw = frame.tostring()
+                features['frames/{:04d}'.format(i)] = _bytes_feature(frame)
 
             example = tf.train.Example(features=tf.train.Features(feature=features))
 
