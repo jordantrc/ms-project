@@ -63,7 +63,7 @@ with tf.Session() as sess:
 
     # load the last model checkpoint
     saver = tf.train.Saver()
-    saver.restore(latest_model)
+    saver.restore(sess, latest_model)
     print("Restored model %s" % latest_model)
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
