@@ -18,6 +18,8 @@ NUM_EPOCHS = 10
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
 
+tf.reset_default_graph()
+
 with tf.Session() as sess:
 
     # init variables
