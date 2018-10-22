@@ -9,10 +9,10 @@ import tensorflow as tf
 import c3d
 import c3d_model
 
-import train_network
-
+from train_network import _parse_function, BATCH_SIZE, LEARNING_RATE
 
 DROPOUT = 0.0
+NUM_CLASSES = 101
 TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
 MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 
@@ -24,7 +24,7 @@ test_files = os.listdir(TEST_DIR)
 with tf.Session() as sess:
 
     # variables
-    weights, biases = c3d.get_variables(train_network.NUM_CLASSES)
+    weights, biases = c3d.get_variables(NUM_CLASSES)
 
     # generate list of model checkpoints, get the latest
     models = os.listdir(MODEL_DIR)
@@ -39,22 +39,22 @@ with tf.Session() as sess:
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
     dataset = tf.data.TFRecordDataset(test_filenames)
-    dataset = dataset.map(train_network._parse_function)
+    dataset = dataset.map(_parse_function)
     dataset = dataset.repeat(1)
-    dataset = dataset.batch(train_network.BATCH_SIZE)
+    dataset = dataset.batch(BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
     y_true_class = tf.argmax(y_true, axis=1)
 
-    logits = c3d_model.inference_3d(x, DROPOUT, train_network.BATCH_SIZE, weights, biases)
+    logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=train_network.LEARNING_RATE)
+    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
 
     train_op = optimizer.minimize(loss_op)
 
