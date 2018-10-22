@@ -10,6 +10,8 @@ import numpy as np
 import random
 import c3d_model
 import c3d
+import time
+import datetime
 
 NUM_CLASSES = 101
 TRAIN_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/train"
@@ -92,11 +94,6 @@ def _parse_function(example_proto):
     return images, label
 
 
-def test_batch(size):
-    '''generates a test batch of size size'''
-
-
-
 # get the list of files for train and test
 train_files = [os.path.join(TRAIN_DIR, x) for x in os.listdir(TRAIN_DIR)]
 test_files = [os.path.join(TEST_DIR, x) for x in os.listdir(TEST_DIR)]
@@ -161,7 +158,8 @@ with tf.Session() as sess:
     print("Beginning training epochs")
 
     for i in range(NUM_EPOCHS):
-        print("EPOCH %s" % i)
+        print("START EPOCH %s" % i)
+        start = time.time()
         sess.run(iterator.initializer, feed_dict={train_filenames: train_files, test_filenames: test_files})
         while True:
             try:
@@ -170,7 +168,10 @@ with tf.Session() as sess:
                 break
         save_path = os.path.join(MODEL_DIR, "model_epoch_%s.ckpt" % i)
         save_path = saver.save(sess, save_path)
-        print("model saved to %s" % save_path)
+        end = time.time()
+        train_time = str(datetime.timedelta(seconds=end - start))
+        print("END EPOCH %s, epoch training time: %s seconds" % (i, train_time))
+        print("model saved to %s\n\n" % save_path)
 
     print("end training epochs")
 
