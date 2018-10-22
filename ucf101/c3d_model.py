@@ -16,7 +16,7 @@ MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 DROPOUT = 0.5
 FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
-BATCH_SIZE = 5
+BATCH_SIZE = 30
 LEARNING_RATE = 1e-3
 
 

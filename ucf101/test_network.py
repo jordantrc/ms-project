@@ -27,6 +27,8 @@ latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 latest_model = os.path.join(MODEL_DIR, latest_model)
 print("latest_model = %s" % latest_model)
 
+current_learning_rate = c3d_model.LEARNING_RATE
+
 with tf.Session() as sess:
     # variables
     weights, biases = c3d.get_variables(NUM_CLASSES)
@@ -54,7 +56,7 @@ with tf.Session() as sess:
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=c3d_model.LEARNING_RATE)
+    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
 
     train_op = optimizer.minimize(loss_op)
 

@@ -17,6 +17,8 @@ NUM_EPOCHS = 16
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
 
+current_learning_rate = c3d_model.LEARNING_RATE
+
 tf.reset_default_graph()
 
 with tf.Session() as sess:
@@ -65,7 +67,7 @@ with tf.Session() as sess:
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=c3d_model.LEARNING_RATE)
+    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
 
     train_op = optimizer.minimize(loss_op)
 
@@ -93,6 +95,10 @@ with tf.Session() as sess:
         train_time = str(datetime.timedelta(seconds=end - start))
         print("END EPOCH %s, epoch training time: %s seconds" % (i, train_time))
         print("model saved to %s\n\n" % save_path)
+
+        if i != 0 and i % 4 == 0:
+            current_learning_rate = current_learning_rate / 10
+            print("learning rate adjusted to %g" % current_learning_rate)
 
     print("end training epochs")
 
