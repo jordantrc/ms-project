@@ -74,8 +74,10 @@ def _parse_function(example_proto):
     # decode the encoded jpegs
     images = []
     for i in range(FRAMES_PER_VIDEO):
-        frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
-
+        # frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
+        frame = tf.decode_raw(parsed_features['frames/{:04d}'.format(i)])
+        frame = tf.reshape(frame, tf.stack([112, 112, 3]))
+        frame = tf.reshape(frame, [1, 112, 112, 3])
         # normalization
         frame = tf.cast(frame, tf.float32) * (1. / 255.) - 0.5
         images.append(frame)
