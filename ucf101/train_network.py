@@ -34,9 +34,9 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
     channels = dimensions[4]
 
     # sample frames for each video
-    clips = []
     clip_batch = []
     for i in range(batch_size):
+        clips = []
         video = image_batch[i]
         print("video = %s, shape = %s" % (video, video.get_shape().as_list()))
         # randomly sample frames
