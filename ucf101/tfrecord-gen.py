@@ -194,7 +194,7 @@ def ucf101_dataset(root, output):
             # package up the frames from the video
             for i in range(images.shape[0]):
                 frame = images[i]
-                frame = tf.image.encode_jpeg(frame, quality=100)
+                # frame = tf.image.encode_jpeg(frame, quality=100)
                 frame_raw = frame.tostring()
 
                 features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
