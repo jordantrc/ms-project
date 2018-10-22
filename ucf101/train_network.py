@@ -90,8 +90,8 @@ def _parse_function(example_proto):
 
 
 # get the list of files for train and test
-train_files = os.listdir(TRAIN_DIR)
-test_files = os.listdir(TEST_DIR)
+train_files = [os.path.join(TRAIN_DIR, x) for x in os.listdir(TRAIN_DIR)]
+test_files = [os.path.join(TEST_DIR, x) for x in os.listdir(TEST_DIR)]
 
 with tf.Session() as sess:
 
