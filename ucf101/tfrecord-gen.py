@@ -150,8 +150,6 @@ def ucf101_dataset(root, output):
 
     train_output_path = os.path.join(output, "train")
     test_output_path = os.path.join(output, "test")
-    train_writer = tf.python_io.TFRecordWriter(train_output_path)
-    test_writer = tf.python_io.TFRecordWriter(test_output_path)
     assert train_writer is not None and test_writer is not None
 
     # open each video and sample frames
