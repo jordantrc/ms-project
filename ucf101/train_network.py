@@ -14,6 +14,7 @@ import c3d
 NUM_CLASSES = 101
 TRAIN_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/train"
 TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
+MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 DROPOUT = 0.5
 FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
@@ -91,8 +92,9 @@ def _parse_function(example_proto):
     return images, label
 
 
-def _label_one_hot(label):
-    '''returns a one-hot tensor for the class label'''
+def test_batch(size):
+    '''generates a test batch of size size'''
+
 
 
 # get the list of files for train and test
@@ -106,6 +108,7 @@ with tf.Session() as sess:
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
     weights, biases = c3d.get_variables(NUM_CLASSES)
+    saver = tf.train.Saver()
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
@@ -165,6 +168,10 @@ with tf.Session() as sess:
                 sess.run(train_op)
             except tf.errors.OutOfRangeError:
                 break
+        save_path = os.path.join(MODEL_DIR, "model_epoch_%s.ckpt" % i)
+        save_path = saver.save(sess, save_path)
+        print("model saved to %s" % save_path)
+
     print("end training epochs")
 
     coord.request_stop()
