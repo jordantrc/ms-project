@@ -9,8 +9,6 @@ import tensorflow as tf
 import c3d
 import c3d_model
 
-from train_network import _parse_function, BATCH_SIZE, LEARNING_RATE
-
 DROPOUT = 0.0
 NUM_CLASSES = 101
 TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
@@ -33,28 +31,27 @@ with tf.Session() as sess:
     latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 
     saver.restore(latest_model)
-
     print("Restored model %s" % latest_model)
 
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
     dataset = tf.data.TFRecordDataset(test_filenames)
-    dataset = dataset.map(_parse_function)
+    dataset = dataset.map(c3d_model._parse_function)
     dataset = dataset.repeat(1)
-    dataset = dataset.batch(BATCH_SIZE)
+    dataset = dataset.batch(c3d_model.BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
     y_true_class = tf.argmax(y_true, axis=1)
 
-    logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weights, biases)
+    logits = c3d_model.inference_3d(x, DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
+    optimizer = tf.train.AdamOptimizer(learning_rate=c3d_model.LEARNING_RATE)
 
     train_op = optimizer.minimize(loss_op)
 

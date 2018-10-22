@@ -8,6 +8,48 @@
 import tensorflow as tf
 
 
+NUM_CLASSES = 101
+TRAIN_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/train"
+TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
+MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
+DROPOUT = 0.5
+FRAMES_PER_VIDEO = 250
+FRAMES_PER_CLIP = 16
+BATCH_SIZE = 5
+LEARNING_RATE = 1e-3
+
+
+def _parse_function(example_proto):
+    """parse map function for video data"""
+    features = dict()
+    features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+
+    for i in range(FRAMES_PER_VIDEO):
+        features['frames/{:04d}'.format(i)] = tf.FixedLenFeature((), tf.string)
+
+    # parse the features
+    parsed_features = tf.parse_single_example(example_proto, features)
+
+    # decode the encoded jpegs
+    images = []
+    for i in range(FRAMES_PER_VIDEO):
+        # frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
+        frame = tf.decode_raw(parsed_features['frames/{:04d}'.format(i)], tf.uint8)
+        frame = tf.reshape(frame, tf.stack([112, 112, 3]))
+        frame = tf.reshape(frame, [1, 112, 112, 3])
+        # normalization
+        frame = tf.cast(frame, tf.float32) * (1. / 255.) - 0.5
+        images.append(frame)
+
+    # pack the individual frames into a tensor
+    images = tf.stack(images)
+
+    label = tf.cast(parsed_features['label'], tf.int64)
+    label = tf.one_hot(label, depth=NUM_CLASSES)
+
+    return images, label
+
+
 def conv3d(name, l_input, w, b):
     return tf.nn.bias_add(
         tf.nn.conv3d(l_input, w, strides=[1, 1, 1, 1, 1], padding='SAME'),

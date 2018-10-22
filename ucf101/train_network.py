@@ -13,16 +13,7 @@ import c3d
 import time
 import datetime
 
-NUM_CLASSES = 101
-TRAIN_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/train"
-TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
-MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
-DROPOUT = 0.5
-FRAMES_PER_VIDEO = 250
-FRAMES_PER_CLIP = 16
-BATCH_SIZE = 5
 NUM_EPOCHS = 10
-LEARNING_RATE = 1e-3
 
 
 def _clip_image_batch(image_batch, num_frames, randomly=True):
@@ -63,40 +54,9 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
     return clip_batch
 
 
-def _parse_function(example_proto):
-    """parse map function for video data"""
-    features = dict()
-    features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-
-    for i in range(FRAMES_PER_VIDEO):
-        features['frames/{:04d}'.format(i)] = tf.FixedLenFeature((), tf.string)
-
-    # parse the features
-    parsed_features = tf.parse_single_example(example_proto, features)
-
-    # decode the encoded jpegs
-    images = []
-    for i in range(FRAMES_PER_VIDEO):
-        # frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
-        frame = tf.decode_raw(parsed_features['frames/{:04d}'.format(i)], tf.uint8)
-        frame = tf.reshape(frame, tf.stack([112, 112, 3]))
-        frame = tf.reshape(frame, [1, 112, 112, 3])
-        # normalization
-        frame = tf.cast(frame, tf.float32) * (1. / 255.) - 0.5
-        images.append(frame)
-
-    # pack the individual frames into a tensor
-    images = tf.stack(images)
-
-    label = tf.cast(parsed_features['label'], tf.int64)
-    label = tf.one_hot(label, depth=NUM_CLASSES)
-
-    return images, label
-
-
 # get the list of files for train and test
-train_files = [os.path.join(TRAIN_DIR, x) for x in os.listdir(TRAIN_DIR)]
-test_files = [os.path.join(TEST_DIR, x) for x in os.listdir(TEST_DIR)]
+train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
+test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
 
 with tf.Session() as sess:
 
@@ -104,7 +64,7 @@ with tf.Session() as sess:
     tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-    weights, biases = c3d.get_variables(NUM_CLASSES)
+    weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
     saver = tf.train.Saver()
 
     # placeholders
@@ -114,9 +74,9 @@ with tf.Session() as sess:
 
     # using tf.data.TFRecordDataset iterator
     dataset = tf.data.TFRecordDataset(train_filenames)
-    dataset = dataset.map(_parse_function)
-    dataset = dataset.repeat(NUM_EPOCHS)
-    dataset = dataset.batch(BATCH_SIZE)
+    dataset = dataset.map(c3d_model._parse_function)
+    dataset = dataset.repeat(c3d_model.NUM_EPOCHS)
+    dataset = dataset.batch(c3d_model.BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
@@ -126,10 +86,10 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    x = tf.reshape(x, [BATCH_SIZE, 250, 112, 112, 3])
+    x = tf.reshape(x, [c3d_model.BATCH_SIZE, 250, 112, 112, 3])
 
     # generate clips for each video in the batch
-    x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
+    x = _clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
@@ -137,14 +97,14 @@ with tf.Session() as sess:
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true_class = tf.argmax(y_true, axis=1)
 
-    logits = c3d_model.inference_3d(x, DROPOUT, BATCH_SIZE, weights, biases)
+    logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
+    optimizer = tf.train.AdamOptimizer(learning_rate=c3d_model.LEARNING_RATE)
 
     train_op = optimizer.minimize(loss_op)
 
@@ -166,7 +126,7 @@ with tf.Session() as sess:
                 sess.run(train_op)
             except tf.errors.OutOfRangeError:
                 break
-        save_path = os.path.join(MODEL_DIR, "model_epoch_%s.ckpt" % i)
+        save_path = os.path.join(c3d_model.MODEL_DIR, "model_epoch_%s.ckpt" % i)
         save_path = saver.save(sess, save_path)
         end = time.time()
         train_time = str(datetime.timedelta(seconds=end - start))
