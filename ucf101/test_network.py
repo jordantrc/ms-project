@@ -17,6 +17,7 @@ MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 tf.reset_default_graph()
 
 test_files = os.listdir(TEST_DIR)
+test_files = [os.path.join(TEST_DIR, x) for x in test_files]
 
 # generate list of model checkpoints, get the latest
 models = os.listdir(MODEL_DIR)
@@ -61,12 +62,12 @@ with tf.Session() as sess:
     correct_pred = tf.equal(y_pred_class, y_true_class)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+
     # load the last model checkpoint
     saver = tf.train.Saver()
     saver.restore(sess, latest_model)
     print("Restored model %s" % latest_model)
-
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     sess.run(init_op)
 
     # test a single run through of the test data
