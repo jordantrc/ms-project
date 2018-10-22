@@ -162,12 +162,13 @@ def ucf101_dataset(root, output):
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
             video_file_name = os.path.basename(v)
+            video_tfrecord_file_name = video_file_name + ".tfrecord"
 
             # determine where to write the tfrecord
             if video_file_name in train_files:
-                tfrecord_output_path = os.path.join(train_output_path, video_file_name, ".tfrecord")
+                tfrecord_output_path = os.path.join(train_output_path, video_tfrecord_file_name)
             elif video_file_name in test_files:
-                tfrecord_output_path = os.path.join(test_output_path, video_file_name, ".tfrecord")
+                tfrecord_output_path = os.path.join(test_output_path, video_tfrecord_file_name)
             else:
                 # error condition
                 assert False, "video_file_name [%s] not found in test or train sets" % video_file_name
