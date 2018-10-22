@@ -23,6 +23,8 @@ models = os.listdir(MODEL_DIR)
 models.sort()
 latest_model = models[-1]
 latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
+latest_model = os.path.join(MODEL_DIR, latest_model)
+print("latest_model = %s" % latest_model)
 
 with tf.Session() as sess:
     # variables
