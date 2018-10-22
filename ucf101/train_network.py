@@ -4,6 +4,7 @@
 # - incorporate tfrecord data input queue
 # - fix storage of labels as integers (indexes into the class index file)
 
+import os
 import tensorflow as tf
 import numpy as np
 import random
@@ -11,8 +12,8 @@ import c3d_model
 import c3d
 
 NUM_CLASSES = 101
-TRAIN_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/train.tfrecord"
-TEST_FILE = "/home/jordanc/datasets/UCF-101/tfrecords/test.tfrecord"
+TRAIN_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/train"
+TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
 DROPOUT = 0.5
 FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
@@ -88,6 +89,10 @@ def _parse_function(example_proto):
     return images, label
 
 
+# get the list of files for train and test
+train_files = os.listdir(TRAIN_DIR)
+test_files = os.listdir(TEST_DIR)
+
 with tf.Session() as sess:
 
     # init variables
@@ -148,7 +153,7 @@ with tf.Session() as sess:
 
     for i in range(NUM_EPOCHS):
         print("EPOCH %s" % i)
-        sess.run(iterator.initializer, feed_dict={train_filenames: [TRAIN_FILE], test_filenames: [TEST_FILE]})
+        sess.run(iterator.initializer, feed_dict={train_filenames: train_files, test_filenames: test_files})
         while True:
             try:
                 sess.run(train_op)
