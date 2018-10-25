@@ -49,7 +49,7 @@ with tf.Session() as sess:
     x, y_true = iterator.get_next()
 
     # initialize
-    sess.run(init_op)
+    # sess.run(init_op)
 
     # test a single run through of the test data
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
