@@ -39,6 +39,8 @@ with tf.Session() as sess:
 
     print("Restored model %s" % latest_model)
 
+    sess.run(tf.local_variables_initializer())
+
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
     dataset = tf.data.TFRecordDataset(test_filenames)
@@ -57,3 +59,5 @@ with tf.Session() as sess:
             print("test accuracy = %g" % acc)
         except tf.errors.OutOfRangeError:
             break
+
+    print("Exhausted test data")
