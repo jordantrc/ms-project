@@ -34,6 +34,7 @@ with tf.Session() as sess:
     train_filenames = tf.placeholder(tf.string, shape=[None])
     test_filenames = tf.placeholder(tf.string, shape=[None])
     batch_size_actual = tf.placeholder(tf.int64, shape=[None])
+    video_size = tf.constant([250 * 112 * 112 *3])
 
     # using tf.data.TFRecordDataset iterator
     dataset = tf.data.TFRecordDataset(train_filenames)
@@ -49,8 +50,8 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    if x.get_shape().as_list()[0] != (c3d_model.BATCH_SIZE * 250 * 112 * 112 * 3):
-        batch_size_actual = x.get_shape().as_list()[0] / (250 * 112 * 112 *3)
+    if x.get_shape().as_list()[0] != (c3d_model.BATCH_SIZE * video_size):
+        batch_size_actual = x.get_shape().as_list()[0] / video_size
     else:
         batch_size_actual = c3d_model.BATCH_SIZE
 
