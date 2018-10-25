@@ -49,7 +49,7 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    batch_size_actual = tf.shape(x.get_shape().as_list[0] / video_size)
+    batch_size_actual = x.get_shape().as_list[0] / video_size
     x = tf.reshape(x, [batch_size_actual, c3d_model.FRAMES_PER_CLIP, 112, 112, 3])
 
     # generate clips for each video in the batch
