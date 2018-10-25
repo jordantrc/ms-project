@@ -33,7 +33,7 @@ with tf.Session() as sess:
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
     train_filenames = tf.placeholder(tf.string, shape=[None])
     test_filenames = tf.placeholder(tf.string, shape=[None])
-    batch_size_actual = tf.placeholder(tf.int64, shape=[None])
+    batch_size_actual = tf.placeholder(tf.int64, shape=[1])
     video_size = tf.constant([250 * 112 * 112 *3])
 
     # using tf.data.TFRecordDataset iterator
