@@ -8,11 +8,18 @@ import os
 import tensorflow as tf
 import c3d
 import c3d_model
+import sys
 
 DROPOUT = 1.0
 NUM_CLASSES = 101
 TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
-MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
+
+# specify a model directory or use the default
+if len(sys.argv) == 2:
+    MODEL_DIR = sys.argv[1]
+    assert os.path.isdir(MODEL_DIR), "%s is not a directory" % MODEL_DIR
+else:
+    MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 
 tf.reset_default_graph()
 
