@@ -32,9 +32,9 @@ latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 latest_model = os.path.join(MODEL_DIR, latest_model)
 print("latest_model = %s" % latest_model)
 
+saver = tf.train.import_meta_graph(latest_model + ".meta")
 
 with tf.Session() as sess:
-    saver = tf.train.import_meta_graph(latest_model + ".meta")
     saver.restore(sess, latest_model)
 
     print("Restored model %s" % latest_model)
@@ -47,9 +47,6 @@ with tf.Session() as sess:
     dataset = dataset.batch(c3d_model.BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
-
-    # initialize
-    # sess.run(init_op)
 
     # test a single run through of the test data
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
