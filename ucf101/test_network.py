@@ -21,8 +21,6 @@ if len(sys.argv) == 2:
 else:
     MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 
-tf.reset_default_graph()
-
 test_files = os.listdir(TEST_DIR)
 test_files = [os.path.join(TEST_DIR, x) for x in test_files]
 
@@ -34,12 +32,11 @@ latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 latest_model = os.path.join(MODEL_DIR, latest_model)
 print("latest_model = %s" % latest_model)
 
-# create saver object
-saver = tf.train.Saver()
 
 with tf.Session() as sess:
-
+    saver = tf.train.import_meta_graph(latest_model + ".meta")
     saver.restore(sess, latest_model)
+
     print("Restored model %s" % latest_model)
 
     test_filenames = tf.placeholder(tf.string, shape=[None])
