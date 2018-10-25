@@ -49,9 +49,7 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    x_shape = tf.shape(x)
-    batch_size_actual = x_shape[0]
-    x = tf.reshape(x, [batch_size_actual, c3d_model.FRAMES_PER_CLIP, 112, 112, 3])
+    x = tf.reshape(x, [c3d_model.BATCH_SIZE, c3d_model.FRAMES_PER_CLIP, 112, 112, 3])
 
     # generate clips for each video in the batch
     x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
@@ -62,7 +60,7 @@ with tf.Session() as sess:
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true_class = tf.argmax(y_true, axis=1)
 
-    logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, batch_size_actual, weights, biases)
+    logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)

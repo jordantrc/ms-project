@@ -16,17 +16,17 @@ MODEL_DIR = "/home/jordanc/datasets/UCF-101/model_ckpts"
 DROPOUT = 0.5
 FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
-BATCH_SIZE = 30
+BATCH_SIZE = 1
 LEARNING_RATE = 1e-3
 
 
 def _clip_image_batch(image_batch, num_frames, randomly=True):
     '''generates a clip for each video in the batch'''
 
-    batch_dimensions = tf.shape(image_batch)
+    dimensions = image_batch.get_shape().as_list()
     # print("dimensions = %s" % dimensions)
-    batch_size = batch_dimensions[0]
-    num_frames_in_video = FRAMES_PER_VIDEO
+    batch_size = dimensions[0]
+    num_frames_in_video = dimensions[1]
 
     # sample frames for each video
     clip_batch = []
