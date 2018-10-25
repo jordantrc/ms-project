@@ -34,10 +34,11 @@ latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 latest_model = os.path.join(MODEL_DIR, latest_model)
 print("latest_model = %s" % latest_model)
 
+# create saver object
+saver = tf.train.Saver()
 
 with tf.Session() as sess:
 
-    saver = tf.train.Saver()
     saver.restore(sess, latest_model)
     print("Restored model %s" % latest_model)
 
