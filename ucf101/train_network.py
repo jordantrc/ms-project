@@ -28,7 +28,6 @@ with tf.Session() as sess:
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
     weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
-    saver = tf.train.Saver()
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
@@ -76,6 +75,8 @@ with tf.Session() as sess:
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+
+    saver = tf.train.Saver()
     sess.run(init_op)
 
     print("Beginning training epochs")
