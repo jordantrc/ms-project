@@ -23,10 +23,10 @@ LEARNING_RATE = 1e-3
 def _clip_image_batch(image_batch, num_frames, randomly=True):
     '''generates a clip for each video in the batch'''
 
-    dimensions = image_batch.get_shape().as_list()
+    batch_dimensions = image_batch.shape()
     # print("dimensions = %s" % dimensions)
-    batch_size = dimensions[0]
-    num_frames_in_video = dimensions[1]
+    batch_size = batch_dimensions[0]
+    num_frames_in_video = FRAMES_PER_VIDEO
 
     # sample frames for each video
     clip_batch = []
