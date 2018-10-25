@@ -24,7 +24,7 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
     '''generates a clip for each video in the batch'''
 
     dimensions = image_batch.get_shape().as_list()
-    print("dimensions = %s" % dimensions)
+    # print("dimensions = %s" % dimensions)
     batch_size = dimensions[0]
     num_frames_in_video = dimensions[1]
 
@@ -33,12 +33,12 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
     for i in range(batch_size):
         clips = []
         video = image_batch[i]
-        print("video = %s, shape = %s" % (video, video.get_shape().as_list()))
+        # print("video = %s, shape = %s" % (video, video.get_shape().as_list()))
         # randomly sample frames
         sample_indexes = random.sample(list(range(num_frames_in_video)), num_frames)
         sample_indexes.sort()
 
-        print("sample indexes = %s" % sample_indexes)
+        # print("sample indexes = %s" % sample_indexes)
 
         for j in sample_indexes:
             clips.append(video[j])
@@ -50,7 +50,7 @@ def _clip_image_batch(image_batch, num_frames, randomly=True):
 
     # turn clip_batch into tensor
     clip_batch = tf.stack(clip_batch)
-    print("clip_batch = %s, shape = %s" % (clip_batch, clip_batch.get_shape().as_list()))
+    # print("clip_batch = %s, shape = %s" % (clip_batch, clip_batch.get_shape().as_list()))
 
     return clip_batch
 
