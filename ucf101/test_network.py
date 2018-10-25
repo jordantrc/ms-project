@@ -34,11 +34,12 @@ latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 latest_model = os.path.join(MODEL_DIR, latest_model)
 print("latest_model = %s" % latest_model)
 
-current_learning_rate = c3d_model.LEARNING_RATE
 
 with tf.Session() as sess:
-    # variables
-    weights, biases = c3d.get_variables(NUM_CLASSES)
+
+    saver = tf.train.Saver()
+    saver.restore(sess, latest_model)
+    print("Restored model %s" % latest_model)
 
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
@@ -49,38 +50,15 @@ with tf.Session() as sess:
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
-    x = tf.reshape(x, [c3d_model.BATCH_SIZE, 250, 112, 112, 3])
-
-    # generate clips for each video in the batch
-    x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
-
-    y_true_class = tf.argmax(y_true, axis=1)
-
-    logits = c3d_model.inference_3d(x, DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
-
-    y_pred = tf.nn.softmax(logits)
-    y_pred_class = tf.argmax(y_pred, axis=1)
-
-    # loss and optimizer
-    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
-
-    train_op = optimizer.minimize(loss_op)
-
-    # evaluate the model
-    correct_pred = tf.equal(y_pred_class, y_true_class)
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-
-    # load the last model checkpoint
-    saver = tf.train.Saver()
-    saver.restore(sess, latest_model)
-    print("Restored model %s" % latest_model)
+    # initialize
     sess.run(init_op)
 
     # test a single run through of the test data
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
 
-    acc = sess.run(accuracy)
-    print("test accuracy = %g" % acc)
+    while True:
+        try:
+            acc = sess.run(accuracy)
+            print("test accuracy = %g" % acc)
+        except tf.errors.OutOfRangeError:
+            break
