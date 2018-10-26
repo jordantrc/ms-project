@@ -42,13 +42,6 @@ with tf.Session() as sess:
     train_iterator = train_dataset.make_initializable_iterator()
     x, y_true = train_iterator.get_next()
 
-    test_dataset = tf.data.TFRecordDataset(test_filenames)
-    test_dataset = test_dataset.map(c3d_model._parse_function)
-    test_dataset = test_dataset.repeat(NUM_EPOCHS)
-    test_dataset = test_dataset.batch(c3d_model.BATCH_SIZE)
-    test_iterator = test_dataset.make_initializable_iterator()
-    x, y_true = test_iterator.get_next()
-
     # print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
     # convert x to float, reshape to 5d
     # x = tf.cast(x, tf.float32)
