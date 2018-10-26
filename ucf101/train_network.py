@@ -23,7 +23,65 @@ tf.reset_default_graph()
 
 with tf.Session() as sess:
 
-    init_op, train_iterator, test_iterator = c3d_model.c3d_network(NUM_EPOCHS, current_learning_rate)
+    # init variables
+    tf.set_random_seed(1234)
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
+    weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
+
+    # placeholders
+    # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
+    train_filenames = tf.placeholder(tf.string, shape=[None])
+    test_filenames = tf.placeholder(tf.string, shape=[None])
+
+    # using tf.data.TFRecordDataset iterator
+    train_dataset = tf.data.TFRecordDataset(train_filenames)
+    train_dataset = train_dataset.map(c3d_model._parse_function)
+    train_dataset = train_dataset.repeat(NUM_EPOCHS)
+    train_dataset = train_dataset.batch(c3d_model.BATCH_SIZE)
+    train_iterator = train_dataset.make_initializable_iterator()
+    x, y_true = train_iterator.get_next()
+
+    test_dataset = tf.data.TFRecordDataset(test_filenames)
+    test_dataset = test_dataset.map(c3d_model._parse_function)
+    test_dataset = test_dataset.repeat(NUM_EPOCHS)
+    test_dataset = test_dataset.batch(c3d_model.BATCH_SIZE)
+    test_iterator = test_dataset.make_initializable_iterator()
+    x, y_true = test_iterator.get_next()
+
+    # print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
+    # convert x to float, reshape to 5d
+    # x = tf.cast(x, tf.float32)
+    # print("reshaping x")
+    # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
+    # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
+    x = tf.reshape(x, [c3d_model.BATCH_SIZE, c3d_model.FRAMES_PER_VIDEO, 112, 112, 3])
+
+    # generate clips for each video in the batch
+    x = _clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
+
+    print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
+
+    # placeholders
+    # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
+    y_true_class = tf.argmax(y_true, axis=1)
+
+    logits = inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
+
+    y_pred = tf.nn.softmax(logits)
+    y_pred_class = tf.argmax(y_pred, axis=1)
+
+    # loss and optimizer
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
+
+    train_op = optimizer.minimize(loss_op)
+
+    # evaluate the model
+    correct_pred = tf.equal(y_pred_class, y_true_class)
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
     saver = tf.train.Saver()
     sess.run(init_op)
