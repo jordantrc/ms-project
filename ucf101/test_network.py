@@ -99,8 +99,8 @@ with tf.Session() as sess:
     i = 0
     while True:
         try:
-            correct, acc = sess.run(correct_pred, accuracy)
-            print("[%s] correct = %s, test accuracy = %g" % (i, correct, acc))
+            acc = sess.run(accuracy)
+            print("[%s] test accuracy = %s" % (i, acc))
             i += 1
         except tf.errors.OutOfRangeError:
             break
