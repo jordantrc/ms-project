@@ -58,7 +58,7 @@ with tf.Session() as sess:
     x = tf.reshape(x, [c3d_model.BATCH_SIZE, c3d_model.FRAMES_PER_VIDEO, 112, 112, 3])
 
     # generate clips for each video in the batch
-    x = _clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
+    x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
