@@ -48,7 +48,7 @@ with tf.Session() as sess:
     # using tf.data.TFRecordDataset iterator
     dataset = tf.data.TFRecordDataset(test_filenames)
     dataset = dataset.map(c3d_model._parse_function)
-    dataset = dataset.repeat(NUM_EPOCHS)
+    dataset = dataset.repeat(1)
     dataset = dataset.batch(c3d_model.BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
