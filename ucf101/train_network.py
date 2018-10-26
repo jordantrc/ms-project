@@ -23,7 +23,7 @@ tf.reset_default_graph()
 
 with tf.Session() as sess:
 
-    init_op = c3d_model.c3d_network(NUM_EPOCHS, current_learning_rate)
+    init_op, train_iterator, test_iterator = c3d_model.c3d_network(NUM_EPOCHS, current_learning_rate)
 
     saver = tf.train.Saver()
     sess.run(init_op)
@@ -33,7 +33,7 @@ with tf.Session() as sess:
     for i in range(NUM_EPOCHS):
         print("START EPOCH %s" % i)
         start = time.time()
-        sess.run(iterator.initializer, feed_dict={train_filenames: train_files, test_filenames: test_files})
+        sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
         while True:
             try:
                 sess.run(train_op)

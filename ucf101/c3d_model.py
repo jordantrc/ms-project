@@ -213,4 +213,4 @@ def c3d_network(num_epochs, initial_learning_rate):
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
-    return init_op
+    return init_op, train_iterator, test_iterator
