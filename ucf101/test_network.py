@@ -82,10 +82,7 @@ with tf.Session() as sess:
     train_op = optimizer.minimize(loss_op)
 
     # evaluate the model
-    y_pred_class.eval()
-    y_true.eval()
-
-    correct_pred = tf.equal(y_pred_class, y_true)
+    correct_pred = tf.equal(y_pred_class, y_true_class)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -99,11 +96,17 @@ with tf.Session() as sess:
     sess.run(init_op)
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
 
+    y_pred_class.eval()
+    y_true_class.eval()
+
     i = 0
     while True:
         try:
             acc = sess.run(accuracy)
+            y_pred_class_actual = sess.run(y_pred_class)
+            y_true_class_actual = sess.run(y_true_class)
             print("[%s] test accuracy = %s" % (i, acc))
+            print("y_pred_class = %s, y_true_class = %s" % (y_pred_class_actual, y_true_class_actual))
             i += 1
         except tf.errors.OutOfRangeError:
             break
