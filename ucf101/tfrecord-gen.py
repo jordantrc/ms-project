@@ -23,7 +23,7 @@ import tensorflow as tf
 CLASS_INDEX_FILE = "UCF101-class-index.txt"
 TRAIN_SET_FILE = "train-test-splits/trainlist01.txt"
 TEST_SET_FILE = "train-test-splits/testlist01.txt"
-DATA_SAMPLE = 0.05
+DATA_SAMPLE = 1.0
 
 
 def main():
