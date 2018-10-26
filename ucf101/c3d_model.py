@@ -212,3 +212,5 @@ def c3d_network(num_epochs, initial_learning_rate):
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+
+    return init_op
