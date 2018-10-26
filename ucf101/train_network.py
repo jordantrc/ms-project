@@ -66,7 +66,7 @@ with tf.Session() as sess:
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true_class = tf.argmax(y_true, axis=1)
 
-    logits = inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
+    logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
