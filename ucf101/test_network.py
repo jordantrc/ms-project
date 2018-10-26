@@ -96,9 +96,6 @@ with tf.Session() as sess:
     sess.run(init_op)
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
 
-    y_pred_class.eval()
-    y_true_class.eval()
-
     i = 0
     cumulative_accuracy = 0.0
     while True:
