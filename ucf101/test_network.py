@@ -101,6 +101,7 @@ with tf.Session() as sess:
         try:
             acc = sess.run(accuracy)
             print("[%s] test accuracy = %g" % (i, acc))
+            i += 1
         except tf.errors.OutOfRangeError:
             break
 
