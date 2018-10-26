@@ -85,9 +85,14 @@ with tf.Session() as sess:
         print("START EPOCH %s" % i)
         start = time.time()
         sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
+
+        j = 0
         while True:
             try:
                 sess.run(train_op)
+                if j % 100 == 0:
+                    print("iteration %s" % j)
+                j += 1
             except tf.errors.OutOfRangeError:
                 break
         save_path = os.path.join(c3d_model.MODEL_DIR, "model_epoch_%s.ckpt" % i)
