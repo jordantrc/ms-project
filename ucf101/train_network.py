@@ -91,7 +91,9 @@ with tf.Session() as sess:
             try:
                 sess.run(train_op)
                 if j % 100 == 0:
-                    print("iteration %s" % j)
+                    run_time = time.time()
+                    run_time_str = str(datetime.timedelta(seconds=run_time - start))
+                    print("iteration %s - running time = %s" % (j, run_time_str))
                 j += 1
             except tf.errors.OutOfRangeError:
                 break
