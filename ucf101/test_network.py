@@ -103,10 +103,11 @@ with tf.Session() as sess:
     cumulative_accuracy = 0.0
     while True:
         try:
-            acc, 
-            y_pred_class_actual, 
-            y_true_class_actual, 
-            correct_pred_actual = sess.run([accuracy, y_pred_class, y_true_class, correct_pred])
+            test_results = sess.run([accuracy, y_pred_class, y_true_class, correct_pred])
+            acc = test_results[0]
+            y_pred_class_actual = test_results[1]
+            y_true_class_actual = test_results[2]
+            correct_pred_actual = test_results[3]
             cumulative_accuracy += float(acc)
             print("[%s] correct = %s, pred/true = [%s/%s], accuracy = %s" % (i, correct_pred_actual, 
                                                                              y_pred_class_actual,
