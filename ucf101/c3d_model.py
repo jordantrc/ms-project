@@ -7,6 +7,7 @@
 
 import tensorflow as tf
 import random
+import c3d
 
 
 NUM_CLASSES = 101
@@ -211,4 +212,3 @@ def c3d_network(num_epochs):
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-    
