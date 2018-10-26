@@ -39,8 +39,6 @@ with tf.Session() as sess:
 
     print("Restored model %s" % latest_model)
 
-    sess.run(tf.local_variables_initializer())
-
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
     dataset = tf.data.TFRecordDataset(test_filenames)
@@ -50,7 +48,11 @@ with tf.Session() as sess:
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
+
+
     # test a single run through of the test data
+    sess.run(tf.local_variables_initializer())
+    sess.run(tf.global_variables_initializer())
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
 
     while True:
