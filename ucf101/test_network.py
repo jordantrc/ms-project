@@ -107,8 +107,11 @@ with tf.Session() as sess:
             cumulative_accuracy += float(acc)
             y_pred_class_actual = sess.run(y_pred_class)
             y_true_class_actual = sess.run(y_true_class)
+            correct_pred_actual = sess.run(correct_pred)
             print("[%s] test accuracy = %s" % (i, acc))
-            print("y_pred_class = %s, y_true_class = %s" % (y_pred_class_actual, y_true_class_actual))
+            print("correct = %s, pred/true = [%s/%s]" % (correct_pred,actual, 
+                                                         y_pred_class_actual,
+                                                         y_true_class_actual))
             i += 1
         except tf.errors.OutOfRangeError:
             break
