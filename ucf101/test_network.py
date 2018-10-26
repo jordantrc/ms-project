@@ -96,10 +96,11 @@ with tf.Session() as sess:
     sess.run(init_op)
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
 
+    i = 0
     while True:
         try:
             acc = sess.run(accuracy)
-            print("test accuracy = %g" % acc)
+            print("[%s] test accuracy = %g" % (i, acc))
         except tf.errors.OutOfRangeError:
             break
 
