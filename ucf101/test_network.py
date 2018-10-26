@@ -100,9 +100,11 @@ with tf.Session() as sess:
     y_true_class.eval()
 
     i = 0
+    cumulative_accuracy = 0.0
     while True:
         try:
             acc = sess.run(accuracy)
+            cumulative_accuracy += acc
             y_pred_class_actual = sess.run(y_pred_class)
             y_true_class_actual = sess.run(y_true_class)
             print("[%s] test accuracy = %s" % (i, acc))
@@ -111,4 +113,5 @@ with tf.Session() as sess:
         except tf.errors.OutOfRangeError:
             break
 
+    print("Cumulative accuracy = %s" % cumulative_accuracy / i)
     print("Exhausted test data")
