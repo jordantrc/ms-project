@@ -77,7 +77,7 @@ with tf.Session() as sess:
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
+    optimizer = tf.train.AdamOptimizer(learning_rate=1.0)
 
     train_op = optimizer.minimize(loss_op)
 
