@@ -11,7 +11,7 @@ import c3d
 import time
 import datetime
 
-NUM_EPOCHS = 16
+NUM_EPOCHS = 1
 
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]

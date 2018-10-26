@@ -32,27 +32,68 @@ latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
 latest_model = os.path.join(MODEL_DIR, latest_model)
 print("latest_model = %s" % latest_model)
 
-saver = tf.train.import_meta_graph(latest_model + ".meta")
-
 with tf.Session() as sess:
-    saver.restore(sess, latest_model)
+    
+    # init variables
+    tf.set_random_seed(1234)
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
+    weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
 
-    print("Restored model %s" % latest_model)
-
+    # placeholders
+    # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
+    train_filenames = tf.placeholder(tf.string, shape=[None])
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
+    # using tf.data.TFRecordDataset iterator
     dataset = tf.data.TFRecordDataset(test_filenames)
     dataset = dataset.map(c3d_model._parse_function)
-    dataset = dataset.repeat(1)
+    dataset = dataset.repeat(NUM_EPOCHS)
     dataset = dataset.batch(c3d_model.BATCH_SIZE)
     iterator = dataset.make_initializable_iterator()
     x, y_true = iterator.get_next()
 
+    # print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
+    # convert x to float, reshape to 5d
+    # x = tf.cast(x, tf.float32)
+    # print("reshaping x")
+    # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
+    # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
+    x = tf.reshape(x, [c3d_model.BATCH_SIZE, c3d_model.FRAMES_PER_VIDEO, 112, 112, 3])
 
+    # generate clips for each video in the batch
+    x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
+
+    print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
+
+    # placeholders
+    # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
+    y_true_class = tf.argmax(y_true, axis=1)
+
+    logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
+
+    y_pred = tf.nn.softmax(logits)
+    y_pred_class = tf.argmax(y_pred, axis=1)
+
+    # loss and optimizer
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
+
+    train_op = optimizer.minimize(loss_op)
+
+    # evaluate the model
+    correct_pred = tf.equal(y_pred_class, y_true_class)
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+
+    # restore the model
+    saver = tf.train.Saver()
+    saver.restore(sess, latest_model)
+    print("Restored model %s" % latest_model)
 
     # test a single run through of the test data
-    sess.run(tf.local_variables_initializer())
-    sess.run(tf.global_variables_initializer())
+    sess.run(init_op)
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
 
     while True:
