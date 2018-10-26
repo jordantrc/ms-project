@@ -108,10 +108,10 @@ with tf.Session() as sess:
             y_pred_class_actual = sess.run(y_pred_class)
             y_true_class_actual = sess.run(y_true_class)
             correct_pred_actual = sess.run(correct_pred)
-            print("[%s] test accuracy = %s" % (i, acc))
-            print("correct = %s, pred/true = [%s/%s]" % (correct_pred,actual, 
-                                                         y_pred_class_actual,
-                                                         y_true_class_actual))
+            print("[%s] correct = %s, pred/true = [%s/%s], accuracy = %s" % (i, correct_pred_actual, 
+                                                                             y_pred_class_actual,
+                                                                             y_true_class_actual,
+                                                                             acc))
             i += 1
         except tf.errors.OutOfRangeError:
             break
