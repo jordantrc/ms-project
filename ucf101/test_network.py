@@ -82,6 +82,9 @@ with tf.Session() as sess:
     train_op = optimizer.minimize(loss_op)
 
     # evaluate the model
+    y_pred_class.eval()
+    y_true.eval()
+
     correct_pred = tf.equal(y_pred_class, y_true)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
