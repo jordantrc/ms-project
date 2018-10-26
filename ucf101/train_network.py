@@ -23,7 +23,7 @@ tf.reset_default_graph()
 
 with tf.Session() as sess:
 
-    c3d_model.c3d_network(NUM_EPOCHS)
+    c3d_model.c3d_network(NUM_EPOCHS, current_learning_rate)
 
     saver = tf.train.Saver()
     sess.run(init_op)

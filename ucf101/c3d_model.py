@@ -151,7 +151,7 @@ def inference_3d(_X, _dropout, batch_size, _weights, _biases):
     return out
 
 
-def c3d_network(num_epochs):
+def c3d_network(num_epochs, initial_learning_rate):
     '''generates the c3d network'''
     # init variables
     tf.set_random_seed(1234)
@@ -203,7 +203,7 @@ def c3d_network(num_epochs):
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
+    optimizer = tf.train.AdamOptimizer(learning_rate=initial_learning_rate)
 
     train_op = optimizer.minimize(loss_op)
 
