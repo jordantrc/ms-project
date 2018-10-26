@@ -188,7 +188,7 @@ def c3d_network(num_epochs):
     x = tf.reshape(x, [BATCH_SIZE, FRAMES_PER_VIDEO, 112, 112, 3])
 
     # generate clips for each video in the batch
-    x = c3d_model._clip_image_batch(x, FRAMES_PER_CLIP, True)
+    x = _clip_image_batch(x, FRAMES_PER_CLIP, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
