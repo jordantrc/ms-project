@@ -76,7 +76,7 @@ with tf.Session() as sess:
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
     sess.run(init_op)
 
     print("Beginning training epochs")
@@ -93,7 +93,7 @@ with tf.Session() as sess:
                 if j % 100 == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
-                    print("iteration %s - running time = %s" % (j, run_time_str))
+                    print("\titeration %s - inter-epoch run time = %s" % (j, run_time_str))
                 j += 1
             except tf.errors.OutOfRangeError:
                 break
@@ -101,8 +101,8 @@ with tf.Session() as sess:
         save_path = saver.save(sess, save_path)
         end = time.time()
         train_time = str(datetime.timedelta(seconds=end - start))
-        print("END EPOCH %s, epoch training time: %s seconds" % (i, train_time))
-        print("model saved to %s\n\n" % save_path)
+        print("END EPOCH %s, epoch training time: %s" % (i, train_time))
+        print("model checkpoint saved to %s\n\n" % save_path)
 
         if i != 0 and i % 4 == 0:
             current_learning_rate = current_learning_rate / 10
