@@ -190,6 +190,9 @@ with tf.Session() as sess:
         # test accuracy, save a confusion matrix
         sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
         k = 0
+        cumulative_accuracy = 0.0
+        predictions = []
+        labels = []
         while True:
             try:
                 test_results = sess.run([accuracy, y_pred_class, y_true_class, correct_pred])
