@@ -4,11 +4,13 @@
 # test data from test tfrecord files
 #
 
+import itertools
 import os
 import tensorflow as tf
 import c3d
 import c3d_model
 import sys
+import matplotlib.pyplot as plt
 
 from sklearn import metrics
 
@@ -38,6 +40,43 @@ def tf_confusion_matrix(predictions, labels, classes):
     cm = metrics.confusion_matrix(y_true, y_pred, classes)
 
     return cm
+
+def plot_confusion_matrix(cm, classes, filename,
+                          normalize=True,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    thresh = cm.max() * 0.73
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, "{0:.4f}".format(cm[i, j]),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+    plt.tight_layout()
+    plt.ylabel('True class')
+    plt.xlabel('Predicted class')
+    plt.savefig(filename)
+    plt.gcf().clear()
+    plt.cla()
+    plt.clf()
+    plt.close()
 
 
 # specify a model to load or use the default
@@ -160,4 +199,5 @@ with tf.Session() as sess:
     print("Exhausted test data")
     print("Cumulative accuracy = %s" % (cumulative_accuracy / i))
     print("Confusion matrix =")
-    print(tf_confusion_matrix(predictions, labels, class_names))
+    cm = tf_confusion_matrix(predictions, labels, class_names)
+    plot_confusion_matrix(cm, class_names, "confusion_matrix.jpg")
