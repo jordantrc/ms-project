@@ -11,11 +11,12 @@ import c3d
 import c3d_model
 import sys
 import matplotlib
-import matplotlib.pyplot as plt
-
-from sklearn import metrics
 
 matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+from sklearn import metrics
+
 
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 DROPOUT = 1.0
