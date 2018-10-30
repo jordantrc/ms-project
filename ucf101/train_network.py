@@ -212,7 +212,7 @@ with tf.Session() as sess:
                 break
     
         print("Exhausted test data")
-        print("Cumulative accuracy = %s" % (cumulative_accuracy / i))
+        print("Cumulative accuracy at end of epoch %s = %s" % (i, cumulative_accuracy / k))
         print("Confusion matrix =")
         cm = tf_confusion_matrix(predictions, labels, class_names)
         plot_confusion_matrix(cm, class_names, "confusion_matrix_%s.jpg" % i)
