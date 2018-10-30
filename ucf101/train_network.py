@@ -169,6 +169,7 @@ with tf.Session() as sess:
         print("START EPOCH %s" % i)
         start = time.time()
         sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
+        sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
 
         j = 0
         while True:
@@ -189,7 +190,6 @@ with tf.Session() as sess:
         print("model checkpoint saved to %s\n\n" % save_path)
 
         # test accuracy, save a confusion matrix
-        sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
         k = 0
         cumulative_accuracy = 0.0
         predictions = []
