@@ -65,6 +65,8 @@ def plot_confusion_matrix(cm, classes, filename,
 
     if normalize:
         cm = cm / cm.astype(np.float).sum(axis=1)
+        # replace NaN with 0
+        cm[~cm.isfinite(cm)] = 0
         print("Normalized confusion matrix")
     else:
         print('Confusion matrix, without normalization')
