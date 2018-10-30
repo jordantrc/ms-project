@@ -44,6 +44,7 @@ def tf_confusion_matrix(predictions, labels, classes):
 
     return cm
 
+
 def plot_confusion_matrix(cm, classes, filename,
                           normalize=True,
                           title='Confusion matrix',
@@ -116,7 +117,7 @@ with tf.Session() as sess:
     test_dataset = test_dataset.repeat(1)
     test_dataset = test_dataset.batch(c3d_model.BATCH_SIZE)
     test_iterator = test_dataset.make_initializable_iterator()
-    x, y_true = test_iterator.get_next()
+    x_test, y_true_test = test_iterator.get_next()
 
     # using tf.data.TFRecordDataset iterator
     train_dataset = tf.data.TFRecordDataset(train_filenames)
@@ -142,6 +143,7 @@ with tf.Session() as sess:
     # placeholders
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true_class = tf.argmax(y_true, axis=1)
+    y_true_test_class = tf.argmax(y_true_test, axis=1)
 
     logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
 
@@ -154,9 +156,13 @@ with tf.Session() as sess:
 
     train_op = optimizer.minimize(loss_op)
 
-    # evaluate the model
-    correct_pred = tf.equal(y_pred_class, y_true_class)
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+    # model evaluation
+    logits_test = c3d_model.inference_3d(x_test, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
+    y_pred_test = tf.nn.softmax(logits_test)
+    y_pred_test_class = tf.argmax(y_pred_test, axis=1)
+
+    eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
+    eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
@@ -196,7 +202,7 @@ with tf.Session() as sess:
         labels = []
         while True:
             try:
-                test_results = sess.run([accuracy, y_pred_class, y_true_class, correct_pred])
+                test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred])
                 acc = test_results[0]
                 y_pred_class_actual = test_results[1]
                 y_true_class_actual = test_results[2]
