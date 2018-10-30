@@ -11,6 +11,7 @@ import c3d
 import time
 import datetime
 import random
+import itertools
 import numpy as np
 import matplotlib
 
@@ -86,14 +87,18 @@ def plot_confusion_matrix(cm, classes, filename,
 
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
+test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
 
 if TRAIN_DATA_SAMPLE < 1.0:
     sample_size = int(len(train_files) * TRAIN_DATA_SAMPLE)
     train_files = random.sample(train_files, sample_size)
     print("Sampled %s training samples" % sample_size)
 
-test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
-assert len(test_files) > 0
+    sample_size_test = int(len(test_files) * TRAIN_DATA_SAMPLE)
+    test_files = random.sample(test_files, sample_size_test)
+    print("Sampled %s testing samples" % sample_size_test)
+
+assert len(test_files) > 0 and len(train_files) > 0
 
 # get the list of classes
 class_names = []
