@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 
 NUM_EPOCHS = 16
-TRAIN_DATA_SAMPLE = 0.01
+TRAIN_DATA_SAMPLE = 0.1
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 
 def tf_confusion_matrix(predictions, labels, classes):
@@ -58,7 +58,7 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
-    plt.figure(figsize=(15, 15))
+    plt.figure(figsize=(50, 50))
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
