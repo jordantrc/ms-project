@@ -28,11 +28,12 @@ def tf_confusion_matrix(predictions, labels, classes):
     y_pred = []
 
     for p in predictions:
-        y_true.append(classes[p])
+        pred = p[0]
+        y_true.append(classes[pred])
 
     for l in labels:
-        index = np.argmax(l)
-        y_pred.append(classes[index])
+        label = l[0]
+        y_pred.append(classes[label])
 
     cm = metrics.confusion_matrix(y_true, y_pred, classes)
 
@@ -159,4 +160,4 @@ with tf.Session() as sess:
     print("Exhausted test data")
     print("Cumulative accuracy = %s" % (cumulative_accuracy / i))
     print("Confusion matrix =")
-    print(tf_confusion_matrix(predictions, labels, ))
+    print(tf_confusion_matrix(predictions, labels, class_names))
