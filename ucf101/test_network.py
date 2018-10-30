@@ -12,6 +12,10 @@ import sys
 
 from sklearn import metrics
 
+CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
+DROPOUT = 1.0
+NUM_CLASSES = 101
+TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
 
 def tf_confusion_matrix(predictions, labels, classes):
     """
@@ -35,10 +39,6 @@ def tf_confusion_matrix(predictions, labels, classes):
     return cm
 
 
-DROPOUT = 1.0
-NUM_CLASSES = 101
-TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
-
 # specify a model to load or use the default
 if len(sys.argv) == 2:
     model_to_load = sys.argv[1]
@@ -51,6 +51,19 @@ else:
     latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
     model_to_load = os.path.join(model_dir, latest_model)
 
+# get the list of class names
+class_names = []
+with open(CLASS_LIST) as class_fd:
+    text = class_fd.read()
+    lines = text.split("\n")
+    for l in lines:
+        if len(l) > 0:
+            i, c = l.split(" ")
+            class_names.append(c)
+
+assert len(class_names) == NUM_CLASSES
+
+# get the list of test files
 test_files = os.listdir(TEST_DIR)
 test_files = [os.path.join(TEST_DIR, x) for x in test_files]
 
@@ -146,4 +159,4 @@ with tf.Session() as sess:
     print("Exhausted test data")
     print("Cumulative accuracy = %s" % (cumulative_accuracy / i))
     print("Confusion matrix =")
-    print(tf_confusion_matrix(predictions, labels, list(range(NUM_CLASSES))))
+    print(tf_confusion_matrix(predictions, labels, ))
