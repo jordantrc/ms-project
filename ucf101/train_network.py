@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 
 NUM_EPOCHS = 16
-TRAIN_DATA_SAMPLE = 0.05
+TRAIN_DATA_SAMPLE = 0.01
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 
 def tf_confusion_matrix(predictions, labels, classes):
@@ -64,7 +64,7 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.yticks(tick_marks, classes)
 
     if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        cm = cm / cm.astype(np.float).sum(axis=1)
         print("Normalized confusion matrix")
     else:
         print('Confusion matrix, without normalization')
