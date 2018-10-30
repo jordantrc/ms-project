@@ -10,9 +10,12 @@ import tensorflow as tf
 import c3d
 import c3d_model
 import sys
+import matplotlib
 import matplotlib.pyplot as plt
 
 from sklearn import metrics
+
+matplotlib.use('Agg')
 
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 DROPOUT = 1.0
@@ -49,7 +52,7 @@ def plot_confusion_matrix(cm, classes, filename,
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    # plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
@@ -110,9 +113,7 @@ test_files = [os.path.join(TEST_DIR, x) for x in test_files]
 with tf.Session() as sess:
     
     # init variables
-    tf.set_random_seed(1234)
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(coord=coord)
+    # tf.set_random_seed(1234)
     weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
 
     # placeholders
