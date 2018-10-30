@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 
 NUM_EPOCHS = 16
-TRAIN_DATA_SAMPLE = 0.05
+TRAIN_DATA_SAMPLE = 0.01
 
 def tf_confusion_matrix(predictions, labels, classes):
     """
