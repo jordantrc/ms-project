@@ -21,6 +21,7 @@ from sklearn import metrics
 
 NUM_EPOCHS = 16
 TRAIN_DATA_SAMPLE = 0.01
+CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 
 def tf_confusion_matrix(predictions, labels, classes):
     """
@@ -94,6 +95,18 @@ if TRAIN_DATA_SAMPLE < 1.0:
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
 assert len(test_files) > 0
 
+# get the list of classes
+class_names = []
+with open(CLASS_LIST) as class_fd:
+    text = class_fd.read()
+    lines = text.split("\n")
+    for l in lines:
+        if len(l) > 0:
+            i, c = l.split(" ")
+            class_names.append(c)
+
+assert len(class_names) == c3d_model.NUM_CLASSES
+
 current_learning_rate = c3d_model.LEARNING_RATE
 
 tf.reset_default_graph()
@@ -159,7 +172,7 @@ with tf.Session() as sess:
     train_op = optimizer.minimize(loss_op)
 
     # model evaluation
-    logits_test = c3d_model.inference_3d(x_test, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
+    logits_test = c3d_model.inference_3d(x_test, 1.0, c3d_model.BATCH_SIZE, weights, biases)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
@@ -183,7 +196,7 @@ with tf.Session() as sess:
         while True:
             try:
                 sess.run(train_op)
-                if j % 100 == 0:
+                if j % 1000 == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
                     print("\titeration %s - epoch %s run time = %s" % (j, i, run_time_str))
