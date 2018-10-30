@@ -113,10 +113,13 @@ test_files = os.listdir(TEST_DIR)
 test_files = [os.path.join(TEST_DIR, x) for x in test_files]
 
 with tf.Session() as sess:
+    saver = tf.train.Saver()
+    saver.restore(sess, model_to_load)
+    print("Restored model %s" % model_to_load)
     
     # init variables
     # tf.set_random_seed(1234)
-    weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
+    # weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
@@ -143,31 +146,24 @@ with tf.Session() as sess:
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
-    # placeholders
-    # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
-    y_true_class = tf.argmax(y_true, axis=1)
+    # y_true_class = tf.argmax(y_true, axis=1)
 
-    logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
+    # logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
 
-    y_pred = tf.nn.softmax(logits)
-    y_pred_class = tf.argmax(y_pred, axis=1)
+    # y_pred = tf.nn.softmax(logits)
+    # y_pred_class = tf.argmax(y_pred, axis=1)
 
     # loss and optimizer
-    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    optimizer = tf.train.AdamOptimizer(learning_rate=1.0)
+    # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+    # optimizer = tf.train.AdamOptimizer(learning_rate=1.0)
 
-    train_op = optimizer.minimize(loss_op)
+    # train_op = optimizer.minimize(loss_op)
 
     # evaluate the model
-    correct_pred = tf.equal(y_pred_class, y_true_class)
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+    # correct_pred = tf.equal(y_pred_class, y_true_class)
+    # accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-
-    # restore the model
-    saver = tf.train.Saver()
-    saver.restore(sess, model_to_load)
-    print("Restored model %s" % model_to_load)
 
     # test a single run through of the test data
     sess.run(init_op)
