@@ -10,6 +10,7 @@ import tensorflow as tf
 import c3d
 import c3d_model
 import sys
+import numpy as np
 import matplotlib
 
 matplotlib.use('Agg')
@@ -119,7 +120,6 @@ with tf.Session() as sess:
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
-    train_filenames = tf.placeholder(tf.string, shape=[None])
     test_filenames = tf.placeholder(tf.string, shape=[None])
 
     # using tf.data.TFRecordDataset iterator
