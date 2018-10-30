@@ -91,6 +91,7 @@ if TRAIN_DATA_SAMPLE < 1.0:
     print("Sampled %s training samples" % sample_size)
 
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
+assert len(test_files) > 0
 
 current_learning_rate = c3d_model.LEARNING_RATE
 
@@ -200,7 +201,7 @@ with tf.Session() as sess:
                 y_pred_class_actual = test_results[1]
                 y_true_class_actual = test_results[2]
                 correct_pred_actual = test_results[3]
-                print("[%s] correct = %s, pred/true = [%s/%s], accuracy = %s" % (k, correct_pred_actual, 
+                print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s" % (k, correct_pred_actual, 
                                                                                  y_pred_class_actual,
                                                                                  y_true_class_actual,
                                                                                  acc))
