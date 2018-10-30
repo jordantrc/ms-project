@@ -5,7 +5,7 @@ import model
 
 
 def save_model():
-    model.create_graph()
+    train = model.create_graph()
 
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())

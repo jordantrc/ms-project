@@ -17,3 +17,5 @@ def create_graph():
 
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
     train = optimizer.minimize(loss=cost)
+
+    return train
