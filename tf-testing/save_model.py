@@ -35,7 +35,7 @@ def save_model():
 
     # saver.save(sess, 'Model/first')
 
-	sess.close()
+    sess.close()
 
 if __name__ == "__main__":
-	save_model()
+    save_model()

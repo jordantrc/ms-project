@@ -18,7 +18,7 @@ def restore_model():
     new_xx = [5, 7]
     print(sess.run(hypothesis, {x: new_xx}))
 
-	sess.close()
+    sess.close()
 
 if __name__ == "__main__":
-	restore_model()
+    restore_model()
