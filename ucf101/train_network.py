@@ -213,6 +213,7 @@ with tf.Session() as sess:
 
                 k += 1
             except tf.errors.OutOfRangeError:
+                print("OutOfRangeError - k = %s" % k)
                 break
     
         print("Exhausted test data")
