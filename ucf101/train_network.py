@@ -58,6 +58,7 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
+    plt.figure(figsize=(15, 15))
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
@@ -201,7 +202,7 @@ with tf.Session() as sess:
         while True:
             try:
                 sess.run(train_op)
-                if j % 1000 == 0:
+                if j % 200 == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
                     print("\titeration %s - epoch %s run time = %s" % (j, i, run_time_str))
