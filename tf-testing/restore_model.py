@@ -1,5 +1,7 @@
 # restore model
 
+import tensorflow as tf
+
 def restore_model():
     x = tf.placeholder(tf.float32)
 
