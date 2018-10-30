@@ -113,8 +113,8 @@ test_files = os.listdir(TEST_DIR)
 test_files = [os.path.join(TEST_DIR, x) for x in test_files]
 
 with tf.Session() as sess:
-    saver = tf.train.import_meta_graph(model_to_load)
-    saver.restore(sess, model_to_load)
+    saver = tf.train.import_meta_graph(model_to_load + ".meta")
+    saver.restore(sess, model_to_load + ".meta")
     print("Restored model %s" % model_to_load)
     
     # init variables
