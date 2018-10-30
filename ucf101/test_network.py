@@ -113,10 +113,6 @@ test_files = os.listdir(TEST_DIR)
 test_files = [os.path.join(TEST_DIR, x) for x in test_files]
 
 with tf.Session() as sess:
-    saver = tf.train.import_meta_graph(model_to_load + ".meta")
-    saver.restore(sess, model_to_load + ".meta")
-    print("Restored model %s" % model_to_load)
-    
     # init variables
     # tf.set_random_seed(1234)
     # weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
@@ -163,8 +159,13 @@ with tf.Session() as sess:
     # correct_pred = tf.equal(y_pred_class, y_true_class)
     # accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    # init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
+    # restore the model
+    saver = tf.train.Saver()
+    saver.restore(sess, model_to_load)
+    print("Restored model %s" % model_to_load)
+    
     # test a single run through of the test data
     sess.run(init_op)
     sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
