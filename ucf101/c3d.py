@@ -3,7 +3,8 @@ import tensorflow as tf
 
 # t = number of frames, h = height, w = width, c = number of channels
 INPUT_DATA_SIZE = {"t": 250, "h": 112, "w": 112, "c": 3}
-NORMAL_STDDEV = 0.1
+WEIGHT_STDDEV = 0.05
+BIAS_STDDEV = 0.1
 
 
 def get_input_placeholder(batch_size):
@@ -29,37 +30,37 @@ def get_variables(num_classes):
     We ommit the FC layers as these layers are used to perform reasoning and do
     not contain feature information '''
 
-    def weight_variable(name, shape):
+    def weight_variable(name, shape, stddev):
         # creates a variable (weight or bias) with given name and shape
-        initial = tf.truncated_normal_initializer(stddev=NORMAL_STDDEV)
+        initial = tf.truncated_normal_initializer(stddev=stddev)
         return tf.get_variable(name, shape, initializer=initial)
 
     with tf.variable_scope('var_name') as var_scope:
         weights = {
-            'wc1': weight_variable('wc1', [3, 3, 3, 3, 64]),
-            'wc2': weight_variable('wc2', [3, 3, 3, 64, 128]),
-            'wc3a': weight_variable('wc3a', [3, 3, 3, 128, 256]),
-            'wc3b': weight_variable('wc3b', [3, 3, 3, 256, 256]),
-            'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512]),
-            'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512]),
-            'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512]),
-            'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512]),
-            'wd1': weight_variable('wd1', [8192, 4096]),
-            'wd2': weight_variable('wd2', [4096, 4096]),
-            'out': weight_variable('wdout', [4096, num_classes]),
+            'wc1': weight_variable('wc1', [3, 3, 3, 3, 64], WEIGHT_STDDEV),
+            'wc2': weight_variable('wc2', [3, 3, 3, 64, 128], WEIGHT_STDDEV),
+            'wc3a': weight_variable('wc3a', [3, 3, 3, 128, 256], WEIGHT_STDDEV),
+            'wc3b': weight_variable('wc3b', [3, 3, 3, 256, 256], WEIGHT_STDDEV),
+            'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512], WEIGHT_STDDEV),
+            'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+            'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+            'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+            'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
+            'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
+            'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
         }
         biases = {
-            'bc1': weight_variable('bc1', [64]),
-            'bc2': weight_variable('bc2', [128]),
-            'bc3a': weight_variable('bc3a', [256]),
-            'bc3b': weight_variable('bc3b', [256]),
-            'bc4a': weight_variable('bc4a', [512]),
-            'bc4b': weight_variable('bc4b', [512]),
-            'bc5a': weight_variable('bc5a', [512]),
-            'bc5b': weight_variable('bc5b', [512]),
-            'bd1': weight_variable('bd1', [4096]),
-            'bd2': weight_variable('bd2', [4096]),
-            'out': weight_variable('bdout', [num_classes]),
+            'bc1': weight_variable('bc1', [64], BIAS_STDDEV),
+            'bc2': weight_variable('bc2', [128], BIAS_STDDEV),
+            'bc3a': weight_variable('bc3a', [256], BIAS_STDDEV),
+            'bc3b': weight_variable('bc3b', [256], BIAS_STDDEV),
+            'bc4a': weight_variable('bc4a', [512], BIAS_STDDEV),
+            'bc4b': weight_variable('bc4b', [512], BIAS_STDDEV),
+            'bc5a': weight_variable('bc5a', [512], BIAS_STDDEV),
+            'bc5b': weight_variable('bc5b', [512], BIAS_STDDEV),
+            'bd1': weight_variable('bd1', [4096], BIAS_STDDEV),
+            'bd2': weight_variable('bd2', [4096], BIAS_STDDEV),
+            'out': weight_variable('bdout', [num_classes], BIAS_STDDEV),
         }
     return weights, biases
 
