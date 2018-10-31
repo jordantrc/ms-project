@@ -9,6 +9,7 @@ import sys
 import tensorflow as tf
 import c3d_model
 import c3d
+import csv
 import time
 import datetime
 import random
@@ -101,6 +102,13 @@ else:
     run_name = sys.argv[1]
     sample = float(sys.argv[2])
     print("Beginning run %s using %s sample size" % (run_name, sample))
+
+
+# open the csv data file and write the header to it
+run_csv_file = 'runs/%s.csv' % run_name
+run_csv_fd = open(run_csv_file, 'wb', newline='')
+run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
+run_csv_writer.writerow(['epoch', 'iteration', 'loss', 'mini_batch_accuracy'])
 
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
@@ -236,8 +244,13 @@ with tf.Session() as sess:
                             mini_batch_acc += acc
                         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
                         print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
+                        csv_row = [i, j, loss_op_out, mini_batch_acc]
                     else:
                         print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
+                        csv_row = [i, j, loss_op_out, mini_batch_acc]
+
+                    # write the csv data to 
+                    run_csv_writer.writerow(csv_row)
 
                 j += 1
             except tf.errors.OutOfRangeError:
