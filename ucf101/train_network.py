@@ -108,7 +108,7 @@ else:
 run_csv_file = 'runs/%s.csv' % run_name
 run_csv_fd = open(run_csv_file, 'wb')
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
-run_csv_writer.writerow(['epoch', 'iteration', 'loss', 'mini_batch_accuracy'])
+run_csv_writer.writerow(['epoch', 'iteration', 'loss', 'train_accuracy', 'mini_batch_accuracy'])
 
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
@@ -196,6 +196,8 @@ with tf.Session() as sess:
     y_pred = tf.nn.softmax(logits)
     y_pred = tf.cast(y_pred, tf.int64)
     y_pred_class = tf.argmax(y_pred, axis=1)
+    correct_pred = tf.equal(y_pred_class, y_true_class)
+    accuracy = tf.reduce_mean(tf.cast(corret_pred, tf.float32))
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
@@ -226,15 +228,21 @@ with tf.Session() as sess:
         sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
 
         j = 0
+        report_step = 200
+        train_acc_accum = 0.0
         while True:
             try:
                 # _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
                 # print("y_true = %s" % y_true)
                 # print("y_pred = %s" % y_pred)
-                _, loss_op_out = sess.run([train_op, loss_op])
-                if j != 0 and j % 200 == 0:
+                _, loss_op_out, train_acc = sess.run([train_op, loss_op, accuracy])
+                train_acc_accum += train_acc
+
+                # report out results and run a test mini-batch every now and then
+                if j != 0 and j % report_step == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
+                    train_step_acc = train_acc_accum / report_step
 
                     # mini batch accuracy - every 1000 iterations
                     if j % 1000 == 0:
@@ -243,14 +251,15 @@ with tf.Session() as sess:
                             acc = sess.run(eval_accuracy)
                             mini_batch_acc += acc
                         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
-                        print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
-                        csv_row = [i, j, loss_op_out, mini_batch_acc]
+                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy (last %s) = %s,  mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, report_step, train_step_acc, mini_batch_acc))
+                        csv_row = [i, j, loss_op_out, train_step_acc, mini_batch_acc]
                     else:
-                        print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
-                        csv_row = [i, j, loss_op_out, ""]
+                        print("\titeration %s - epoch %s run time = %s, train accuracy (last %s) = %s, loss = %s" % (j, i, run_time_str, train_step_acc, report_step, loss_op_out))
+                        csv_row = [i, j, loss_op_out, train_step_acc, ""]
 
                     # write the csv data to 
                     run_csv_writer.writerow(csv_row)
+                    train_acc_accum = 0.0
 
                 j += 1
             except tf.errors.OutOfRangeError:
@@ -305,3 +314,5 @@ with tf.Session() as sess:
     coord.request_stop()
     coord.join(threads)
     sess.close()
+
+run_csv_fd.close()
