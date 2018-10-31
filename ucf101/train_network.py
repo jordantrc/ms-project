@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 
 NUM_EPOCHS = 16
-TRAIN_DATA_SAMPLE = 0.001
+TRAIN_DATA_SAMPLE = 0.1
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 
 def tf_confusion_matrix(predictions, labels, classes):
@@ -203,9 +203,8 @@ with tf.Session() as sess:
         j = 0
         while True:
             try:
-                _, y_true = sess.run([train_op, y_true])
+                sess.run(train_op)
                 if j % 200 == 0:
-                    print("y_true = %s" % y_true)
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
                     print("\titeration %s - epoch %s run time = %s" % (j, i, run_time_str))
