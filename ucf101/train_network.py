@@ -227,8 +227,8 @@ with tf.Session() as sess:
 
                     # mini batch accuracy
                     mini_batch_acc = 0.0
-                    for i in range(MINI_BATCH_SIZE):
-                        acc = eval_accuracy
+                    for k in range(MINI_BATCH_SIZE):
+                        acc = sess.run(eval_accuracy)
                         mini_batch_acc += acc
                     mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
 
