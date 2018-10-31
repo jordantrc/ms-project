@@ -5,6 +5,7 @@
 # - fix storage of labels as integers (indexes into the class index file)
 
 import os
+import sys
 import tensorflow as tf
 import c3d_model
 import c3d
@@ -87,6 +88,12 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.clf()
     plt.close()
 
+if len(sys.argv) != 2:
+    print("Must provide a run name")
+    sys.exit(1)
+else:
+    run_name = sys.argv[1]
+    print("Beginning run %s" % run_name)
 
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
@@ -116,8 +123,6 @@ with open(CLASS_LIST) as class_fd:
 assert len(class_names) == c3d_model.NUM_CLASSES
 
 current_learning_rate = c3d_model.LEARNING_RATE
-
-tf.reset_default_graph()
 
 with tf.Session() as sess:
 
@@ -249,7 +254,7 @@ with tf.Session() as sess:
         print("Cumulative accuracy at end of epoch %s = %s" % (i, cumulative_accuracy / k))
         print("Confusion matrix =")
         cm = tf_confusion_matrix(predictions, labels, class_names)
-        plot_confusion_matrix(cm, class_names, "confusion_matrix_%s.jpg" % i)
+        plot_confusion_matrix(cm, class_names, "runs/%s_confusion_matrix_%s.jpg" % (run_name, i))
 
         if i != 0 and i % 4 == 0:
             current_learning_rate = current_learning_rate / 10
