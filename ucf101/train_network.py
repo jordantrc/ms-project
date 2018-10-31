@@ -94,7 +94,7 @@ def plot_confusion_matrix(cm, classes, filename,
 
 if len(sys.argv) != 3:
     print("Must provide a run name and sample size")
-    print_usage()
+    print_help()
     sys.exit(1)
 else:
     run_name = sys.argv[1]
