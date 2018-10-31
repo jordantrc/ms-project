@@ -22,8 +22,12 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 
 NUM_EPOCHS = 16
-TRAIN_DATA_SAMPLE = 0.1
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
+
+def print_help():
+    '''prints a help message'''
+    print("Usage:\ntrain_network.py <run name> <sample size as decimal percentage>")
+
 
 def tf_confusion_matrix(predictions, labels, classes):
     """
@@ -88,23 +92,25 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.clf()
     plt.close()
 
-if len(sys.argv) != 2:
-    print("Must provide a run name")
+if len(sys.argv) != 3:
+    print("Must provide a run name and sample size")
+    print_usage()
     sys.exit(1)
 else:
     run_name = sys.argv[1]
-    print("Beginning run %s" % run_name)
+    sample = sys.argv[2]
+    print("Beginning run %s using %s sample size" % (run_name, sample))
 
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
 
-if TRAIN_DATA_SAMPLE < 1.0:
-    sample_size = int(len(train_files) * TRAIN_DATA_SAMPLE)
+if sample < 1.0:
+    sample_size = int(len(train_files) * sample)
     train_files = random.sample(train_files, sample_size)
     print("Sampled %s training samples" % sample_size)
 
-    sample_size_test = int(len(test_files) * TRAIN_DATA_SAMPLE)
+    sample_size_test = int(len(test_files) * sample)
     test_files = random.sample(test_files, sample_size_test)
     print("Sampled %s testing samples" % sample_size_test)
 
