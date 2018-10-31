@@ -103,6 +103,7 @@ else:
 
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
+random.shuffle(train_files)
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
 
 if sample < 1.0:
@@ -221,7 +222,11 @@ with tf.Session() as sess:
                 if j % 200 == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
-                    print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
+
+                    # mini batch accuracy
+
+
+                    print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
                 j += 1
             except tf.errors.OutOfRangeError:
                 break
