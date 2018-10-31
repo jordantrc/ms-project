@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 
 NUM_EPOCHS = 16
+MINI_BATCH_SIZE = 50
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 
 def print_help():
@@ -105,6 +106,7 @@ else:
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
 random.shuffle(train_files)
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
+random.shuffle(test_files)
 
 if sample < 1.0:
     sample_size = int(len(train_files) * sample)
@@ -224,7 +226,11 @@ with tf.Session() as sess:
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
 
                     # mini batch accuracy
-
+                    mini_batch_acc = 0.0
+                    for i in range(MINI_BATCH_SIZE):
+                        acc = eval_accuracy
+                        mini_batch_acc += acc
+                    mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
 
                     print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
                 j += 1
@@ -238,6 +244,7 @@ with tf.Session() as sess:
         print("model checkpoint saved to %s\n\n" % save_path)
 
         # test accuracy, save a confusion matrix
+        sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
         k = 0
         cumulative_accuracy = 0.0
         predictions = []
