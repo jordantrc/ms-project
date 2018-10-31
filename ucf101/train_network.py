@@ -98,7 +98,7 @@ if len(sys.argv) != 3:
     sys.exit(1)
 else:
     run_name = sys.argv[1]
-    sample = sys.argv[2]
+    sample = float(sys.argv[2])
     print("Beginning run %s using %s sample size" % (run_name, sample))
 
 # get the list of files for train and test
