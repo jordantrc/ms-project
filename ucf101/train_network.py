@@ -179,6 +179,7 @@ with tf.Session() as sess:
 
     # placeholders
     # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
+    y_true = tf.cast(y_true, tf.int64)
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
 
