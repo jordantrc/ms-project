@@ -197,7 +197,7 @@ with tf.Session() as sess:
     y_pred = tf.cast(y_pred, tf.int64)
     y_pred_class = tf.argmax(y_pred, axis=1)
     correct_pred = tf.equal(y_pred_class, y_true_class)
-    accuracy = tf.reduce_mean(tf.cast(corret_pred, tf.float32))
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     # loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
