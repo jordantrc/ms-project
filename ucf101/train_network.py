@@ -74,10 +74,10 @@ def plot_confusion_matrix(cm, classes, filename,
     print(cm)
 
     thresh = cm.max() * 0.73
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, "{0:.4f}".format(cm[i, j]),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+    # for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+    #    plt.text(j, i, "{0:.4f}".format(cm[i, j]),
+    #             horizontalalignment="center",
+    #             color="white" if cm[i, j] > thresh else "black")
     plt.tight_layout()
     plt.ylabel('True class')
     plt.xlabel('Predicted class')
@@ -122,7 +122,7 @@ tf.reset_default_graph()
 with tf.Session() as sess:
 
     # init variables
-    tf.set_random_seed(1234)
+    # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
     weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
