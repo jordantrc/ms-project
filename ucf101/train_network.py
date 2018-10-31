@@ -214,9 +214,10 @@ with tf.Session() as sess:
         j = 0
         while True:
             try:
-                _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
-                print("y_true = %s" % y_true)
-                print("y_pred = %s" % y_pred)
+                # _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
+                # print("y_true = %s" % y_true)
+                # print("y_pred = %s" % y_pred)
+                sess.run(train_op)
                 if j % 200 == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
