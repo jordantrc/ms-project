@@ -106,7 +106,7 @@ else:
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
-run_csv_fd = open(run_csv_file, 'wb', newline='')
+run_csv_fd = open(run_csv_file, 'wb')
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
 run_csv_writer.writerow(['epoch', 'iteration', 'loss', 'mini_batch_accuracy'])
 
