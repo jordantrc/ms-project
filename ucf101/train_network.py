@@ -254,7 +254,7 @@ with tf.Session() as sess:
                         print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy (last %s) = %s,  mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, report_step, train_step_acc, mini_batch_acc))
                         csv_row = [i, j, loss_op_out, train_step_acc, mini_batch_acc]
                     else:
-                        print("\titeration %s - epoch %s run time = %s, train accuracy (last %s) = %s, loss = %s" % (j, i, run_time_str, train_step_acc, report_step, loss_op_out))
+                        print("\titeration %s - epoch %s run time = %s, train accuracy (last %s) = %s, loss = %s" % (j, i, run_time_str, report_step, train_step_acc, loss_op_out))
                         csv_row = [i, j, loss_op_out, train_step_acc, ""]
 
                     # write the csv data to 
