@@ -225,14 +225,17 @@ with tf.Session() as sess:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
 
-                    # mini batch accuracy
-                    mini_batch_acc = 0.0
-                    for k in range(MINI_BATCH_SIZE):
-                        acc = sess.run(eval_accuracy)
-                        mini_batch_acc += acc
-                    mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
+                    # mini batch accuracy - every 1000 iterations
+                    if j % 1000 == 0:
+                        mini_batch_acc = 0.0
+                        for k in range(MINI_BATCH_SIZE):
+                            acc = sess.run(eval_accuracy)
+                            mini_batch_acc += acc
+                        mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
+                        print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
+                    else:
+                        print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
 
-                    print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
                 j += 1
             except tf.errors.OutOfRangeError:
                 break
