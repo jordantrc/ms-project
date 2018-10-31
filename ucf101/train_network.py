@@ -217,7 +217,8 @@ with tf.Session() as sess:
                 # _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
                 # print("y_true = %s" % y_true)
                 # print("y_pred = %s" % y_pred)
-                sess.run(train_op)
+                loss_op = sess.run([train_op, loss_op])
+                print("loss_op = %s" % loss_op)
                 if j % 200 == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
