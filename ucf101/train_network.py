@@ -247,7 +247,7 @@ with tf.Session() as sess:
                         csv_row = [i, j, loss_op_out, mini_batch_acc]
                     else:
                         print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
-                        csv_row = [i, j, loss_op_out, mini_batch_acc]
+                        csv_row = [i, j, loss_op_out, ""]
 
                     # write the csv data to 
                     run_csv_writer.writerow(csv_row)
