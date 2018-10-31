@@ -3,6 +3,7 @@ import tensorflow as tf
 
 # t = number of frames, h = height, w = width, c = number of channels
 INPUT_DATA_SIZE = {"t": 250, "h": 112, "w": 112, "c": 3}
+NORMAL_STDDEV = 0.1
 
 
 def get_input_placeholder(batch_size):
@@ -30,7 +31,7 @@ def get_variables(num_classes):
 
     def weight_variable(name, shape):
         # creates a variable (weight or bias) with given name and shape
-        initial = tf.truncated_normal_initializer(stddev=0.04)
+        initial = tf.truncated_normal_initializer(stddev=NORMAL_STDDEV)
         return tf.get_variable(name, shape, initializer=initial)
 
     with tf.variable_scope('var_name') as var_scope:
