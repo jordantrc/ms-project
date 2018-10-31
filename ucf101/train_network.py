@@ -217,12 +217,11 @@ with tf.Session() as sess:
                 # _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
                 # print("y_true = %s" % y_true)
                 # print("y_pred = %s" % y_pred)
-                _, loss_op = sess.run([train_op, loss_op])
-                print("loss_op = %s" % loss_op)
+                _, loss_op_out = sess.run([train_op, loss_op])
                 if j % 200 == 0:
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
-                    print("\titeration %s - epoch %s run time = %s" % (j, i, run_time_str))
+                    print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
                 j += 1
             except tf.errors.OutOfRangeError:
                 break
