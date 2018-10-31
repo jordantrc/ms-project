@@ -185,6 +185,7 @@ with tf.Session() as sess:
     logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
+    y_pred = tf.cast(y_pred, tf.int64)
     y_pred_class = tf.argmax(y_pred, axis=1)
 
     # loss and optimizer
@@ -196,6 +197,7 @@ with tf.Session() as sess:
     # model evaluation
     logits_test = c3d_model.inference_3d(x_test, 0.5, c3d_model.BATCH_SIZE, weights, biases)
     y_pred_test = tf.nn.softmax(logits_test)
+    y_pred_test = tf.cast(y_pred_test, tf.int64)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
     eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
