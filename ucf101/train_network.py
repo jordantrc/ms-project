@@ -236,7 +236,7 @@ with tf.Session() as sess:
                 # print("y_true = %s" % y_true)
                 # print("y_pred = %s" % y_pred)
                 _, loss_op_out, train_acc, logits_out = sess.run([train_op, loss_op, accuracy, logits])
-                print("logits = %s" % logits)
+                print("logits = %s" % logits_out)
                 train_acc_accum += train_acc
 
                 # report out results and run a test mini-batch every now and then
