@@ -182,11 +182,11 @@ if not all_classes:
     test_files = test_files_filtered
     print("train files = %s" % train_files)
     print("test files = %s" % test_files)
-assert len(test_files) > 0 and len(train_files) > 0, 'test = %s, train = %s' % (len(test_files, len(train_files)))
+assert len(test_files) > 0 and len(train_files) > 0, 'test = %s, train = %s' % (len(test_files), len(train_files))
 
 random.shuffle(train_files)
 
-# sample from the test and train files if necessary
+# sample from the test and train files if necessary3
 if sample < 1.0:
     sample_size = int(len(train_files) * sample)
     train_files = random.sample(train_files, sample_size)
