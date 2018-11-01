@@ -170,10 +170,7 @@ with open(CLASS_LIST) as class_fd:
     for l in lines:
         if len(l) > 0:
             i, c = l.split(" ")
-            if all_classes or c in included_classes:
-                class_names.append(c)                
-
-assert len(class_names) == num_classes_actual
+            class_names.append(c)                
 
 current_learning_rate = c3d_model.LEARNING_RATE
 
@@ -296,7 +293,7 @@ with tf.Session() as sess:
                             mini_batch_acc += acc
                         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
                         
-                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy= %s,  mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, train_step_acc, mini_batch_acc))
+                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy = %s,  mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, train_step_acc, mini_batch_acc))
                         csv_row = [i, j, loss_op_out, train_step_acc, mini_batch_acc]
                     
                     else:
