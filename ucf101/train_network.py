@@ -165,8 +165,6 @@ if not all_classes:
             if c in t:
                 test_files_filtered.append(t)
 
-    print("train_files_filtered length = %s, test_files_filtered length = %s" % (len(train_files_filtered), len(test_files_filtered)))
-
     train_files = train_files_filtered
     test_files = test_files_filtered
 assert len(test_files) > 0 and len(train_files) > 0

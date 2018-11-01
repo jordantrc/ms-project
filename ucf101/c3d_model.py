@@ -16,7 +16,7 @@ class C3DModel():
                  num_classes=101,
                  model_dir="/home/jordanc/datasets/UCF-101/model_ckpts",
                  train_dir="/home/jordanc/datasets/UCF-101/tfrecords/train",
-                 test_dir="/home/jordanc/datasets/UCF-101/model_ckpts",
+                 test_dir="/home/jordanc/datasets/UCF-101/tfrecords/test",
                  dropout=0.5,
                  frames_per_video=250,
                  frames_per_clip=16,
