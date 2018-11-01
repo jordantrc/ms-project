@@ -132,14 +132,13 @@ else:
     if ',' in included_classes:
         all_classes = False
         included_classes = [x.strip() for x in sys.argv[3].split(',')]
-        num_classes_actual = len(included_classes)
     elif included_classes != 'all':
         print("Invalid value for class inclusion [%s]" % included_classes)
         sys.exit(1)
+    else:
 
-    print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, num_classes_actual))
 
-print("Using classes definition %s" % included_classes)
+    print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
 
 # get the list of classes
 class_names = get_class_list(CLASS_INDEX_FILE)
