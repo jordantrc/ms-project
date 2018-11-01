@@ -157,7 +157,10 @@ if not all_classes:
     train_files_filtered = []
     test_files_filtered = []
     for c in included_classes:
+        print("c = %s" % c)
         for t in train_files:
+            print("t = %s" % t)
+            print("c in t = %s" % (c in t))
             if c in t:
                 train_files_filtered.append(t)
 
