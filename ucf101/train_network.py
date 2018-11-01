@@ -25,10 +25,32 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 NUM_EPOCHS = 16
 MINI_BATCH_SIZE = 50
+TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
+TEST_SPLIT = 'train-test-splits/testlist01.txt'
 
 def print_help():
     '''prints a help message'''
     print("Usage:\ntrain_network.py <run name> <sample size as decimal percentage> <classes to include>")
+
+
+def file_split(list_file, directory):
+    '''returns the absolute path to the samples given train-test split file and root directory'''
+    file_names = []
+    with open(list_file, r) as list_file_fd:
+        text = list_file_fd.read()
+        lines = text.split('\n')
+        for l in lines:
+            _, sample = l.split('/')
+            file_names.append(sample)
+
+    file_paths = []
+    file_list = os.listdir(directory)
+    for n in file_names:
+        for f in file_list:
+            if n in f:
+                file_paths.append(os.path.join(directory, f))
+
+    return file_paths
 
 
 def tf_confusion_matrix(predictions, labels, classes):
@@ -142,8 +164,8 @@ run_log_file = 'runs/%s.log' % run_name
 run_log_fd = open(run_log_file, 'w')
 
 # get the list of files for train and test
-train_files = [os.path.join(model.train_dir, x) for x in os.listdir(model.train_dir)]
-test_files = [os.path.join(model.test_dir, x) for x in os.listdir(model.test_dir)]
+train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir)
+test_files = file_split(TEST_SPLIT, model.tfrecord_dir)
 
 if not all_classes:
     train_files_filtered = []
