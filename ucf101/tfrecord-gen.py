@@ -172,6 +172,7 @@ def ucf101_dataset(root, output):
                                                                              resize_height,
                                                                              resize_width)
             label_int = classes.index(label)
+            print("label_int = %s, class name = %s" % (label_int, classes[label_int]))
             assert label_int >= 0
 
             features['label'] = _int64_feature(label_int)
