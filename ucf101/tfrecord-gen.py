@@ -145,9 +145,6 @@ def ucf101_dataset(root, output):
 
     print("smallest class = %s (%s videos)" % (smallest_class, smallest_class_num))
 
-    train_output_path = os.path.join(output, "train")
-    test_output_path = os.path.join(output, "test")
-
     # open each video and sample frames
     for c in classes:
         videos = class_videos[c]
@@ -160,15 +157,7 @@ def ucf101_dataset(root, output):
             video_file_name = os.path.basename(v)
             video_tfrecord_file_name = video_file_name + ".tfrecord"
 
-            # determine where to write the tfrecord
-            if video_file_name in train_files:
-                tfrecord_output_path = os.path.join(train_output_path, video_tfrecord_file_name)
-            elif video_file_name in test_files:
-                tfrecord_output_path = os.path.join(test_output_path, video_tfrecord_file_name)
-            else:
-                # error condition
-                assert False, "video_file_name [%s] not found in test or train sets" % video_file_name
-
+            tf_record_output_path = os.path.join(output, video_record_file_name)
             tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
             assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
 
