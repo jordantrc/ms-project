@@ -152,21 +152,20 @@ run_log_fd = open(run_log_file, 'w')
 train_files = [os.path.join(model.train_dir, x) for x in os.listdir(model.train_dir)]
 test_files = [os.path.join(model.test_dir, x) for x in os.listdir(model.test_dir)]
 
-print("train_files = %s" % train_files)
 if not all_classes:
     train_files_filtered = []
     test_files_filtered = []
     for c in included_classes:
         print("c = %s" % c)
         for t in train_files:
-            print("t = %s" % t)
-            print("c in t = %s" % (c in t))
             if c in t:
                 train_files_filtered.append(t)
 
         for t in test_files:
             if c in t:
                 test_files_filtered.append(t)
+
+    print("train_files_filtered length = %s, test_files_filtered length = %s" % (len(train_files_filtered), len(test_files_filtered)))
 
     train_files = train_files_filtered
     test_files = test_files_filtered
