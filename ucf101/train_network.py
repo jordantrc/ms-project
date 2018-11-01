@@ -36,7 +36,7 @@ def print_help():
 def file_split(list_file, directory):
     '''returns the absolute path to the samples given train-test split file and root directory'''
     file_names = []
-    with open(list_file, r) as list_file_fd:
+    with open(list_file, 'r') as list_file_fd:
         text = list_file_fd.read()
         lines = text.split('\n')
         for l in lines:
