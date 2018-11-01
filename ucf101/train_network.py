@@ -110,7 +110,7 @@ else:
 
     if ',' in included_classes:
         all_classes = False
-        included_classes = sys.argv[3].split(',').strip()
+        included_classes = [x.strip() for x in sys.argv[3].split(',')]
         num_classes_actual = len(included_classes)
     elif included_classes != 'all':
         print("Invalid value for class inclusion [%s]" % included_classes)
