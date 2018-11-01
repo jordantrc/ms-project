@@ -43,6 +43,7 @@ def file_split(list_file, directory):
             if len(l) > 0:
                 _, sample = l.split('/')
                 file_names.append(sample)
+    print('file_names = %s' % len(file_names))
 
     file_paths = []
     file_list = os.listdir(directory)
