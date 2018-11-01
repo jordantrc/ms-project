@@ -167,6 +167,8 @@ if not all_classes:
 
     train_files = train_files_filtered
     test_files = test_files_filtered
+    print("train files = %s" % train_files)
+    print("test files = %s" % test_files)
 assert len(test_files) > 0 and len(train_files) > 0
 
 random.shuffle(train_files)
@@ -290,7 +292,7 @@ with tf.Session() as sess:
                 # report out results and run a test mini-batch every now and then
                 if j != 0 and j % report_step == 0:
                     print("logits = %s" % logits_out)
-                    print("x = %s" % x_actual)
+                    # print("x = %s" % x_actual)
                     print("y_true = %s" % y_true_actual)
                     print("y_pred = %s" % y_pred_actual)
                     run_time = time.time()
