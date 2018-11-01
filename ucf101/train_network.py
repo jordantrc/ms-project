@@ -7,7 +7,6 @@
 import os
 import sys
 import tensorflow as tf
-import c3d_model
 import c3d
 import csv
 import time
@@ -21,6 +20,7 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 from sklearn import metrics
+from c3d_model import C3DModel
 
 NUM_EPOCHS = 16
 MINI_BATCH_SIZE = 50
