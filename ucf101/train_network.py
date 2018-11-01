@@ -40,8 +40,9 @@ def file_split(list_file, directory):
         text = list_file_fd.read()
         lines = text.split('\n')
         for l in lines:
-            _, sample = l.split('/')
-            file_names.append(sample)
+            if len(l) > 0:
+                _, sample = l.split('/')
+                file_names.append(sample)
 
     file_paths = []
     file_list = os.listdir(directory)
