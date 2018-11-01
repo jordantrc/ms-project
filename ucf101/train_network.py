@@ -97,7 +97,6 @@ def plot_confusion_matrix(cm, classes, filename,
 
 
 all_classes = True
-num_classes_actual = c3d_model.NUM_CLASSES
 
 if len(sys.argv) != 4:
     print("Must provide a run name, sample size, and a list of classes to include (or 'all' for all classes)")
@@ -118,6 +117,24 @@ else:
 
     print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, num_classes_actual))
 
+# get the list of classes
+class_names = []
+num_classes = 0
+num_classes_actual = 0
+with open(CLASS_LIST) as class_fd:
+    text = class_fd.read()
+    lines = text.split("\n")
+    for l in lines:
+        if len(l) > 0:
+            i, c = l.split(" ")
+            num_classes += 1
+            if all_classes or c in included_classes:
+                num_classes_actual += 1
+                class_names.append(c)   
+assert len(class_names) == num_classes_actual
+
+# create the model object
+model = C3DModel(num_classes=num_classes_actual)
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
@@ -130,8 +147,8 @@ run_log_file = 'runs/%s.log' % run_name
 run_log_fd = open(run_log_file, 'w')
 
 # get the list of files for train and test
-train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
-test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
+train_files = [os.path.join(model.train_dir, x) for x in os.listdir(model.train_dir)]
+test_files = [os.path.join(model.test_dir, x) for x in os.listdir(model.test_dir)]
 if not all_classes:
     train_files_filtered = []
     test_files_filtered = []
@@ -162,25 +179,13 @@ assert len(test_files) > 0 and len(train_files) > 0
 
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
 
-# get the list of classes
-class_names = []
-with open(CLASS_LIST) as class_fd:
-    text = class_fd.read()
-    lines = text.split("\n")
-    for l in lines:
-        if len(l) > 0:
-            i, c = l.split(" ")
-            class_names.append(c)                
-
-current_learning_rate = c3d_model.LEARNING_RATE
-
 with tf.Session() as sess:
 
     # init variables
     # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-    weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
+    weights, biases = c3d.get_variables(model.num_classes)
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
@@ -189,17 +194,17 @@ with tf.Session() as sess:
 
     # using tf.data.TFRecordDataset iterator
     test_dataset = tf.data.TFRecordDataset(test_filenames)
-    test_dataset = test_dataset.map(c3d_model._parse_function)
+    test_dataset = test_dataset.map(model._parse_function)
     test_dataset = test_dataset.repeat(1)
-    test_dataset = test_dataset.batch(c3d_model.BATCH_SIZE)
+    test_dataset = test_dataset.batch(model.batch_size)
     test_iterator = test_dataset.make_initializable_iterator()
     x_test, y_true_test = test_iterator.get_next()
 
     # using tf.data.TFRecordDataset iterator
     train_dataset = tf.data.TFRecordDataset(train_filenames)
-    train_dataset = train_dataset.map(c3d_model._parse_function)
+    train_dataset = train_dataset.map(model._parse_function)
     train_dataset = train_dataset.repeat(NUM_EPOCHS)
-    train_dataset = train_dataset.batch(c3d_model.BATCH_SIZE)
+    train_dataset = train_dataset.batch(model.batch_size)
     train_iterator = train_dataset.make_initializable_iterator()
     x, y_true = train_iterator.get_next()
 
@@ -209,12 +214,12 @@ with tf.Session() as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    x = tf.reshape(x, [c3d_model.BATCH_SIZE, c3d_model.FRAMES_PER_VIDEO, 112, 112, 3])
-    x_test = tf.reshape(x_test, [c3d_model.BATCH_SIZE, c3d_model.FRAMES_PER_VIDEO, 112, 112, 3])
+    x = tf.reshape(x, [model.batch_size, model.frames_per_video, 112, 112, 3])
+    x_test = tf.reshape(x_test, [model.batch_size, model.frames_per_video, 112, 112, 3])
 
     # generate clips for each video in the batch
-    x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
-    x_test = c3d_model._clip_image_batch(x_test, c3d_model.FRAMES_PER_CLIP, True)
+    x = model._clip_image_batch(x, model.frames_per_clip, True)
+    x_test = model._clip_image_batch(x_test, model.frames_per_clip, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
@@ -224,7 +229,7 @@ with tf.Session() as sess:
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
 
-    logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
+    logits = model.inference_3d(x, model.dropout, model.batch_size, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred = tf.cast(y_pred, tf.int64)
@@ -235,12 +240,12 @@ with tf.Session() as sess:
     # loss and optimizer
     # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
     loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class))
-    optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
+    optimizer = tf.train.AdamOptimizer(learning_rate=model.current_learning_rate)
 
     train_op = optimizer.minimize(loss_op)
 
     # model evaluation
-    logits_test = c3d_model.inference_3d(x_test, 0.5, c3d_model.BATCH_SIZE, weights, biases)
+    logits_test = model.inference_3d(x_test, 0.5, model.batch_size, weights, biases)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test = tf.cast(y_pred_test, tf.int64)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
@@ -266,19 +271,20 @@ with tf.Session() as sess:
         train_acc_accum = 0.0
         while True:
             try:
-                train_result = sess.run([train_op, loss_op, accuracy, x, y_true_class, y_pred_class])
+                train_result = sess.run([train_op, loss_op, accuracy, x, y_true_class, y_pred_class, logits])
                 loss_op_out = train_result[1]
                 train_acc = train_result[2]
                 x_actual = train_result[3]
                 y_true_actual = train_result[4]
                 y_pred_actual = train_result[5]
+                logits_out = train_results[6]
 
                 train_acc_accum += train_acc
 
                 # report out results and run a test mini-batch every now and then
                 if j != 0 and j % report_step == 0:
-                    # print("logits = %s" % logits_out)
-                    # print("x = %s" % x_actual)
+                    print("logits = %s" % logits_out)
+                    print("x = %s" % x_actual)
                     print("y_true = %s" % y_true_actual)
                     print("y_pred = %s" % y_pred_actual)
                     run_time = time.time()
@@ -309,7 +315,7 @@ with tf.Session() as sess:
                 break
 
         # save a model checkpoint and report end of epoch information
-        save_path = os.path.join(c3d_model.MODEL_DIR, "model_epoch_%s.ckpt" % i)
+        save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % i)
         save_path = saver.save(sess, save_path)
         end = time.time()
         train_time = str(datetime.timedelta(seconds=end - start))
