@@ -236,12 +236,14 @@ with tf.Session() as sess:
                 # _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
                 # print("y_true = %s" % y_true)
                 # print("y_pred = %s" % y_pred)
-                _, loss_op_out, train_acc, logits_out = sess.run([train_op, loss_op, accuracy, logits])
+                _, loss_op_out, train_acc, logits_out, y_true_actual = sess.run([train_op, loss_op, accuracy, logits, y_true_class])
                 # print("logits = %s" % logits_out)
                 train_acc_accum += train_acc
 
                 # report out results and run a test mini-batch every now and then
                 if j != 0 and j % report_step == 0:
+                    print("logits = %s" % logits_out)
+                    print("y_true = %s" % y_true_actual)
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
                     train_step_acc = train_acc_accum / report_step
@@ -274,7 +276,7 @@ with tf.Session() as sess:
         save_path = saver.save(sess, save_path)
         end = time.time()
         train_time = str(datetime.timedelta(seconds=end - start))
-        print("END EPOCH %s, epoch training time: %s" % (i, train_time))
+        print("END EPOCH %s, iterations = %s, epoch training time: %s" % (i, j, train_time))
         print("model checkpoint saved to %s\n\n" % save_path)
 
         # test accuracy, save a confusion matrix
