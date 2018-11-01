@@ -117,6 +117,8 @@ else:
 
     print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, num_classes_actual))
 
+print("Using classes definition %s" % included_classes)
+
 # get the list of classes
 class_names = []
 num_classes = 0
