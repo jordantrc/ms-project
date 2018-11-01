@@ -54,6 +54,22 @@ def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
+def get_class_list(file):
+    '''get the list of classes from the provided file'''
+    classes = []
+    with open(file) as class_index_file_fd:
+        print("Opening %s" % (CLASS_INDEX_FILE))
+        lines = class_index_file_fd.read().split('\n')
+        # print(lines)
+        for l in lines:
+            if len(l) > 0:
+                _, c = l.split(" ")
+                classes.append(c)
+    assert len(classes) > 0
+
+    return classes
+
+
 def integer_label(classes, label):
     # print("integer_label: label = %s, classes = %s" % (label, classes))
     int_label = -1
@@ -105,16 +121,7 @@ def ucf101_dataset(root, output):
 
     # read class index file to get the class
     # index information
-    classes = []
-    with open(CLASS_INDEX_FILE) as class_index_file_fd:
-        print("Opening %s" % (CLASS_INDEX_FILE))
-        lines = class_index_file_fd.read().split('\n')
-        # print(lines)
-        for l in lines:
-            if len(l) > 0:
-                _, c = l.split(" ")
-                classes.append(c)
-    assert len(classes) > 0
+    classes = get_class_list(CLASS_INDEX_FILE)
 
     # read the training and test list files to get the list of training
     # and test samples

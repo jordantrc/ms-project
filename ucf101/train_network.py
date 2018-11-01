@@ -21,10 +21,10 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn import metrics
 from c3d_model import C3DModel
+from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 NUM_EPOCHS = 16
 MINI_BATCH_SIZE = 50
-CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 
 def print_help():
     '''prints a help message'''
@@ -120,23 +120,16 @@ else:
 print("Using classes definition %s" % included_classes)
 
 # get the list of classes
-class_names = []
-num_classes = 0
-num_classes_actual = 0
-with open(CLASS_LIST) as class_fd:
-    text = class_fd.read()
-    lines = text.split("\n")
-    for l in lines:
-        if len(l) > 0:
-            i, c = l.split(" ")
-            num_classes += 1
-            if all_classes or c in included_classes:
-                num_classes_actual += 1
-                class_names.append(c)   
-assert len(class_names) == num_classes_actual and num_classes_actual > 0
+class_names = get_class_list(CLASS_INDEX_FILE)
+
+if not all_classes:
+    class_names = [x for x in class_names if x in included_classes]
+num_classes = len(class_names)
+
+assert num_classes > 0
 
 # create the model object
-model = C3DModel(num_classes=num_classes_actual)
+model = C3DModel(num_classes=num_classes)
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
