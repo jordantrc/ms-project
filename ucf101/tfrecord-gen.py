@@ -119,7 +119,7 @@ def ucf101_dataset(root, output):
     assert len(classes) > 0
 
     for k, v in classes.items():
-        print("k = %s, v = %s")
+        print("k = %s, v = %s" % (k, v))
 
     # read the training and test list files to get the list of training
     # and test samples
