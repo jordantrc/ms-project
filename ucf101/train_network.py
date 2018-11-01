@@ -183,7 +183,7 @@ with tf.Session() as sess:
     # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-    weights, biases = c3d.get_variables(num_classes_actual)
+    weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')

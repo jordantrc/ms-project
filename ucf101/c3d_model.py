@@ -82,7 +82,6 @@ def _parse_function(example_proto):
     images = tf.stack(images)
 
     label = tf.cast(parsed_features['label'], tf.int64)
-    label = tf.one_hot(label, depth=NUM_CLASSES)
 
     return images, label
 
