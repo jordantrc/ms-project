@@ -160,6 +160,8 @@ if sample < 1.0:
 
 assert len(test_files) > 0 and len(train_files) > 0
 
+print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
+
 # get the list of classes
 class_names = []
 with open(CLASS_LIST) as class_fd:
