@@ -233,17 +233,21 @@ with tf.Session() as sess:
         train_acc_accum = 0.0
         while True:
             try:
-                # _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
-                # print("y_true = %s" % y_true)
-                # print("y_pred = %s" % y_pred)
-                _, loss_op_out, train_acc, logits_out, y_true_actual = sess.run([train_op, loss_op, accuracy, logits, y_true_class])
-                # print("logits = %s" % logits_out)
+                train_result = sess.run([train_op, loss_op, accuracy, x, y_true_class, y_pred_class])
+                loss_op_out = train_result[1]
+                train_acc = train_result[2]
+                x_actual = train_result[3]
+                y_true_actual = train_result[4]
+                y_pred_actual = train_result[5]
+
                 train_acc_accum += train_acc
 
                 # report out results and run a test mini-batch every now and then
                 if j != 0 and j % report_step == 0:
-                    print("logits = %s" % logits_out)
+                    # print("logits = %s" % logits_out)
+                    print("x = %s" % x_actual)
                     print("y_true = %s" % y_true_actual)
+                    print("y_pred = %s" % y_pred_actual)
                     run_time = time.time()
                     run_time_str = str(datetime.timedelta(seconds=run_time - start))
                     train_step_acc = train_acc_accum / report_step
