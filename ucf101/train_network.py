@@ -235,7 +235,7 @@ with tf.Session() as sess:
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
 
-    logits = model.inference_3d(x, model.dropout, model.batch_size, weights, biases)
+    logits = model.inference_3d(x, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
     y_pred = tf.cast(y_pred, tf.int64)

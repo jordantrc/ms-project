@@ -106,7 +106,7 @@ class C3DModel():
     def max_pool(self, name, l_input, k):
         return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME')
 
-    def inference_3d(self, _X, batch_size, _weights, _biases):
+    def inference_3d(self, _X, _weights, _biases):
 
         print("_X = %s" % _X)
 
