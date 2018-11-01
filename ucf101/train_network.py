@@ -163,9 +163,11 @@ if not all_classes:
 
     train_files = train_files_filtered
     test_files = test_files_filtered
+assert len(test_files) > 0 and len(train_files) > 0
 
 random.shuffle(train_files)
 
+# sample from the test and train files if necessary
 if sample < 1.0:
     sample_size = int(len(train_files) * sample)
     train_files = random.sample(train_files, sample_size)
