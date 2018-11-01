@@ -28,7 +28,7 @@ CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
 
 def print_help():
     '''prints a help message'''
-    print("Usage:\ntrain_network.py <run name> <sample size as decimal percentage>")
+    print("Usage:\ntrain_network.py <run name> <sample size as decimal percentage> <classes to include>")
 
 
 def tf_confusion_matrix(predictions, labels, classes):
@@ -81,10 +81,11 @@ def plot_confusion_matrix(cm, classes, filename,
     print(cm)
 
     thresh = cm.max() * 0.73
-    # for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-    #    plt.text(j, i, "{0:.4f}".format(cm[i, j]),
-    #             horizontalalignment="center",
-    #             color="white" if cm[i, j] > thresh else "black")
+    if cm.shape[0] < 10 and cm.shape[1] < 10:
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            plt.text(j, i, "{0:.4f}".format(cm[i, j]),
+                     horizontalalignment="center",
+                     color="white" if cm[i, j] > thresh else "black")
     plt.tight_layout()
     plt.ylabel('True class')
     plt.xlabel('Predicted class')
@@ -94,14 +95,28 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.clf()
     plt.close()
 
+
+all_classes = True
+num_classes_actual = c3d_model.NUM_CLASSES
+
 if len(sys.argv) != 3:
-    print("Must provide a run name and sample size")
+    print("Must provide a run name, sample size, and a list of classes to include (or 'all' for all classes)")
     print_help()
     sys.exit(1)
 else:
     run_name = sys.argv[1]
     sample = float(sys.argv[2])
-    print("Beginning run %s using %s sample size" % (run_name, sample))
+    included_classes = sys.argv[3]
+
+    if ',' in included_classes:
+        all_classes = False
+        included_classes = sys.argv[3].split(',').strip()
+        num_classes_actual = len(included_classes)
+    elif included_classes != 'all':
+        print("Invalid value for class inclusion [%s]" % included_classes)
+        sys.exit(1)
+
+    print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, num_classes_actual))
 
 
 # open the csv data file and write the header to it
@@ -110,11 +125,29 @@ run_csv_fd = open(run_csv_file, 'wb')
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
 run_csv_writer.writerow(['epoch', 'iteration', 'loss', 'train_accuracy', 'mini_batch_accuracy'])
 
+# open the log file
+run_log_file = 'runs/%s.log' % run_name
+run_log_fd = open(run_log_file, 'w')
+
 # get the list of files for train and test
 train_files = [os.path.join(c3d_model.TRAIN_DIR, x) for x in os.listdir(c3d_model.TRAIN_DIR)]
-random.shuffle(train_files)
 test_files = [os.path.join(c3d_model.TEST_DIR, x) for x in os.listdir(c3d_model.TEST_DIR)]
-random.shuffle(test_files)
+if not all_classes:
+    train_files_filtered = []
+    test_files_filtered = []
+    for c in included_classes:
+        for t in train_files:
+            if c in t:
+                train_files_filtered.append(t)
+
+        for t in test_files:
+            if c in t:
+                test_files_filtered.append(t)
+
+    train_files = train_files_filtered
+    test_files = test_files_filtered
+
+random.shuffle(train_files)
 
 if sample < 1.0:
     sample_size = int(len(train_files) * sample)
@@ -135,9 +168,10 @@ with open(CLASS_LIST) as class_fd:
     for l in lines:
         if len(l) > 0:
             i, c = l.split(" ")
-            class_names.append(c)
+            if all_classes or c in included_classes:
+                class_names.append(c)                
 
-assert len(class_names) == c3d_model.NUM_CLASSES
+assert len(class_names) == num_classes_actual
 
 current_learning_rate = c3d_model.LEARNING_RATE
 
@@ -147,7 +181,7 @@ with tf.Session() as sess:
     # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-    weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
+    weights, biases = c3d.get_variables(num_classes_actual)
 
     # placeholders
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
@@ -245,7 +279,7 @@ with tf.Session() as sess:
                 # report out results and run a test mini-batch every now and then
                 if j != 0 and j % report_step == 0:
                     # print("logits = %s" % logits_out)
-                    print("x = %s" % x_actual)
+                    # print("x = %s" % x_actual)
                     print("y_true = %s" % y_true_actual)
                     print("y_pred = %s" % y_pred_actual)
                     run_time = time.time()
