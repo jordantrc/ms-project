@@ -21,7 +21,7 @@ class C3DModel():
                  frames_per_video=250,
                  frames_per_clip=16,
                  batch_size=1,
-                 learning_rate=1e-3)
+                 learning_rate=0.001)
         '''initializes the object'''
         self.num_classes = num_classes
         self.model_dir = model_dir
