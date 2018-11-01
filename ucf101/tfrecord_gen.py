@@ -195,7 +195,8 @@ def ucf101_dataset(root, output):
 
             tfrecord_writer.write(example.SerializeToString())
             tfrecord_writer.close()
-            print("images shape: %s written to tfrecord file %s" % (images.shape, tfrecord_output_path))
+            zeros = np.count_nonzero(images==0)
+            print("images shape: %s, count zero = %s written to tfrecord file %s" % (images.shape, zeros, tfrecord_output_path))
 
 
 def video_class(path):

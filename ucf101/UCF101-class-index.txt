@@ -34,7 +34,7 @@
 34 Haircut
 35 Hammering
 36 HammerThrow
-37 HandstandPushups
+37 HandStandPushups
 38 HandstandWalking
 39 HeadMassage
 40 HighJump
