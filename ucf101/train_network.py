@@ -151,6 +151,8 @@ run_log_fd = open(run_log_file, 'w')
 # get the list of files for train and test
 train_files = [os.path.join(model.train_dir, x) for x in os.listdir(model.train_dir)]
 test_files = [os.path.join(model.test_dir, x) for x in os.listdir(model.test_dir)]
+
+print("train_files = %s" % train_files)
 if not all_classes:
     train_files_filtered = []
     test_files_filtered = []
