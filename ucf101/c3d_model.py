@@ -25,8 +25,7 @@ class C3DModel():
         '''initializes the object'''
         self.num_classes = num_classes
         self.model_dir = model_dir
-        self.train_dir = train_dir
-        self.test_dir = test_dir
+        self.tfrecord_dir = tfrecord_dir
         self.dropout = dropout
         self.frames_per_video = frames_per_video
         self.frames_per_clip = frames_per_clip
