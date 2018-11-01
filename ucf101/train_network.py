@@ -133,7 +133,7 @@ with open(CLASS_LIST) as class_fd:
             if all_classes or c in included_classes:
                 num_classes_actual += 1
                 class_names.append(c)   
-assert len(class_names) == num_classes_actual
+assert len(class_names) == num_classes_actual and num_classes_actual > 0
 
 # create the model object
 model = C3DModel(num_classes=num_classes_actual)
