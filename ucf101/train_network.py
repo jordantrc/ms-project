@@ -251,7 +251,7 @@ with tf.Session() as sess:
     train_op = optimizer.minimize(loss_op)
 
     # model evaluation
-    logits_test = model.inference_3d(x_test, 0.5, model.batch_size, weights, biases)
+    logits_test = model.inference_3d(x_test, weights, biases)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test = tf.cast(y_pred_test, tf.int64)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
