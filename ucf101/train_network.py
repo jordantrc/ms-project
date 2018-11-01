@@ -283,7 +283,7 @@ with tf.Session() as sess:
                 x_actual = train_result[3]
                 y_true_actual = train_result[4]
                 y_pred_actual = train_result[5]
-                logits_out = train_results[6]
+                logits_out = train_result[6]
 
                 train_acc_accum += train_acc
 
