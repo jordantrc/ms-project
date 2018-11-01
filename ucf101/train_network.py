@@ -235,7 +235,8 @@ with tf.Session() as sess:
                 # _, y_true, y_pred = sess.run([train_op, y_true, y_pred])
                 # print("y_true = %s" % y_true)
                 # print("y_pred = %s" % y_pred)
-                _, loss_op_out, train_acc = sess.run([train_op, loss_op, accuracy])
+                _, loss_op_out, train_acc, logits_out = sess.run([train_op, loss_op, accuracy, logits])
+                print("logits = %s" % logits)
                 train_acc_accum += train_acc
 
                 # report out results and run a test mini-batch every now and then
@@ -251,10 +252,12 @@ with tf.Session() as sess:
                             acc = sess.run(eval_accuracy)
                             mini_batch_acc += acc
                         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
-                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy (last %s) = %s,  mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, report_step, train_step_acc, mini_batch_acc))
+                        
+                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy= %s,  mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, train_step_acc, mini_batch_acc))
                         csv_row = [i, j, loss_op_out, train_step_acc, mini_batch_acc]
+                    
                     else:
-                        print("\titeration %s - epoch %s run time = %s, train accuracy (last %s) = %s, loss = %s" % (j, i, run_time_str, report_step, train_step_acc, loss_op_out))
+                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy = %s" % (j, i, run_time_str, loss_op_out, train_step_acc))
                         csv_row = [i, j, loss_op_out, train_step_acc, ""]
 
                     # write the csv data to 
@@ -264,6 +267,8 @@ with tf.Session() as sess:
                 j += 1
             except tf.errors.OutOfRangeError:
                 break
+
+        # save a model checkpoint and report end of epoch information
         save_path = os.path.join(c3d_model.MODEL_DIR, "model_epoch_%s.ckpt" % i)
         save_path = saver.save(sess, save_path)
         end = time.time()
