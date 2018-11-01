@@ -200,7 +200,8 @@ with tf.Session() as sess:
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     # loss and optimizer
-    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+    # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+    loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class))
     optimizer = tf.train.AdamOptimizer(learning_rate=current_learning_rate)
 
     train_op = optimizer.minimize(loss_op)
