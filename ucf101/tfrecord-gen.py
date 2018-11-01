@@ -118,6 +118,9 @@ def ucf101_dataset(root, output):
                 class_indexes[i] = c
     assert len(classes) > 0
 
+    for k, v in classes.items():
+        print("k = %s, v = %s")
+
     # read the training and test list files to get the list of training
     # and test samples
     train_files = split_file_list(TRAIN_SET_FILE)

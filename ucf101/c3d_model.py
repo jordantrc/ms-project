@@ -14,6 +14,7 @@ class C3DModel():
 
     def __init__(self,
                  num_classes=101,
+                 class_map=None,
                  model_dir="/home/jordanc/datasets/UCF-101/model_ckpts",
                  train_dir="/home/jordanc/datasets/UCF-101/tfrecords/train",
                  test_dir="/home/jordanc/datasets/UCF-101/tfrecords/test",
@@ -33,6 +34,7 @@ class C3DModel():
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.current_learning_rate = learning_rate
+        self.class_map = class_map  # a map from class stored in tfrecord to new class
 
     def _clip_image_batch(self, image_batch, num_frames, randomly=True):
         '''generates a clip for each video in the batch'''
