@@ -135,9 +135,7 @@ else:
     elif included_classes != 'all':
         print("Invalid value for class inclusion [%s]" % included_classes)
         sys.exit(1)
-    else:
-
-
+    
     print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
 
 # get the list of classes
