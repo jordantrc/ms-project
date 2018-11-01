@@ -105,21 +105,16 @@ def ucf101_dataset(root, output):
 
     # read class index file to get the class
     # index information
-    classes = {}
-    class_indexes = {}
+    classes = []
     with open(CLASS_INDEX_FILE) as class_index_file_fd:
         print("Opening %s" % (CLASS_INDEX_FILE))
         lines = class_index_file_fd.read().split('\n')
         # print(lines)
         for l in lines:
             if len(l) > 0:
-                i, c = l.split(" ")
-                classes[i] = [c]
-                class_indexes[i] = c
+                _, c = l.split(" ")
+                classes.append(c)
     assert len(classes) > 0
-
-    for k, v in classes.items():
-        print("k = %s, v = %s" % (k, v))
 
     # read the training and test list files to get the list of training
     # and test samples
@@ -132,22 +127,21 @@ def ucf101_dataset(root, output):
     # get count of each class
     smallest_class = None
     smallest_class_num = -1
-    for k in classes.keys():
-        class_name = classes[k][0]
-        class_directory = os.path.join(video_directory, class_name)
+    class_videos = {}
+    for c in classes:
+        class_directory = os.path.join(video_directory, c)
         videos = os.listdir(class_directory)
         videos = [os.path.join(class_directory, v) for v in videos]
 
         if smallest_class is None:
             smallest_class_num = len(videos)
-            smallest_class = class_name
+            smallest_class = c
         elif len(videos) < smallest_class_num:
             smallest_class_num = len(videos)
-            smallest_class = class_name
+            smallest_class = c
 
-        # append the count to the class_indices
-        classes[k].append(videos)
-        print("%s - %s videos" % (class_name, len(videos)))
+        class_videos[c] = videos
+        print("%s - %s videos" % (c, len(videos)))
 
     print("smallest class = %s (%s videos)" % (smallest_class, smallest_class_num))
 
@@ -155,9 +149,8 @@ def ucf101_dataset(root, output):
     test_output_path = os.path.join(output, "test")
 
     # open each video and sample frames
-    for k in classes.keys():
-        class_name = classes[k][0]
-        videos = classes[k][1]
+    for c in classes:
+        videos = class_videos[c]
 
         # sample videos based on DATA_SAMPLE
         videos = random.sample(videos, int(len(videos) * DATA_SAMPLE))
@@ -189,7 +182,7 @@ def ucf101_dataset(root, output):
                                                                              flip_horizontally,
                                                                              resize_height,
                                                                              resize_width)
-            label_int = integer_label(class_indexes, label)
+            label_int = classes.index(label)
             assert label_int >= 0
 
             features['label'] = _int64_feature(label_int)
