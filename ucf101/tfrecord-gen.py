@@ -157,7 +157,7 @@ def ucf101_dataset(root, output):
             video_file_name = os.path.basename(v)
             video_tfrecord_file_name = video_file_name + ".tfrecord"
 
-            tf_record_output_path = os.path.join(output, video_record_file_name)
+            tf_record_output_path = os.path.join(output, video_tfrecord_file_name)
             tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
             assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
 
