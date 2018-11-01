@@ -34,7 +34,7 @@ class C3DModel():
         self.learning_rate = learning_rate
         self.current_learning_rate = learning_rate
 
-    def _clip_image_batch(image_batch, num_frames, randomly=True):
+    def _clip_image_batch(self, image_batch, num_frames, randomly=True):
         '''generates a clip for each video in the batch'''
 
         dimensions = image_batch.get_shape().as_list()
@@ -68,7 +68,7 @@ class C3DModel():
 
         return clip_batch
 
-    def _parse_function(example_proto):
+    def _parse_function(self, example_proto):
         """parse map function for video data"""
         features = dict()
         features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
@@ -98,15 +98,15 @@ class C3DModel():
 
         return images, label
 
-    def conv3d(name, l_input, w, b):
+    def conv3d(self, name, l_input, w, b):
         return tf.nn.bias_add(
             tf.nn.conv3d(l_input, w, strides=[1, 1, 1, 1, 1], padding='SAME'),
             b)
 
-    def max_pool(name, l_input, k):
+    def max_pool(self, name, l_input, k):
         return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME')
 
-    def inference_3d(_X, batch_size, _weights, _biases):
+    def inference_3d(self, _X, batch_size, _weights, _biases):
 
         print("_X = %s" % _X)
 
