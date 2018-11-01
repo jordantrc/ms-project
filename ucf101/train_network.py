@@ -99,7 +99,7 @@ def plot_confusion_matrix(cm, classes, filename,
 all_classes = True
 num_classes_actual = c3d_model.NUM_CLASSES
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 4:
     print("Must provide a run name, sample size, and a list of classes to include (or 'all' for all classes)")
     print_help()
     sys.exit(1)
