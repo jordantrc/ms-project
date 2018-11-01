@@ -18,7 +18,7 @@ DROPOUT = 0.5
 FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
 BATCH_SIZE = 1
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-3
 
 
 def _clip_image_batch(image_batch, num_frames, randomly=True):
