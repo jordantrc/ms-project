@@ -9,12 +9,13 @@ import tensorflow as tf
 import random
 import c3d
 
+NUM_CLASSES = 101
 
 class C3DModel():
 
     def __init__(self,
-                 num_classes=101,
-                 class_map=[],
+                 num_classes=NUM_CLASSES,
+                 class_map=None,
                  model_dir="/home/jordanc/datasets/UCF-101/model_ckpts",
                  tfrecord_dir="/home/jordanc/datasets/UCF-101/tfrecords",
                  dropout=0.5,
@@ -32,7 +33,21 @@ class C3DModel():
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.current_learning_rate = learning_rate
-        self.class_map = class_map  # a map from class stored in tfrecord to new class
+
+        if class_map is not None:
+            new_map = None
+            for i in range(NUM_CLASSES):
+                if i == 0 and i not in class_map:
+                    new_map = tf.constant([-1])
+                elif i == 0 and i in class_map:
+                    new_map = tf.constant([0])
+                elif i in class_map:
+                    new_map = tf.concat([new_map, tf.constant([class_map.index(i)])], 0)
+                else:
+                    new_map = tf.concat([new_map, tf.constant([-1])], 0)
+            self.class_map = new_map
+        else:
+            self.class_map = None
 
     def _clip_image_batch(self, image_batch, num_frames, randomly=True):
         '''generates a clip for each video in the batch'''
@@ -94,8 +109,8 @@ class C3DModel():
         images = tf.stack(images)
 
         label = tf.cast(parsed_features['label'], tf.int64)
-        if len(self.class_map) > 0:
-            label = self.class_map.index(label)
+        if self.class_map is not None:
+            label = self.class_map[label]
         label = tf.one_hot(label, depth=self.num_classes)
 
         return images, label
