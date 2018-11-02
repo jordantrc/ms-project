@@ -43,17 +43,17 @@ def file_split(list_file, directory):
             if len(l) > 0:
                 _, sample = l.split('/')
                 file_names.append(sample)
-    print('file_names = %s' % len(file_names))
+    print('file_names = %s...' % file_names[0:5])
 
     file_paths = []
     file_list = os.listdir(directory)
-    print("file_list = %s" % len(file_list))
+    print("file_list = %s..." % file_list[0:5])
     for n in file_names:
         for f in file_list:
             if n in f:
                 file_paths.append(os.path.join(directory, f))
-    print("file_paths = %s" % len(file_paths))
-
+    print("file_paths = %s..." % file_paths[0:5])
+    
     return file_paths
 
 
