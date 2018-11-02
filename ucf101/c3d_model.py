@@ -94,7 +94,7 @@ class C3DModel():
         images = tf.stack(images)
 
         label = tf.cast(parsed_features['label'], tf.int64)
-        if len(class_map) > 0:
+        if len(self.class_map) > 0:
             label = self.class_map.index(label)
         label = tf.one_hot(label, depth=self.num_classes)
 
