@@ -148,15 +148,21 @@ else:
 
 # get the list of classes
 class_names = get_class_list(CLASS_INDEX_FILE)
+included_class_indexes = []
 
 if not all_classes:
-    class_names = [x for x in class_names if x in included_classes]
-num_classes = len(class_names)
+    new_class_names = []
+    for i, c in enumerate(class_names):
+        if c in included_classes:
+            included_class_indexes.append(i)
+            new_class_names.append(c)
+    class_names = new_class_names
 
+num_classes = len(class_names)
 assert num_classes > 0
 
 # create the model object
-model = C3DModel(num_classes=num_classes)
+model = C3DModel(num_classes=num_classes, class_map=included_class_indexes)
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name

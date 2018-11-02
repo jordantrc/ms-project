@@ -21,7 +21,8 @@ class C3DModel():
                  frames_per_video=250,
                  frames_per_clip=16,
                  batch_size=1,
-                 learning_rate=1e-3):
+                 learning_rate=1e-3,
+                 class_map=[]):
         '''initializes the object'''
         self.num_classes = num_classes
         self.model_dir = model_dir
@@ -94,6 +95,8 @@ class C3DModel():
         images = tf.stack(images)
 
         label = tf.cast(parsed_features['label'], tf.int64)
+        if len(class_map) > 0:
+            label = self.class_map.index(label)
         label = tf.one_hot(label, depth=self.num_classes)
 
         return images, label
