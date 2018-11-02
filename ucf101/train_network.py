@@ -74,6 +74,8 @@ def balance_classes(files):
         else:
             class_counts[class_name] = 1
 
+    print("class_counts = %s" % class_counts)
+
     smallest_class_count = None
     smallest_class = None
     for k, v in class_counts.items():
@@ -232,8 +234,6 @@ if not all_classes:
     print("test files = %s" % test_files)
 assert len(test_files) > 0 and len(train_files) > 0, 'test = %s, train = %s' % (len(test_files), len(train_files))
 
-random.shuffle(train_files)
-
 # sample from the test and train files if necessary3
 if sample < 1.0:
     sample_size = int(len(train_files) * sample)
@@ -248,6 +248,8 @@ if sample < 1.0:
     print("Sampled %s testing samples" % sample_size_test)
 
 assert len(test_files) > 0 and len(train_files) > 0
+
+random.shuffle(train_files)
 
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
 
