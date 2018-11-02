@@ -219,7 +219,7 @@ with tf.Session() as sess:
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
     train_filenames = tf.placeholder(tf.string, shape=[None])
     test_filenames = tf.placeholder(tf.string, shape=[None])
-    learning_rate = tf.placeholder(tf.float32, shape=[None])
+    learning_rate = tf.placeholder(tf.float32, shape=[])
 
     # using tf.data.TFRecordDataset iterator
     test_dataset = tf.data.TFRecordDataset(test_filenames)
@@ -268,7 +268,7 @@ with tf.Session() as sess:
     # loss and optimizer
     # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
     loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class))
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate[0])
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
     train_op = optimizer.minimize(loss_op)
 
