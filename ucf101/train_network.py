@@ -219,6 +219,7 @@ with tf.Session() as sess:
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
     train_filenames = tf.placeholder(tf.string, shape=[None])
     test_filenames = tf.placeholder(tf.string, shape=[None])
+    learning_rate = tf.placeholder(tf.float32, shape=[None])
 
     # using tf.data.TFRecordDataset iterator
     test_dataset = tf.data.TFRecordDataset(test_filenames)
@@ -267,7 +268,7 @@ with tf.Session() as sess:
     # loss and optimizer
     # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
     loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class))
-    optimizer = tf.train.AdamOptimizer(learning_rate=model.current_learning_rate)
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
     train_op = optimizer.minimize(loss_op)
 
@@ -297,7 +298,8 @@ with tf.Session() as sess:
         train_acc_accum = 0.0
         while True:
             try:
-                train_result = sess.run([train_op, loss_op, accuracy, x, y_true_class, y_pred_class, logits])
+                train_result = sess.run([train_op, loss_op, accuracy, x, y_true_class, y_pred_class, logits], 
+                                        feed_dict={learning_rate: model.current_learning_rate})
                 loss_op_out = train_result[1]
                 train_acc = train_result[2]
                 x_actual = train_result[3]
@@ -383,8 +385,8 @@ with tf.Session() as sess:
         plot_confusion_matrix(cm, class_names, "runs/%s_confusion_matrix_%s.jpg" % (run_name, i))
 
         if i != 0 and i % 4 == 0:
-            current_learning_rate = current_learning_rate / 10
-            print("learning rate adjusted to %g" % current_learning_rate)
+            model.current_learning_rate = model.current_learning_rate / 10
+            print("learning rate adjusted to %g" % model.current_learning_rate)
 
     print("end training epochs")
 
