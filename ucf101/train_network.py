@@ -260,7 +260,6 @@ with tf.Session() as sess:
     logits = model.inference_3d(x, weights, biases)
 
     y_pred = tf.nn.softmax(logits)
-    y_pred = tf.cast(y_pred, tf.int64)
     y_pred_class = tf.argmax(y_pred, axis=1)
     correct_pred = tf.equal(y_pred_class, y_true_class)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
@@ -275,7 +274,6 @@ with tf.Session() as sess:
     # model evaluation
     logits_test = model.inference_3d(x_test, weights, biases)
     y_pred_test = tf.nn.softmax(logits_test)
-    y_pred_test = tf.cast(y_pred_test, tf.int64)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
     eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
