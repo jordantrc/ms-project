@@ -252,8 +252,6 @@ with tf.Session() as sess:
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
-    # placeholders
-    # x = tf.placeholder(tf.uint8, shape=[None, num_features], name='x')
     y_true = tf.cast(y_true, tf.int64)
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
@@ -273,6 +271,7 @@ with tf.Session() as sess:
     train_op = optimizer.minimize(loss_op)
 
     # model evaluation
+
     logits_test = model.inference_3d(x_test, weights, biases)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
@@ -313,7 +312,7 @@ with tf.Session() as sess:
 
                 # report out results and run a test mini-batch every now and then
                 if j != 0 and j % report_step == 0:
-                    # print("logits = %s" % logits_out)
+                    print("logits = %s" % logits_out)
                     # print("x = %s" % x_actual)
                     print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
                     run_time = time.time()
