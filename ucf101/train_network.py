@@ -86,9 +86,12 @@ def balance_classes(files):
             smallest_class_count = v
             smallest_class = k
 
+    print("smallest_class = %s, count = %s" % (smallest_class, smallest_class_count))
+
     balanced_files = []
     for k in class_counts:
         class_files = [x for x in files if k in x]
+        print("class %s has %s class_files = %s" % (k, len(class_files), class_files))
         # sample the files
         class_files = random.sample(class_files, smallest_class_count)
         balanced_files.extend(class_files)
