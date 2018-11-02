@@ -291,7 +291,7 @@ with tf.Session() as sess:
         print("START EPOCH %s" % i)
         start = time.time()
         sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
-        sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
+        sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
 
         j = 0
         report_step = 200
@@ -327,11 +327,11 @@ with tf.Session() as sess:
                             mini_batch_acc += acc
                         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
                         
-                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy = %s,  mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, train_step_acc, mini_batch_acc))
+                        print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
                         csv_row = [i, j, loss_op_out, train_step_acc, mini_batch_acc]
                     
                     else:
-                        print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy = %s" % (j, i, run_time_str, loss_op_out, train_step_acc))
+                        print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
                         csv_row = [i, j, loss_op_out, train_step_acc, ""]
 
                     # write the csv data to 
