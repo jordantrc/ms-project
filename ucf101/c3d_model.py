@@ -14,15 +14,14 @@ class C3DModel():
 
     def __init__(self,
                  num_classes=101,
-                 class_map=None,
+                 class_map=[],
                  model_dir="/home/jordanc/datasets/UCF-101/model_ckpts",
                  tfrecord_dir="/home/jordanc/datasets/UCF-101/tfrecords",
                  dropout=0.5,
                  frames_per_video=250,
                  frames_per_clip=16,
                  batch_size=1,
-                 learning_rate=1e-3,
-                 class_map=[]):
+                 learning_rate=1e-3):
         '''initializes the object'''
         self.num_classes = num_classes
         self.model_dir = model_dir
