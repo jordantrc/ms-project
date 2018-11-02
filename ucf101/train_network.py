@@ -80,7 +80,7 @@ def balance_classes(files):
         if smallest_class is None:
             smallest_class_count = v
             smallest_class = k
-        elif v > smalles_class_count:
+        elif v > smallest_class_count:
             smallest_class_count = v
             smallest_class = k
 
