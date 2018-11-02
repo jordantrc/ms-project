@@ -42,6 +42,7 @@ def file_split(list_file, directory):
         for l in lines:
             if len(l) > 0:
                 _, sample = l.split('/')
+                sample = sample.strip()
                 if ' ' in sample:
                     sample, _ = sample.split(' ')
                     sample = sample.strip()
