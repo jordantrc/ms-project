@@ -10,6 +10,7 @@ import random
 import c3d
 
 NUM_CLASSES = 101
+FRAMES_PER_VIDEO = 250
 
 class C3DModel():
 
@@ -19,7 +20,7 @@ class C3DModel():
                  model_dir="/home/jordanc/datasets/UCF-101/model_ckpts",
                  tfrecord_dir="/home/jordanc/datasets/UCF-101/tfrecords",
                  dropout=0.5,
-                 frames_per_video=250,
+                 frames_per_video=FRAMES_PER_VIDEO,
                  frames_per_clip=16,
                  batch_size=1,
                  learning_rate=1e-3):

@@ -20,6 +20,10 @@ import random
 import sys
 import tensorflow as tf
 
+import c3d_model
+
+from itertools import cycle
+
 CLASS_INDEX_FILE = "UCF101-class-index.txt"
 TRAIN_SET_FILE = "train-test-splits/trainlist01.txt"
 TEST_SET_FILE = "train-test-splits/testlist01.txt"
@@ -207,6 +211,16 @@ def video_class(path):
     return classname
 
 
+def process_frame(frame, width, height, flip):
+    '''performs pre-processing on a frame'''
+    image = cv2.resize(frame, (width, height), interpolation=cv2.INTER_CUBIC) 
+    if flip:
+        image = cv2.flip(image, 0)
+    image = image.astype(np.float32)
+
+    return image
+
+
 def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, flip, resize_height, resize_width):
     """returns an ndarray of samples from a video"""
     assert os.path.isfile(path), "unable to open %s" % (path)
@@ -227,86 +241,68 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
         frame_count = int(cap.get(cv2.cv.CAP_PROP_FRAME_COUNT))
         height = int(cap.get(cv2.cv.CAP_PROP_FRAME_HEIGHT))
         width = int(cap.get(cv2.cv.CAP_PROP_FRAME_WIDTH))
-        fps = float(cap.get(cv2.cv.CAP_PROP_FPS))
+        fps = int(cap.get(cv2.cv.CAP_PROP_FPS))
     else:
         print("using cv2 for meta")
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        fps = float(cap.get(cv2.CAP_PROP_FPS))
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
 
     print("video metadata:")
     print("frame_count = %d" % (frame_count))
     print("height = %d" % (height))
     print("width = %d" % (width))
-    print("fps = %d" % (fps))
+    print("fps = %f" % (fps))
     print("length = %f" % (frame_count / fps))
 
-    video_seconds = list(range(0, int(frame_count / fps)))
-    sample_times = []
-    oversample = False
+    sample_size = int(fps * sample_length)
+    frames_needed = c3d_model.FRAMES_PER_VIDEO
+    buf = np.empty((frames_needed, resize_height, resize_width, 3), np.dtype('uint8'))
 
-    if len(video_seconds[::sample_length]) > num_samples:
-        sample_times = random.sample(video_seconds[::sample_length], num_samples)
-        add_times = []
-        for s in sample_times:
-            for i in range(1, sample_length):
-                add_times.append(s + i)
-        sample_times.extend(add_times)
-        sample_times.sort()
-    else:
-        # oversampling is needed
-        oversample = True
-        index = 0
-        while len(sample_times) < (num_samples * sample_length):
-            sample_times.append(video_seconds[index])
-            index += 1
-            if index == len(video_seconds):
-                index = 0
-
-    print("sample_times = %s" % (sample_times))
+    # read as many frames as possible into a list
+    frame_buffer = []
     success, image = cap.read()
-
-    buf = np.empty((int(fps * sample_length * num_samples), resize_height, resize_width, 3), np.dtype('uint8'))
-    in_second = 0
-    count = 0
-    sequence = 0
-    max_sequence = (fps * sample_length * num_samples) - 1
     while success:
-        if in_second in sample_times:
-            # image transformations - resize to 224x224, convert to float
-            image = cv2.resize(image, (resize_width, resize_height), interpolation=cv2.INTER_CUBIC)
-            if flip_video:
-                image = cv2.flip(image, 0)
-            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = image.astype(np.float32)
-
-            if oversample:
-                num_samples = sample_times.count(in_second)
-                indices = [i for i, x in enumerate(sample_times) if x == in_second]
-            else:
-                num_samples = 1
-
-            if num_samples == 1:
-                # cv2.imwrite("./frames/frame%d-%d.jpg" % (sequence, count), image)
-                # print("image = %s, shape = %s" % (image, image.shape))
-                if sequence <= max_sequence:
-                    buf[sequence] = image
-                sequence += 1
-            else:
-                for s in range(num_samples):
-                    index = indices[s]
-                    sequence = int((fps * index) + (count % fps))
-                    if sequence <= max_sequence:
-                        buf[sequence] = image
-                    # print("index = %s sequence = %s" % (index, sequence))
-                    # print("frame index = %s" % frame_index)
-                    # cv2.imwrite("./frames/frame%d-%d.jpg" % (sequence, count), image)
-
+        frame_buffer.append(image)
         success, image = cap.read()
-        # print('read new frame: ', success)
-        count += 1
-        in_second = int(count / fps)
+
+    # determine how many frames were captured
+    frames_obtained = len(frame_buffer)
+
+    frames_captured = 0
+    if frames_obtained <= frames_needed:
+        # turn the buffer into a circular list
+        frame_buffer = cycle(frame_buffer)
+        while frames_captured < frames_needed:
+            image = process_frame(next(frame_buffer), resize_width, resize_height, flip_video)
+            buf[frames_captured] = image
+            frames_captured += 1
+
+    else:
+        indexes = list(range(frames_obtained))[::50]
+        indexes = indexes[:-1]  # chop off the last index
+        frame_index = 0
+        capture = False
+        while frames_captured < frames_needed:
+            if frame_index in indexes:
+                # start capturing
+                capture = True
+                sample_index = 0
+            elif sample_index == 50:
+                capture = False
+                sample_index = 0
+
+            if capture:
+                image = process_frame(frame_buffer[frame_index], resize_width, resize_height, flip_video)
+                buf[frames_captured] = image
+                sample_index += 1
+                frame_index += 1
+                frames_captured += 1
+            else:
+                frame_index += 1
+
+    assert frames_captured == frames_needed, "captured %s frames, needed %s" % (frames_captured, frames_needed)
 
     return video_class_name, width, height, buf
 

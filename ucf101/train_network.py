@@ -31,7 +31,7 @@ VALIDATE_WITH_TRAIN = True
 
 def print_help():
     '''prints a help message'''
-    print("Usage:\ntrain_network.py <run name> <sample size as decimal percentage> <classes to include>")
+    print("Usage:\ntrain_network.py <run name> <sample size as decimal percentage> <classes to include> <model save dir> <tfrecord directory>")
 
 
 def file_split(list_file, directory):
@@ -168,14 +168,15 @@ def plot_confusion_matrix(cm, classes, filename,
 
 all_classes = True
 
-if len(sys.argv) != 4:
-    print("Must provide a run name, sample size, and a list of classes to include (or 'all' for all classes)")
+if len(sys.argv) != 6:
     print_help()
     sys.exit(1)
 else:
     run_name = sys.argv[1]
     sample = float(sys.argv[2])
     included_classes = sys.argv[3]
+    model_dir = sys.argv[4]
+    tfrecord_dir = sys.argv[5]
 
     if ',' in included_classes:
         all_classes = False
@@ -202,7 +203,7 @@ num_classes = len(class_names)
 assert num_classes > 0
 
 # create the model object
-model = C3DModel()
+model = C3DModel(model_dir=model_dir,tfrecord_dir=tfrecord_dir)
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
