@@ -240,7 +240,10 @@ model = C3DModel(model_dir=model_dir,tfrecord_dir=tfrecord_dir)
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
-run_csv_fd = open(run_csv_file, 'w', newline='')
+if sys.version_info[0] == 3:
+    run_csv_fd = open(run_csv_file, 'w', newline='')
+else:
+    run_csv_fd = open(run_csv_file, 'wb')
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
 run_csv_writer.writerow(['test_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
 
@@ -431,7 +434,8 @@ with tf.Session() as sess:
             hit_5_out = train_result[9]
 
             train_acc_accum += train_acc
-            train_hit5_accum += hit_5_out
+            if hit_5_out == True:
+                train_hit5_accum += 1.0
 
             # report out results and run a test mini-batch every now and then
             if j != 0 and j % report_step == 0:
