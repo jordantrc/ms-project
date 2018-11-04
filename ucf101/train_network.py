@@ -257,7 +257,7 @@ run_log_fd.write("HYPER PARAMETERS:\n")
 run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\n" % 
                 (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT))
 run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
-run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS_STDDEV = %s\n" % (csd.WEIGHT_STDDEV, c3d.BIAS_STDDEV))
+run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS_STDDEV = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS_STDDEV))
 
 # get the list of files for train and test
 train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir)
