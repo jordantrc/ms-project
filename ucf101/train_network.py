@@ -374,7 +374,7 @@ with tf.Session() as sess:
     sess.run(init_op)
 
     # TRAINING
-    report_step = int(len(train_files) * 0.05)
+    report_step = min(200, int(len(train_files) * 0.05))
     print("Beginning training epochs, reporting every %s, mini-test batch every %s samples" % (report_step, report_step * 5))
 
     in_epoch = 1
@@ -459,7 +459,10 @@ with tf.Session() as sess:
                     csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
                 
                 else:
-                    print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, in_epoch, run_time_str, loss_op_out))
+                    train_acc_accum = train_acc_accum / report_step
+                    train_hit5_accum = train_hit5_accum / report_step
+                    print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
+                         (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
                     csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
 
                 # write the csv data to 
