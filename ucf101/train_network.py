@@ -176,7 +176,7 @@ def test_network(sess, test_files, run_name, epoch):
     labels = []
     while True:
         try:
-            test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, hit_5, top_5])
+            test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5])
             acc = test_results[0]
             y_pred_class_actual = test_results[1]
             y_true_class_actual = test_results[2]
@@ -257,6 +257,7 @@ run_log_fd.write("HYPER PARAMETERS:\n")
 run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\n" % 
                 (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT))
 run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
+run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS_STDDEV = %s\n" % (csd.WEIGHT_STDDEV, c3d.BIAS_STDDEV))
 
 # get the list of files for train and test
 train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir)
@@ -356,6 +357,8 @@ with tf.Session() as sess:
     y_pred_class = tf.argmax(y_pred, axis=1)
     correct_pred = tf.equal(y_pred_class, y_true_class)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+    hit_5 = tf.nn.in_top_k(logits, y_true_class, 5)
+    top_5 = tf.nn.top_k(logits, k=5)
 
     # loss and optimizer
     # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
@@ -369,8 +372,8 @@ with tf.Session() as sess:
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
-    hit_5 = tf.nn.in_top_k(logits_test, y_true_test_class, 5)
-    top_5 = tf.nn.top_k(logits_test, k=5)
+    eval_hit_5 = tf.nn.in_top_k(logits_test, y_true_test_class, 5)
+    eval_top_5 = tf.nn.top_k(logits_test, k=5)
     eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
     eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
 
@@ -455,7 +458,7 @@ with tf.Session() as sess:
                     mini_batch_acc = 0.0
                     mini_batch_hit5 = 0.0
                     for k in range(MINI_BATCH_SIZE):
-                        acc, hit_5_out, top_5_out = sess.run([eval_accuracy, hit_5, top_5])
+                        acc, hit_5_out, top_5_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5])
                         mini_batch_acc += acc
                         if hit_5_out[0]:
                             mini_batch_hit5 += 1.0
@@ -480,6 +483,7 @@ with tf.Session() as sess:
 
             j += 1
         except tf.errors.OutOfRangeError:
+            print("Out of range error")
             break
 
     print("end training epochs")
