@@ -29,6 +29,7 @@ TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
 TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
+DATA_SHUFFLE_MULTIPLIER = 0.05
 
 def print_help():
     '''prints a help message'''
@@ -254,8 +255,8 @@ run_log_file = 'runs/%s.log' % run_name
 run_log_fd = open(run_log_file, 'w')
 run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
 run_log_fd.write("HYPER PARAMETERS:\n")
-run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\n" % 
-                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT))
+run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nDATA_SHUFFLE_MULTIPLIER = %s\n" % 
+                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, DATA_SHUFFLE_MULTIPLIER))
 run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
 run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS_STDDEV = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS_STDDEV))
 
@@ -326,7 +327,7 @@ with tf.Session() as sess:
 
     # using tf.data.TFRecordDataset iterator
     train_dataset = tf.data.TFRecordDataset(train_filenames)
-    train_dataset = train_dataset.shuffle(int(len(train_files) * 0.05), reshuffle_each_iteration=True)
+    train_dataset = train_dataset.shuffle(int(len(train_files) * DATA_SHUFFLE_MULTIPLIER), reshuffle_each_iteration=True)
     train_dataset = train_dataset.map(model._parse_function)
     train_dataset = train_dataset.repeat(NUM_EPOCHS)
     train_dataset = train_dataset.batch(model.batch_size)
