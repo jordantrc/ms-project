@@ -303,7 +303,10 @@ random.shuffle(train_files)
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
 run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
-with tf.Session() as sess:
+# Tensorflow configuration
+config = tf.ConfigProto(allow_soft_placement=True)
+
+with tf.Session(config=config) as sess:
 
     # init variables
     # tf.set_random_seed(1234)
