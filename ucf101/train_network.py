@@ -176,21 +176,23 @@ def test_network(sess, test_files, run_name, epoch):
     labels = []
     while True:
         try:
-            test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, hit_5])
+            test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, hit_5, top_5])
             acc = test_results[0]
             y_pred_class_actual = test_results[1]
             y_true_class_actual = test_results[2]
             correct_pred_actual = test_results[3]
             hit_5_actual = test_results[4]
-            print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s, hit@5 = %s" % (k, correct_pred_actual, 
+            top_5_actual = test_results[5]
+            print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s, hit@5 = %s, top 5 = %s" % (k, correct_pred_actual, 
                                                                              y_pred_class_actual,
                                                                              y_true_class_actual,
                                                                              acc,
-                                                                             hit_5_actual))
+                                                                             hit_5_actual,
+                                                                             top_5_actual))
 
             # add to accumulations
-            if hit_5_actual == True:
-                cumulative_hit_at_5 += 1
+            if hit_5_actual[0]:
+                cumulative_hit_at_5 += 1.0
             cumulative_accuracy += float(acc)
             predictions.append(y_pred_class_actual)
             labels.append(y_true_class_actual)
@@ -367,7 +369,8 @@ with tf.Session() as sess:
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
-    hit_5 = tf.nn.in_top_k(logits_test, y_pred_test_class, 5)
+    hit_5 = tf.nn.in_top_k(logits_test, y_true_test_class, 5)
+    top_5 = tf.nn.top_k(logits_test, k=5)
     eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
     eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
 
@@ -434,7 +437,8 @@ with tf.Session() as sess:
             hit_5_out = train_result[9]
 
             train_acc_accum += train_acc
-            if hit_5_out == True:
+            # print("hit_5_out = %s, type = %s, hit_5_out[0] = %s, type = %s" % (hit_5_out, type(hit_5_out), hit_5_out[0], type(hit_5_out[0])))
+            if hit_5_out[0]:
                 train_hit5_accum += 1.0
 
             # report out results and run a test mini-batch every now and then
@@ -451,15 +455,15 @@ with tf.Session() as sess:
                     mini_batch_acc = 0.0
                     mini_batch_hit5 = 0.0
                     for k in range(MINI_BATCH_SIZE):
-                        acc, hit_5_out = sess.run([eval_accuracy, hit_5])
+                        acc, hit_5_out, top_5_out = sess.run([eval_accuracy, hit_5, top_5])
                         mini_batch_acc += acc
-                        if hit_5_out == True:
+                        if hit_5_out[0]:
                             mini_batch_hit5 += 1.0
                     mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
                     mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
                     
-                    print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s" %
-                         (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5))
+                    print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s, y_true = %s, top 5 = %s" %
+                         (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5, y_true_class_actual, top_5_out))
                     csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
                 
                 else:
