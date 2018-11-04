@@ -326,7 +326,7 @@ with tf.Session() as sess:
 
     # using tf.data.TFRecordDataset iterator
     train_dataset = tf.data.TFRecordDataset(train_filenames)
-    train_dataset = train_dataset.shuffle(len(train_files), reshuffle_each_iteration=True)
+    train_dataset = train_dataset.shuffle(int(len(train_files) * 0.05), reshuffle_each_iteration=True)
     train_dataset = train_dataset.map(model._parse_function)
     train_dataset = train_dataset.repeat(NUM_EPOCHS)
     train_dataset = train_dataset.batch(model.batch_size)
