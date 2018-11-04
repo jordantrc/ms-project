@@ -3,3 +3,6 @@
 *.jpg
 *.pyc
 *.csv
+*.png
+*.pdf
+*.log

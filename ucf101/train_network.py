@@ -28,6 +28,7 @@ MINI_BATCH_SIZE = 50
 TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
 TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
+BALANCE_CLASSES = True
 
 def print_help():
     '''prints a help message'''
@@ -48,16 +49,16 @@ def file_split(list_file, directory):
                     sample, _ = sample.split(' ')
                     sample = sample.strip()
                 file_names.append(sample)
-    print('file_names = %s...' % file_names[0:5])
+    # print('file_names = %s...' % file_names[0:5])
 
     file_paths = []
     file_list = os.listdir(directory)
-    print("file_list = %s..." % file_list[0:5])
+    # print("file_list = %s..." % file_list[0:5])
     for n in file_names:
         for f in file_list:
             if n in f:
                 file_paths.append(os.path.join(directory, f))
-    print("file_paths = %s..." % file_paths[0:5])
+    # print("file_paths = %s..." % file_paths[0:5])
 
     return file_paths
 
@@ -91,13 +92,12 @@ def balance_classes(files):
     balanced_files = []
     for k in class_counts:
         class_files = [x for x in files if k in x]
-        print("class %s has %s class_files = %s" % (k, len(class_files), class_files))
+        # print("class %s has %s class_files = %s" % (k, len(class_files), class_files))
         # sample the files
         class_files = random.sample(class_files, smallest_class_count)
         balanced_files.extend(class_files)
 
     return balanced_files
-
 
 
 def tf_confusion_matrix(predictions, labels, classes):
@@ -166,6 +166,50 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.close()
 
 
+def test_network(sess, test_files, run_name, epoch):
+    '''tests the neural network'''
+    sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
+    k = 0
+    cumulative_accuracy = 0.0
+    cumulative_hit_at_5 = 0.0
+    predictions = []
+    labels = []
+    while True:
+        try:
+            test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, hit_5])
+            acc = test_results[0]
+            y_pred_class_actual = test_results[1]
+            y_true_class_actual = test_results[2]
+            correct_pred_actual = test_results[3]
+            hit_5_actual = test_results[4]
+            print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s, hit@5 = %s" % (k, correct_pred_actual, 
+                                                                             y_pred_class_actual,
+                                                                             y_true_class_actual,
+                                                                             acc,
+                                                                             hit_5_actual))
+
+            # add to accumulations
+            if hit_5_actual == True:
+                cumulative_hit_at_5 += 1
+            cumulative_accuracy += float(acc)
+            predictions.append(y_pred_class_actual)
+            labels.append(y_true_class_actual)
+
+            k += 1
+        except tf.errors.OutOfRangeError:
+            # print("OutOfRangeError - k = %s" % k)
+            break
+
+    print("Exhausted test data")
+    print("Cumulative test accuracy at end of epoch %s = %s" % (epoch, cumulative_accuracy / k))
+    print("Cumulative test hit@5 accuracy at end of epoch %s = %s" % (epoch, cumulative_hit_at_5 / k))
+    print("Confusion matrix =")
+    cm = tf_confusion_matrix(predictions, labels, class_names)
+    plot_confusion_matrix(cm, class_names, "runs/%s_confusion_matrix_%s.pdf" % (run_name, epoch))
+
+    return ['test', epoch, "", "", cumulative_accuracy / k, cumulative_hit_at_5 / k]
+
+
 all_classes = True
 
 if len(sys.argv) != 6:
@@ -191,29 +235,23 @@ else:
 class_names = get_class_list(CLASS_INDEX_FILE)
 included_class_indexes = []
 
-if not all_classes:
-    new_class_names = []
-    for i, c in enumerate(class_names):
-        if c in included_classes:
-            included_class_indexes.append(i)
-            new_class_names.append(c)
-    class_names = new_class_names
-
-num_classes = len(class_names)
-assert num_classes > 0
-
 # create the model object
 model = C3DModel(model_dir=model_dir,tfrecord_dir=tfrecord_dir)
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
-run_csv_fd = open(run_csv_file, 'wb')
+run_csv_fd = open(run_csv_file, 'w', newline='')
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
-run_csv_writer.writerow(['epoch', 'iteration', 'loss', 'train_accuracy', 'mini_batch_accuracy'])
+run_csv_writer.writerow(['test_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
 
 # open the log file
 run_log_file = 'runs/%s.log' % run_name
 run_log_fd = open(run_log_file, 'w')
+run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
+run_log_fd.write("HYPER PARAMETERS:\n")
+run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\n" % 
+                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT))
+run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
 
 # get the list of files for train and test
 train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir)
@@ -234,28 +272,29 @@ if not all_classes:
 
     train_files = train_files_filtered
     test_files = test_files_filtered
-    print("train files = %s" % train_files)
-    print("test files = %s" % test_files)
+    # print("train files = %s" % train_files)
+    # print("test files = %s" % test_files)
 assert len(test_files) > 0 and len(train_files) > 0, 'test = %s, train = %s' % (len(test_files), len(train_files))
 
 # sample from the test and train files if necessary3
 if sample < 1.0:
     sample_size = int(len(train_files) * sample)
     train_files = random.sample(train_files, sample_size)
-    print("Sampled %s training samples" % sample_size)
-
-    # balance the classes for training
-    train_files = balance_classes(train_files)
+    print("%s training samples" % sample_size)
 
     sample_size_test = int(len(test_files) * sample)
     test_files = random.sample(test_files, sample_size_test)
-    print("Sampled %s testing samples" % sample_size_test)
+    print("%s testing samples" % sample_size_test)
 
 assert len(test_files) > 0 and len(train_files) > 0
 
-random.shuffle(train_files)
+if BALANCE_CLASSES:
+    # balance the classes for training
+    train_files = balance_classes(train_files)
 
+random.shuffle(train_files)
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
+run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
 with tf.Session() as sess:
 
@@ -321,11 +360,11 @@ with tf.Session() as sess:
     train_op = optimizer.minimize(loss_op)
 
     # model evaluation
-
     logits_test = model.inference_3d(x_test, weights, biases)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
+    hit_5 = tf.nn.in_top_k(logits_test, y_pred_test_class, 5)
     eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
     eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
 
@@ -334,117 +373,121 @@ with tf.Session() as sess:
     saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
     sess.run(init_op)
 
-    print("Beginning training epochs")
+    # TRAINING
+    report_step = int(len(train_files) * 0.05)
+    print("Beginning training epochs, reporting every %s, mini-test batch every %s samples" % (report_step, report_step * 5))
 
-    for i in range(NUM_EPOCHS):
-        print("START EPOCH %s" % i)
-        start = time.time()
-        sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
-        if VALIDATE_WITH_TRAIN:
-            sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
-        else:
-            sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
-
-        j = 0
-        report_step = 200
-        train_acc_accum = 0.0
-        while True:
-            try:
-                train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits], 
-                                        feed_dict={learning_rate: model.current_learning_rate})
-                loss_op_out = train_result[1]
-                train_acc = train_result[2]
-                x_actual = train_result[3]
-                y_true_actual = train_result[4]
-                y_true_class_actual = train_result[5]
-                y_pred_actual = train_result[6]
-                y_pred_class_actual = train_result[7]
-                logits_out = train_result[8]
-
-                train_acc_accum += train_acc
-
-                # report out results and run a test mini-batch every now and then
-                if j != 0 and j % report_step == 0:
-                    print("logits = %s" % logits_out)
-                    # print("x = %s" % x_actual)
-                    print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
-                    run_time = time.time()
-                    run_time_str = str(datetime.timedelta(seconds=run_time - start))
-                    train_step_acc = train_acc_accum / report_step
-
-                    # mini batch accuracy - every 1000 iterations
-                    if j % 1000 == 0:
-                        mini_batch_acc = 0.0
-                        for k in range(MINI_BATCH_SIZE):
-                            acc = sess.run(eval_accuracy)
-                            mini_batch_acc += acc
-                        mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
-                        
-                        print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s" % (j, i, run_time_str, loss_op_out, mini_batch_acc))
-                        csv_row = [i, j, loss_op_out, train_step_acc, mini_batch_acc]
-                    
-                    else:
-                        print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, i, run_time_str, loss_op_out))
-                        csv_row = [i, j, loss_op_out, train_step_acc, ""]
-
-                    # write the csv data to 
-                    run_csv_writer.writerow(csv_row)
-                    train_acc_accum = 0.0
-
-                j += 1
-            except tf.errors.OutOfRangeError:
-                break
-
-        # save a model checkpoint and report end of epoch information
-        save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % i)
-        save_path = saver.save(sess, save_path)
-        end = time.time()
-        train_time = str(datetime.timedelta(seconds=end - start))
-        print("END EPOCH %s, iterations = %s, epoch training time: %s" % (i, j, train_time))
-        print("model checkpoint saved to %s\n\n" % save_path)
-
-        # test accuracy, save a confusion matrix
+    in_epoch = 1
+    print("START EPOCH %s" % in_epoch)
+    start = time.time()
+    sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
+    if VALIDATE_WITH_TRAIN:
+        sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
+    else:
         sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
-        k = 0
-        cumulative_accuracy = 0.0
-        predictions = []
-        labels = []
-        while True:
-            try:
-                test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred])
-                acc = test_results[0]
-                y_pred_class_actual = test_results[1]
-                y_true_class_actual = test_results[2]
-                correct_pred_actual = test_results[3]
-                print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s" % (k, correct_pred_actual, 
-                                                                                 y_pred_class_actual,
-                                                                                 y_true_class_actual,
-                                                                                 acc))
 
-                # add to accumulations
-                cumulative_accuracy += float(acc)
-                predictions.append(y_pred_class_actual)
-                labels.append(y_true_class_actual)
+    j = 0
+    train_acc_accum = 0.0
+    train_hit5_accum = 0.0
+    while True:
+        if j != 0 and j % len(train_files) == 0 :
+            # end of epoch
+            # save a model checkpoint and report end of epoch information
+            save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+            save_path = saver.save(sess, save_path)
+            end = time.time()
+            train_time = str(datetime.timedelta(seconds=end - start))
+            print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
+            print("model checkpoint saved to %s\n\n" % save_path)
 
-                k += 1
-            except tf.errors.OutOfRangeError:
-                print("OutOfRangeError - k = %s" % k)
-                break
-    
-        print("Exhausted test data")
-        print("Cumulative accuracy at end of epoch %s = %s" % (i, cumulative_accuracy / k))
-        print("Confusion matrix =")
-        cm = tf_confusion_matrix(predictions, labels, class_names)
-        plot_confusion_matrix(cm, class_names, "runs/%s_confusion_matrix_%s.jpg" % (run_name, i))
+            # test the network
+            test_results = test_network(sess, test_files, run_name, in_epoch)
+            run_csv_writer.writerow(test_results)
 
-        if i != 0 and i % 4 == 0:
-            model.current_learning_rate = model.current_learning_rate / 10
-            print("learning rate adjusted to %g" % model.current_learning_rate)
+            in_epoch += 1
+
+            if in_epoch % 4 == 0:
+                model.current_learning_rate = model.current_learning_rate / 10
+                print("learning rate adjusted to %g" % model.current_learning_rate)
+
+            print("START EPOCH %s" % in_epoch)
+            start = time.time()
+            if VALIDATE_WITH_TRAIN:
+                sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
+            else:
+                sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
+
+        try:
+            train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
+                                    feed_dict={learning_rate: model.current_learning_rate})
+            loss_op_out = train_result[1]
+            train_acc = train_result[2]
+            x_actual = train_result[3]
+            y_true_actual = train_result[4]
+            y_true_class_actual = train_result[5]
+            y_pred_actual = train_result[6]
+            y_pred_class_actual = train_result[7]
+            logits_out = train_result[8]
+            hit_5_out = train_result[9]
+
+            train_acc_accum += train_acc
+            train_hit5_accum += hit_5_out
+
+            # report out results and run a test mini-batch every now and then
+            if j != 0 and j % report_step == 0:
+                # print("logits = %s" % logits_out)
+                # print("x = %s" % x_actual)
+                # print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
+                run_time = time.time()
+                run_time_str = str(datetime.timedelta(seconds=run_time - start))
+                train_step_acc = train_acc_accum / report_step
+
+                # mini batch accuracy - every 5 report step iterations
+                if j % (report_step * 5) == 0:
+                    mini_batch_acc = 0.0
+                    mini_batch_hit5 = 0.0
+                    for k in range(MINI_BATCH_SIZE):
+                        acc, hit_5_out = sess.run([eval_accuracy, hit_5])
+                        mini_batch_acc += acc
+                        if hit_5_out == True:
+                            mini_batch_hit5 += 1.0
+                    mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
+                    mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
+                    
+                    print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s" %
+                         (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5))
+                    csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
+                
+                else:
+                    print("\titeration %s - epoch %s run time = %s, loss = %s" % (j, in_epoch, run_time_str, loss_op_out))
+                    csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
+
+                # write the csv data to 
+                run_csv_writer.writerow(csv_row)
+                train_acc_accum = 0.0
+                train_hit5_accum = 0.0
+
+            j += 1
+        except tf.errors.OutOfRangeError:
+            break
 
     print("end training epochs")
+    # end of epoch
+    # save a model checkpoint and report end of epoch information
+    save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+    save_path = saver.save(sess, save_path)
+    end = time.time()
+    train_time = str(datetime.timedelta(seconds=end - start))
+    print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
+    print("model checkpoint saved to %s\n\n" % save_path)
+
+    # final test
+    test_results = test_network(sess, test_files, run_name, in_epoch)
+    run_csv_writer.writerow(test_results)
 
     coord.request_stop()
     coord.join(threads)
     sess.close()
 
 run_csv_fd.close()
+run_log_fd.close()
