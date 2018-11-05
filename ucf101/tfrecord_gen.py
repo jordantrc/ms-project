@@ -217,7 +217,7 @@ def video_class(path):
 def clips_from_video(frames, clip_size):
     '''takes the frames from a video and creates as many full-size
     clips as possible given the clip_size'''
-    num_clips = math.floor(c3d_model.FRAMES_PER_VIDEO / clip_size)
+    num_clips = int(math.floor(c3d_model.FRAMES_PER_VIDEO / clip_size))
     clips = []
 
     offset = 0
