@@ -14,6 +14,7 @@
 from __future__ import print_function
 
 import cv2
+import math
 import numpy as np
 import os
 import random
@@ -165,16 +166,6 @@ def ucf101_dataset(root, output):
 
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
-            video_file_name = os.path.basename(v)
-            video_tfrecord_file_name = video_file_name + ".tfrecord"
-
-            tfrecord_output_path = os.path.join(output, video_tfrecord_file_name)
-            tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
-            assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
-
-            features = dict()
-
-            # get video data from the video
             label, image_width, image_height, images = video_file_to_ndarray(v,
                                                                              num_samples,
                                                                              sample_length,
@@ -186,21 +177,33 @@ def ucf101_dataset(root, output):
             print("label_int = %s, class name = %s" % (label_int, classes[label_int]))
             assert label_int >= 0
 
-            features['label'] = _int64_feature(label_int)
+            # generate clips from the video
+            clips = clips_from_video(images, c3d_model.FRAMES_PER_CLIP)
+            print("generated %s clips of size %s" % (len(clips), c3d_model.FRAMES_PER_CLIP))
 
-            # package up the frames from the video
-            for i in range(images.shape[0]):
-                frame = images[i]
-                # frame = tf.image.encode_jpeg(frame, quality=100)
-                frame_raw = frame.tostring()
-                features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
+            for i, c in enumerate(clips):
+                video_file_name = os.path.basename(v)
+                clip_tfrecord_file_name = video_file_name + "_clip%02d.tfrecord" % i
 
-            example = tf.train.Example(features=tf.train.Features(feature=features))
+                tfrecord_output_path = os.path.join(output, clip_tfrecord_file_name)
+                tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
+                assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
 
-            tfrecord_writer.write(example.SerializeToString())
-            tfrecord_writer.close()
-            zeros = np.count_nonzero(images==0)
-            print("images shape: %s, count zero = %s written to tfrecord file %s" % (images.shape, zeros, tfrecord_output_path))
+                features = dict()
+                features['label'] = _int64_feature(label_int)
+
+                # package up the frames from the clip
+                for i in range(c.shape[0]):
+                    frame = c[i]
+                    # frame = tf.image.encode_jpeg(frame, quality=100)
+                    frame_raw = frame.tostring()
+                    features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
+
+                example = tf.train.Example(features=tf.train.Features(feature=features))
+
+                tfrecord_writer.write(example.SerializeToString())
+                tfrecord_writer.close()
+                print("clip shape: %s, written to tfrecord file %s" % (c.shape, tfrecord_output_path))
 
 
 def video_class(path):
@@ -209,6 +212,20 @@ def video_class(path):
     parts = filename.split('_')
     classname = parts[1]
     return classname
+
+
+def clips_from_video(frames, clip_size):
+    '''takes the frames from a video and creates as many full-size
+    clips as possible given the clip_size'''
+    num_clips = math.floor(c3d_model.FRAMES_PER_VIDEO / clip_size)
+    clips = []
+
+    offset = 0
+    for i in range(num_clips):
+        clips.append(frames[offset:offset + clip_size])
+        offset += clip_size
+
+    return clips
 
 
 def process_frame(frame, width, height, flip):

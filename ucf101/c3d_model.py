@@ -11,6 +11,7 @@ import c3d
 
 NUM_CLASSES = 101
 FRAMES_PER_VIDEO = 250
+FRAMES_PER_CLIP = 16
 
 class C3DModel():
 
@@ -21,7 +22,7 @@ class C3DModel():
                  tfrecord_dir="/home/jordanc/datasets/UCF-101/tfrecords",
                  dropout=0.5,
                  frames_per_video=FRAMES_PER_VIDEO,
-                 frames_per_clip=16,
+                 frames_per_clip=FRAMES_PER_CLIP,
                  batch_size=1,
                  learning_rate=1e-3):
         '''initializes the object'''
@@ -89,7 +90,7 @@ class C3DModel():
         features = dict()
         features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
 
-        for i in range(self.frames_per_video):
+        for i in range(self.frames_per_clip):
             features['frames/{:04d}'.format(i)] = tf.FixedLenFeature((), tf.string)
 
         # parse the features
@@ -97,7 +98,7 @@ class C3DModel():
 
         # decode the encoded jpegs
         images = []
-        for i in range(self.frames_per_video):
+        for i in range(self.frames_per_clip):
             # frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
             frame = tf.decode_raw(parsed_features['frames/{:04d}'.format(i)], tf.uint8)
             frame = tf.reshape(frame, tf.stack([112, 112, 3]))

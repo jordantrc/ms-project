@@ -212,7 +212,8 @@ def test_network(sess, test_files, run_name, epoch):
 
     return ['test', epoch, "", "", cumulative_accuracy / k, cumulative_hit_at_5 / k]
 
-
+# get the list of classes
+class_names = get_class_list(CLASS_INDEX_FILE)
 all_classes = True
 
 if len(sys.argv) != 6:
@@ -228,15 +229,16 @@ else:
     if ',' in included_classes:
         all_classes = False
         included_classes = [x.strip() for x in sys.argv[3].split(',')]
-    elif included_classes != 'all':
+    elif included_classes.isdigit():
+        all_classes = False
+        included_classes = random.sample(class_names, int(included_classes))
+    elif included_classes == "all":
+        all_classes = True
+    else:
         print("Invalid value for class inclusion [%s]" % included_classes)
         sys.exit(1)
     
     print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
-
-# get the list of classes
-class_names = get_class_list(CLASS_INDEX_FILE)
-included_class_indexes = []
 
 # create the model object
 model = C3DModel(model_dir=model_dir,tfrecord_dir=tfrecord_dir)
@@ -244,15 +246,15 @@ model = C3DModel(model_dir=model_dir,tfrecord_dir=tfrecord_dir)
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
 if sys.version_info[0] == 3:
-    run_csv_fd = open(run_csv_file, 'w', newline='')
+    run_csv_fd = open(run_csv_file, 'w', newline='', buffering=1)
 else:
-    run_csv_fd = open(run_csv_file, 'wb')
+    run_csv_fd = open(run_csv_file, 'wb', buffering=0)
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
 run_csv_writer.writerow(['test_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
 
 # open the log file
 run_log_file = 'runs/%s.log' % run_name
-run_log_fd = open(run_log_file, 'w')
+run_log_fd = open(run_log_file, 'w', buffering=1)
 run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
 run_log_fd.write("HYPER PARAMETERS:\n")
 run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nDATA_SHUFFLE_MULTIPLIER = %s\n" % 
@@ -347,8 +349,8 @@ with tf.Session(config=config) as sess:
     x_test = tf.reshape(x_test, [model.batch_size, model.frames_per_video, 112, 112, 3])
 
     # generate clips for each video in the batch
-    x = model._clip_image_batch(x, model.frames_per_clip, True)
-    x_test = model._clip_image_batch(x_test, model.frames_per_clip, True)
+    # x = model._clip_image_batch(x, model.frames_per_clip, True)
+    # x_test = model._clip_image_batch(x_test, model.frames_per_clip, True)
 
     print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
