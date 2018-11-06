@@ -23,7 +23,7 @@ from sklearn import metrics
 from c3d_model import C3DModel
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-NUM_EPOCHS = 50
+NUM_EPOCHS = 16
 MINI_BATCH_SIZE = 50
 TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
 TEST_SPLIT = 'train-test-splits/testlist01.txt'
