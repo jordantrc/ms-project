@@ -232,7 +232,7 @@ def process_frame(frame, width, height, flip):
     '''performs pre-processing on a frame'''
     image = cv2.resize(frame, (width, height), interpolation=cv2.INTER_CUBIC) 
     if flip:
-        image = cv2.flip(image, 0)
+        image = cv2.flip(image, 1)
     image = image.astype(np.float32)
 
     return image

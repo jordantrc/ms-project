@@ -212,6 +212,7 @@ def test_network(sess, test_files, run_name, epoch):
 
     return ['test', epoch, "", "", cumulative_accuracy / k, cumulative_hit_at_5 / k]
 
+
 # get the list of classes
 class_names = get_class_list(CLASS_INDEX_FILE)
 all_classes = True
@@ -252,16 +253,6 @@ else:
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
 run_csv_writer.writerow(['test_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
 
-# open the log file
-run_log_file = 'runs/%s.log' % run_name
-run_log_fd = open(run_log_file, 'w', buffering=1)
-run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
-run_log_fd.write("HYPER PARAMETERS:\n")
-run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nDATA_SHUFFLE_MULTIPLIER = %s\n" % 
-                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, DATA_SHUFFLE_MULTIPLIER))
-run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
-run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS_STDDEV = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS_STDDEV))
-
 # get the list of files for train and test
 train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir)
 test_files = file_split(TEST_SPLIT, model.tfrecord_dir)
@@ -285,7 +276,7 @@ if not all_classes:
     # print("test files = %s" % test_files)
 assert len(test_files) > 0 and len(train_files) > 0, 'test = %s, train = %s' % (len(test_files), len(train_files))
 
-# sample from the test and train files if necessary3
+# sample from the test and train files if necessary
 if sample < 1.0:
     sample_size = int(len(train_files) * sample)
     train_files = random.sample(train_files, sample_size)
@@ -297,12 +288,25 @@ if sample < 1.0:
 
 assert len(test_files) > 0 and len(train_files) > 0
 
+# reset size of mini-batch based on the number of test files
+MINI_BATCH_SIZE = min(MINI_BATCH_SIZE, len(test_files))
+
 if BALANCE_CLASSES:
     # balance the classes for training
     train_files = balance_classes(train_files)
 
 random.shuffle(train_files)
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
+
+# open the log file
+run_log_file = 'runs/%s.log' % run_name
+run_log_fd = open(run_log_file, 'w', buffering=1)
+run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
+run_log_fd.write("HYPER PARAMETERS:\n")
+run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nDATA_SHUFFLE_MULTIPLIER = %s\n" % 
+                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, DATA_SHUFFLE_MULTIPLIER))
+run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
+run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS_STDDEV = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS_STDDEV))
 run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
 # Tensorflow configuration
@@ -465,10 +469,17 @@ with tf.Session(config=config) as sess:
                     mini_batch_acc = 0.0
                     mini_batch_hit5 = 0.0
                     for k in range(MINI_BATCH_SIZE):
-                        acc, hit_5_out, top_5_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5])
-                        mini_batch_acc += acc
-                        if hit_5_out[0]:
-                            mini_batch_hit5 += 1.0
+                        try:
+                            acc, hit_5_out, top_5_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5])
+                            mini_batch_acc += acc
+                            if hit_5_out[0]:
+                                mini_batch_hit5 += 1.0
+                        except tf.errors.OutOfRangeError:
+                            # if out of data, just reinitialize the iterator
+                            if VALIDATE_WITH_TRAIN:
+                                sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
+                            else:
+                                sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
                     mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
                     mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
                     
