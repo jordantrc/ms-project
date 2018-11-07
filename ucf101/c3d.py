@@ -3,8 +3,8 @@ import tensorflow as tf
 
 # t = number of frames, h = height, w = width, c = number of channels
 INPUT_DATA_SIZE = {"t": 250, "h": 112, "w": 112, "c": 3}
-WEIGHT_STDDEV = 0.04
-BIAS_STDDEV = 0.04
+WEIGHT_STDDEV = 0.1
+BIAS = 0.1
 
 
 def get_input_placeholder(batch_size):
@@ -35,6 +35,10 @@ def get_variables(num_classes):
         initial = tf.truncated_normal_initializer(stddev=stddev)
         return tf.get_variable(name, shape, initializer=initial)
 
+    def bias_variable(name, shape, val):
+        initial = tf.constant(val, name=name, shape=shape)
+        return tf.Variable(initial)
+
     with tf.variable_scope('var_name') as var_scope:
         weights = {
             'wc1': weight_variable('wc1', [3, 3, 3, 3, 64], WEIGHT_STDDEV),
@@ -50,17 +54,17 @@ def get_variables(num_classes):
             'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
         }
         biases = {
-            'bc1': weight_variable('bc1', [64], BIAS_STDDEV),
-            'bc2': weight_variable('bc2', [128], BIAS_STDDEV),
-            'bc3a': weight_variable('bc3a', [256], BIAS_STDDEV),
-            'bc3b': weight_variable('bc3b', [256], BIAS_STDDEV),
-            'bc4a': weight_variable('bc4a', [512], BIAS_STDDEV),
-            'bc4b': weight_variable('bc4b', [512], BIAS_STDDEV),
-            'bc5a': weight_variable('bc5a', [512], BIAS_STDDEV),
-            'bc5b': weight_variable('bc5b', [512], BIAS_STDDEV),
-            'bd1': weight_variable('bd1', [4096], BIAS_STDDEV),
-            'bd2': weight_variable('bd2', [4096], BIAS_STDDEV),
-            'out': weight_variable('bdout', [num_classes], BIAS_STDDEV),
+            'bc1': bias_variable('bc1', [64], BIAS),
+            'bc2': bias_variable('bc2', [128], BIAS),
+            'bc3a': bias_variable('bc3a', [256], BIAS),
+            'bc3b': bias_variable('bc3b', [256], BIAS),
+            'bc4a': bias_variable('bc4a', [512], BIAS),
+            'bc4b': bias_variable('bc4b', [512], BIAS),
+            'bc5a': bias_variable('bc5a', [512], BIAS),
+            'bc5b': bias_variable('bc5b', [512], BIAS),
+            'bd1': bias_variable('bd1', [4096], BIAS),
+            'bd2': bias_variable('bd2', [4096], BIAS),
+            'out': bias_variable('bdout', [num_classes], BIAS),
         }
     return weights, biases
 

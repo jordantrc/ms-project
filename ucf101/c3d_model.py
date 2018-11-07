@@ -12,6 +12,7 @@ import c3d
 NUM_CLASSES = 101
 FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
+BATCH_SIZE = 1
 
 class C3DModel():
 
@@ -23,7 +24,7 @@ class C3DModel():
                  dropout=0.5,
                  frames_per_video=FRAMES_PER_VIDEO,
                  frames_per_clip=FRAMES_PER_CLIP,
-                 batch_size=1,
+                 batch_size=BATCH_SIZE,
                  learning_rate=1e-3):
         '''initializes the object'''
         self.num_classes = num_classes
@@ -125,9 +126,12 @@ class C3DModel():
     def max_pool(self, name, l_input, k):
         return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME')
 
-    def inference_3d(self, _X, _weights, _biases):
+    def inference_3d(self, _X, _weights, _biases, train):
 
-        print("_X = %s" % _X)
+        if train:
+            dropout = self.dropout
+        else:
+            dropout = 1.0
 
         # Convolution layer
         conv1 = self.conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
@@ -163,17 +167,53 @@ class C3DModel():
         # Fully connected layer
         pool5 = tf.transpose(pool5, perm=[0, 1, 4, 2, 3])
         # Reshape conv3 output to fit dense layer input
-        print("pool5 = %s, shape = %s" % (pool5, pool5.get_shape().as_list()))
+        # print("pool5 = %s, shape = %s" % (pool5, pool5.get_shape().as_list()))
         dense1 = tf.reshape(pool5, [self.batch_size, _weights['wd1'].get_shape().as_list()[0]])
         dense1 = tf.matmul(dense1, _weights['wd1']) + _biases['bd1']
 
         dense1 = tf.nn.relu(dense1, name='fc1')  # Relu activation
-        dense1 = tf.nn.dropout(dense1, self.dropout)
+        dense1 = tf.nn.dropout(dense1, dropout)
 
         dense2 = tf.nn.relu(tf.matmul(dense1, _weights['wd2']) + _biases['bd2'], name='fc2')  # Relu activation
-        dense2 = tf.nn.dropout(dense2, self.dropout)
+        dense2 = tf.nn.dropout(dense2, dropout)
 
         # Output: class prediction
         out = tf.matmul(dense2, _weights['out']) + _biases['out']
 
         return out
+
+    def c3d(self, _X, training):
+        '''based on https://github.com/tqvinhcs/C3D-tensorflow/blob/master/m_c3d.py'''
+
+        net = tf.layers.conv3d(inputs=_X, filters=64, kernel_size=3, padding='SAME', activation=tf.nn.relu)
+        net = tf.layers.max_pooling3d(inputs=net, pool_size=(1, 2, 2), strides=(1, 2, 2), padding='SAME')
+
+        net = tf.layers.conv3d(inputs=net, filters=128, kernel_size=3, padding='SAME', activation=tf.nn.relu)
+        net = tf.layers.max_pooling3d(inputs=net, pool_size=2, strides=2, padding='SAME')
+
+        net = tf.layers.conv3d(inputs=net, filters=256, kernel_size=3, padding='SAME', activation=tf.nn.relu)
+        net = tf.layers.conv3d(inputs=net, filters=256, kernel_size=3, padding='SAME', activation=tf.nn.relu)
+        net = tf.layers.max_pooling3d(inputs=net, pool_size=2, strides=2, padding='SAME')
+
+        net = tf.layers.conv3d(inputs=net, filters=512, kernel_size=3, padding='SAME', activation=tf.nn.relu)
+        net = tf.layers.conv3d(inputs=net, filters=512, kernel_size=3, padding='SAME', activation=tf.nn.relu)
+        net = tf.layers.max_pooling3d(inputs=net, pool_size=2, strides=2, padding='SAME')
+        net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [1, 1], [0, 0]])  
+
+        net = tf.layers.conv3d(inputs=net, filters=512, kernel_size=3, activation=tf.nn.relu, padding='VALID')
+        net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [1, 1], [0, 0]])  
+        net = tf.layers.conv3d(inputs=net, filters=512, kernel_size=3, activation=tf.nn.relu, padding='VALID')
+        net = tf.layers.max_pooling3d(inputs=net, pool_size=2, strides=2, padding='SAME')
+
+        net = tf.layers.flatten(net)
+        net = tf.layers.dense(inputs=net, units=4096, activation=tf.nn.relu)
+        net = tf.identity(net, name='fc1')
+        net = tf.layers.dropout(inputs=net, rate=self.dropout, training=training)
+
+        net = tf.layers.dense(inputs=net, units=4096, activation=tf.nn.relu)
+        net = tf.identity(net, name='fc2')
+        net = tf.layers.dropout(inputs=net, rate=self.dropout, training=training)
+
+        net = tf.layers.dense(inputs=net, units=self.num_classes, activation=None)
+        net = tf.identity(net, name='logits')
+        return net
