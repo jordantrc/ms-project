@@ -321,7 +321,7 @@ run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_fi
 config = tf.ConfigProto(allow_soft_placement=True)
 
 with tf.Session(config=config) as sess:
-    sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+    #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
     # init variables
     # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
@@ -486,7 +486,8 @@ with tf.Session(config=config) as sess:
                     mini_batch_hit5 = 0.0
                     for k in range(MINI_BATCH_SIZE):
                         try:
-                            acc, hit_5_out, top_5_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5])
+                            acc, hit_5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x])
+                            print("x = %s" % x_out)
                             mini_batch_acc += acc
                             if hit_5_out[0]:
                                 mini_batch_hit5 += 1.0
