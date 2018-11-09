@@ -41,7 +41,13 @@ def get_variables(num_classes, var_type="default"):
         initial = tf.constant(val, name=name, shape=shape)
         return tf.Variable(initial)
 
+    def _variable_on_cpu(name, shape, initializer):
+        with tf.device('/cpu:0'):
+            var = tf.get_variable(name, shape, initializer=initializer)
+        return var
+
     def _variable_with_weight_decay(name, shape, wd):
+        '''taken from https://github.com/hx173149/C3D-tensorflow/blob/master/train_c3d_ucf101.py'''
         var = _variable_on_cpu(name, shape, tf.contrib.layers.xavier_initializer())
         if wd is not None:
             weight_decay = tf.nn.l2_loss(var)*wd
