@@ -5,6 +5,8 @@ import tensorflow as tf
 INPUT_DATA_SIZE = {"t": 250, "h": 112, "w": 112, "c": 3}
 WEIGHT_STDDEV = 0.1
 BIAS = 0.1
+WEIGHT_DECAY = 0.0005
+BIAS_DECAY = 0.0
 
 
 def get_input_placeholder(batch_size):
@@ -25,7 +27,7 @@ def get_output_placeholder(batch_size):
                           name="c3d_label_ph")
 
 
-def get_variables(num_classes):
+def get_variables(num_classes, var_type="default"):
     '''Define all of the variables for the convolutional layers of the C3D model.
     We ommit the FC layers as these layers are used to perform reasoning and do
     not contain feature information '''
@@ -39,33 +41,72 @@ def get_variables(num_classes):
         initial = tf.constant(val, name=name, shape=shape)
         return tf.Variable(initial)
 
-    with tf.variable_scope('var_name') as var_scope:
-        weights = {
-            'wc1': weight_variable('wc1', [3, 3, 3, 3, 64], WEIGHT_STDDEV),
-            'wc2': weight_variable('wc2', [3, 3, 3, 64, 128], WEIGHT_STDDEV),
-            'wc3a': weight_variable('wc3a', [3, 3, 3, 128, 256], WEIGHT_STDDEV),
-            'wc3b': weight_variable('wc3b', [3, 3, 3, 256, 256], WEIGHT_STDDEV),
-            'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512], WEIGHT_STDDEV),
-            'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
-            'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
-            'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
-            'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
-            'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
-            'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
-        }
-        biases = {
-            'bc1': bias_variable('bc1', [64], BIAS),
-            'bc2': bias_variable('bc2', [128], BIAS),
-            'bc3a': bias_variable('bc3a', [256], BIAS),
-            'bc3b': bias_variable('bc3b', [256], BIAS),
-            'bc4a': bias_variable('bc4a', [512], BIAS),
-            'bc4b': bias_variable('bc4b', [512], BIAS),
-            'bc5a': bias_variable('bc5a', [512], BIAS),
-            'bc5b': bias_variable('bc5b', [512], BIAS),
-            'bd1': bias_variable('bd1', [4096], BIAS),
-            'bd2': bias_variable('bd2', [4096], BIAS),
-            'out': bias_variable('bdout', [num_classes], BIAS),
-        }
+    def _variable_with_weight_decay(name, shape, wd):
+        var = _variable_on_cpu(name, shape, tf.contrib.layers.xavier_initializer())
+        if wd is not None:
+            weight_decay = tf.nn.l2_loss(var)*wd
+            tf.add_to_collection('weightdecay_losses', weight_decay)
+        return var
+
+    weights = None
+    biases = None
+    if var_type == "default":
+        with tf.variable_scope('var_name') as var_scope:
+            weights = {
+                'wc1': weight_variable('wc1', [3, 3, 3, 3, 64], WEIGHT_STDDEV),
+                'wc2': weight_variable('wc2', [3, 3, 3, 64, 128], WEIGHT_STDDEV),
+                'wc3a': weight_variable('wc3a', [3, 3, 3, 128, 256], WEIGHT_STDDEV),
+                'wc3b': weight_variable('wc3b', [3, 3, 3, 256, 256], WEIGHT_STDDEV),
+                'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512], WEIGHT_STDDEV),
+                'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+                'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+                'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+                'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
+                'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
+                'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
+            }
+            biases = {
+                'bc1': bias_variable('bc1', [64], BIAS),
+                'bc2': bias_variable('bc2', [128], BIAS),
+                'bc3a': bias_variable('bc3a', [256], BIAS),
+                'bc3b': bias_variable('bc3b', [256], BIAS),
+                'bc4a': bias_variable('bc4a', [512], BIAS),
+                'bc4b': bias_variable('bc4b', [512], BIAS),
+                'bc5a': bias_variable('bc5a', [512], BIAS),
+                'bc5b': bias_variable('bc5b', [512], BIAS),
+                'bd1': bias_variable('bd1', [4096], BIAS),
+                'bd2': bias_variable('bd2', [4096], BIAS),
+                'out': bias_variable('bdout', [num_classes], BIAS),
+            }
+
+    elif var_type == "weight decay":
+        with tf.variable_scope('var_name') as var_scope:
+            weights = {
+                'wc1': _variable_with_weight_decay('wc1', [3, 3, 3, 3, 64], WEIGHT_DECAY),
+                'wc2': _variable_with_weight_decay('wc2', [3, 3, 3, 64, 128], WEIGHT_DECAY),
+                'wc3a': _variable_with_weight_decay('wc3a', [3, 3, 3, 128, 256], WEIGHT_DECAY),
+                'wc3b': _variable_with_weight_decay('wc3b', [3, 3, 3, 256, 256], WEIGHT_DECAY),
+                'wc4a': _variable_with_weight_decay('wc4a', [3, 3, 3, 256, 512], WEIGHT_DECAY),
+                'wc4b': _variable_with_weight_decay('wc4b', [3, 3, 3, 512, 512], WEIGHT_DECAY),
+                'wc5a': _variable_with_weight_decay('wc5a', [3, 3, 3, 512, 512], WEIGHT_DECAY),
+                'wc5b': _variable_with_weight_decay('wc5b', [3, 3, 3, 512, 512], WEIGHT_DECAY),
+                'wd1': _variable_with_weight_decay('wd1', [8192, 4096], WEIGHT_DECAY),
+                'wd2': _variable_with_weight_decay('wd2', [4096, 4096], WEIGHT_DECAY),
+                'out': _variable_with_weight_decay('wdout', [4096, num_classes], WEIGHT_DECAY),
+            }
+            biases = {
+                'bc1': _variable_with_weight_decay('bc1', [64], BIAS_DECAY),
+                'bc2': _variable_with_weight_decay('bc2', [128], BIAS_DECAY),
+                'bc3a': _variable_with_weight_decay('bc3a', [256], BIAS_DECAY),
+                'bc3b': _variable_with_weight_decay('bc3b', [256], BIAS_DECAY),
+                'bc4a': _variable_with_weight_decay('bc4a', [512], BIAS_DECAY),
+                'bc4b': _variable_with_weight_decay('bc4b', [512], BIAS_DECAY),
+                'bc5a': _variable_with_weight_decay('bc5a', [512], BIAS_DECAY),
+                'bc5b': _variable_with_weight_decay('bc5b', [512], BIAS_DECAY),
+                'bd1': _variable_with_weight_decay('bd1', [4096], BIAS_DECAY),
+                'bd2': _variable_with_weight_decay('bd2', [4096], BIAS_DECAY),
+                'out': _variable_with_weight_decay('bdout', [num_classes], BIAS_DECAY),
+            }
     return weights, biases
 
 
