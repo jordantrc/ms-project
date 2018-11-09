@@ -487,7 +487,7 @@ with tf.Session(config=config) as sess:
                     for k in range(MINI_BATCH_SIZE):
                         try:
                             acc, hit_5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x])
-                            print("x = %s" % x_out)
+                            print("type(x) = %s, x = %s" % (type(x_out), x_out))
                             mini_batch_acc += acc
                             if hit_5_out[0]:
                                 mini_batch_hit5 += 1.0
