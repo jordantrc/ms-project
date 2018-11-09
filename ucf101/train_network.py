@@ -15,6 +15,7 @@ import random
 import itertools
 import numpy as np
 import matplotlib
+from tensorflow.python import debug as tf_debug
 
 matplotlib.use('Agg')
 
@@ -29,7 +30,7 @@ TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
 TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
-DATA_SHUFFLE_MULTIPLIER = 0.05
+SHUFFLE_SIZE = 1000
 
 def print_help():
     '''prints a help message'''
@@ -149,7 +150,7 @@ def plot_confusion_matrix(cm, classes, filename,
     else:
         print('Confusion matrix, without normalization')
 
-    numpy.set_printoptions(threshold='nan')
+    # np.set_printoptions(threshold='nan')
     print(cm)
 
     thresh = cm.max() * 0.73
@@ -221,34 +222,31 @@ def test_network(sess, test_files, run_name, epoch):
 class_names = get_class_list(CLASS_INDEX_FILE)
 all_classes = True
 
-if len(sys.argv) != 6:
-    print_help()
-    sys.exit(1)
+# argument collection
+run_name = sys.argv[1]
+sample = float(sys.argv[2])
+included_classes = sys.argv[3]
+model_dir = sys.argv[4]
+tfrecord_dir = sys.argv[5]
+
+if ',' in included_classes:
+    all_classes = False
+    included_classes = [x.strip() for x in sys.argv[3].split(',')]
+    for c in included_classes:
+        assert c in class_names, "%s is not a valid class" % c
+
+elif included_classes.isdigit():
+    all_classes = False
+    included_classes = random.sample(class_names, int(included_classes))
+
+elif included_classes == "all":
+    all_classes = True
+
 else:
-    run_name = sys.argv[1]
-    sample = float(sys.argv[2])
-    included_classes = sys.argv[3]
-    model_dir = sys.argv[4]
-    tfrecord_dir = sys.argv[5]
+    print("Invalid value for class inclusion [%s]" % included_classes)
+    sys.exit(1)
 
-    if ',' in included_classes:
-        all_classes = False
-        included_classes = [x.strip() for x in sys.argv[3].split(',')]
-        for c in included_classes:
-            assert c in class_names, "%s is not a valid class" % c
-
-    elif included_classes.isdigit():
-        all_classes = False
-        included_classes = random.sample(class_names, int(included_classes))
-
-    elif included_classes == "all":
-        all_classes = True
-
-    else:
-        print("Invalid value for class inclusion [%s]" % included_classes)
-        sys.exit(1)
-    
-    print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
+print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
 
 # create the model object
 model = C3DModel(model_dir=model_dir,tfrecord_dir=tfrecord_dir)
@@ -299,6 +297,7 @@ assert len(test_files) > 0 and len(train_files) > 0
 
 # reset size of mini-batch based on the number of test files
 MINI_BATCH_SIZE = min(MINI_BATCH_SIZE, len(test_files))
+SHUFFLE_SIZE = min(SHUFFLE_SIZE, int(len(train_files) * 0.05))
 
 if BALANCE_CLASSES:
     # balance the classes for training
@@ -312,8 +311,8 @@ run_log_file = 'runs/%s.log' % run_name
 run_log_fd = open(run_log_file, 'w', buffering=1)
 run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
 run_log_fd.write("HYPER PARAMETERS:\n")
-run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nDATA_SHUFFLE_MULTIPLIER = %s\n" % 
-                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, DATA_SHUFFLE_MULTIPLIER))
+run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nSHUFFLE_SIZE = %s\n" % 
+                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, SHUFFLE_SIZE))
 run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
 run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS))
 run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
@@ -322,7 +321,7 @@ run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_fi
 config = tf.ConfigProto(allow_soft_placement=True)
 
 with tf.Session(config=config) as sess:
-
+    sess = tf_debug.LocalCLIDebugWrapperSession(sess)
     # init variables
     # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
@@ -348,7 +347,7 @@ with tf.Session(config=config) as sess:
 
     # using tf.data.TFRecordDataset iterator
     train_dataset = tf.data.TFRecordDataset(train_filenames)
-    train_dataset = train_dataset.shuffle(int(len(train_files) * DATA_SHUFFLE_MULTIPLIER), reshuffle_each_iteration=True)
+    train_dataset = train_dataset.shuffle(SHUFFLE_SIZE, reshuffle_each_iteration=True)
     train_dataset = train_dataset.map(model._parse_function)
     train_dataset = train_dataset.repeat(NUM_EPOCHS)
     train_dataset = train_dataset.batch(model.batch_size)
