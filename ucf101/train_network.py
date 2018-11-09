@@ -31,6 +31,7 @@ TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
+VARIABLE_TYPE = 'weight decay'
 
 def print_help():
     '''prints a help message'''
@@ -315,6 +316,8 @@ run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_
                 (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, SHUFFLE_SIZE))
 run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
 run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS))
+run_log_fd.write("WEIGHT_DECAY = %s\nBIAS_DECAY = %s\n" % (c3d.WEIGHT_DECAY, c3d.BIAS_DECAY))
+run_log_fd.write("VARIABLE_TYPE = %s\n" % (VARIABLE_TYPE))
 run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
 # Tensorflow configuration
@@ -326,7 +329,10 @@ with tf.Session(config=config) as sess:
     # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-    weights, biases = c3d.get_variables(model.num_classes, var_type="weight decay")
+    if VARIABLE_TYPE == 'default':
+        weights, biases = c3d.get_variables(model.num_classes)
+    elif VARIABLE_TYPE == 'weight decay':
+        weights, biases = c3d.get_variables(model.num_classes, var_type="weight decay")
 
     # placeholders and constants
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
