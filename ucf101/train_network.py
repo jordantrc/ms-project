@@ -485,11 +485,11 @@ with tf.Session(config=config) as sess:
 
             # report out results and run a test mini-batch every now and then
             if j != 0 and j % report_step == 0:
-                print("logits = %s" % logits_out)
-                print("x = %s" % x_actual)
-                print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
-                print("train_acc = %s" % train_acc)
-                print("hit_5_out = %s, type = %s, hit_5_out[0] = %s, type = %s" % (hit_5_out, type(hit_5_out), hit_5_out[0], type(hit_5_out[0])))
+                #print("logits = %s" % logits_out)
+                #print("x = %s" % x_actual)
+                #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
+                #print("train_acc = %s" % train_acc)
+                #print("hit_5_out = %s, type = %s, hit_5_out[0] = %s, type = %s" % (hit_5_out, type(hit_5_out), hit_5_out[0], type(hit_5_out[0])))
                 run_time = time.time()
                 run_time_str = str(datetime.timedelta(seconds=run_time - start))
                 train_step_acc = train_acc_accum / report_step
