@@ -105,7 +105,6 @@ class C3DModel():
             frame = tf.reshape(frame, [1, 112, 112, 3])
             # normalization
             # frame = tf.cast(frame, tf.float32) * (1.0 / 255.0) - 0.5
-            frame = tf.cast(frame, tf.float32) * (2.0 / 255.0) - 1.0
             images.append(frame)
 
         # pack the individual frames into a tensor
