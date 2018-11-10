@@ -99,7 +99,9 @@ class C3DModel():
         for i in range(self.frames_per_clip):
             # frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
             frame = tf.decode_raw(parsed_features['frames/{:04d}'.format(i)], tf.uint8)
+            # normalize the frame
             frame = tf.reshape(frame, tf.stack([112, 112, 3]))
+            frame = tf.image.per_image_standardization(frame)
             frame = tf.reshape(frame, [1, 112, 112, 3])
             # normalization
             # frame = tf.cast(frame, tf.float32) * (1.0 / 255.0) - 0.5

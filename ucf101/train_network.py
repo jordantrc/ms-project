@@ -399,9 +399,9 @@ with tf.Session(config=config) as sess:
     # loss and optimizer
     # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
     loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class, name="softmax"), name="reduce_mean")
-    learning_rate = tf.train.exponential_decay(learning_rate=model.learning_rate, global_step=global_step, 
-                                               decay_steps=(4 * len(train_files)), decay_rate=0.96,
-                                               staircase=True)
+    #learning_rate = tf.train.exponential_decay(learning_rate=model.learning_rate, global_step=global_step, 
+    #                                           decay_steps=(4 * len(train_files)), decay_rate=0.96,
+    #                                           staircase=True)
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     #optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
     train_op = optimizer.minimize(loss_op, name="train")
@@ -455,9 +455,9 @@ with tf.Session(config=config) as sess:
 
             in_epoch += 1
 
-            #if in_epoch % 4 == 0:
-            #    model.current_learning_rate = model.current_learning_rate / 10
-            #    print("learning rate adjusted to %g" % model.current_learning_rate)
+            if in_epoch % 4 == 0:
+                model.current_learning_rate = model.current_learning_rate / 10
+                print("learning rate adjusted to %g" % model.current_learning_rate)
 
             print("START EPOCH %s" % in_epoch)
             start = time.time()
