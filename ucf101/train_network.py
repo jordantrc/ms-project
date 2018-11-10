@@ -32,7 +32,7 @@ TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
-VARIABLE_TYPE = 'weight decay'
+VARIABLE_TYPE = 'default'
 
 def print_help():
     '''prints a help message'''
