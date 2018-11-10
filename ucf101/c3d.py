@@ -50,7 +50,7 @@ def get_variables(num_classes, var_type="default"):
         '''taken from https://github.com/hx173149/C3D-tensorflow/blob/master/train_c3d_ucf101.py'''
         var = _variable_on_cpu(name, shape, tf.contrib.layers.xavier_initializer())
         if wd is not None:
-            weight_decay = tf.nn.l2_loss(var)*wd
+            weight_decay = tf.nn.l2_loss(var) * wd
             tf.add_to_collection('weightdecay_losses', weight_decay)
         return var
 

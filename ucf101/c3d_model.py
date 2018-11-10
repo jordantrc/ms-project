@@ -12,7 +12,6 @@ import c3d
 NUM_CLASSES = 101
 FRAMES_PER_VIDEO = 250
 FRAMES_PER_CLIP = 16
-BATCH_SIZE = 1
 
 class C3DModel():
 
@@ -24,7 +23,6 @@ class C3DModel():
                  dropout=0.5,
                  frames_per_video=FRAMES_PER_VIDEO,
                  frames_per_clip=FRAMES_PER_CLIP,
-                 batch_size=BATCH_SIZE,
                  learning_rate=1e-3):
         '''initializes the object'''
         self.num_classes = num_classes
@@ -33,7 +31,6 @@ class C3DModel():
         self.dropout = dropout
         self.frames_per_video = frames_per_video
         self.frames_per_clip = frames_per_clip
-        self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.current_learning_rate = learning_rate
 
@@ -105,7 +102,8 @@ class C3DModel():
             frame = tf.reshape(frame, tf.stack([112, 112, 3]))
             frame = tf.reshape(frame, [1, 112, 112, 3])
             # normalization
-            frame = tf.cast(frame, tf.float32) * (1. / 255.) - 0.5
+            # frame = tf.cast(frame, tf.float32) * (1.0 / 255.0) - 0.5
+            frame = tf.cast(frame, tf.float32) * (2.0 / 255.0) - 1.0
             images.append(frame)
 
         # pack the individual frames into a tensor
@@ -126,7 +124,7 @@ class C3DModel():
     def max_pool(self, name, l_input, k):
         return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME')
 
-    def inference_3d(self, _X, _weights, _biases, train):
+    def inference_3d(self, _X, _weights, _biases, batch_size, train):
 
         if train:
             dropout = self.dropout
@@ -168,7 +166,7 @@ class C3DModel():
         pool5 = tf.transpose(pool5, perm=[0, 1, 4, 2, 3])
         # Reshape conv3 output to fit dense layer input
         # print("pool5 = %s, shape = %s" % (pool5, pool5.get_shape().as_list()))
-        dense1 = tf.reshape(pool5, [self.batch_size, _weights['wd1'].get_shape().as_list()[0]])
+        dense1 = tf.reshape(pool5, [batch_size, _weights['wd1'].get_shape().as_list()[0]])
         dense1 = tf.matmul(dense1, _weights['wd1']) + _biases['bd1']
 
         dense1 = tf.nn.relu(dense1, name='fc1')  # Relu activation

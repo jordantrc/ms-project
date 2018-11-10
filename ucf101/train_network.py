@@ -26,6 +26,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 NUM_EPOCHS = 16
 MINI_BATCH_SIZE = 50
+BATCH_SIZE = 10
 TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
 TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
@@ -305,7 +306,12 @@ if BALANCE_CLASSES:
     train_files = balance_classes(train_files)
 
 random.shuffle(train_files)
+# throw out samples to fit the batch size
+num_samples_batch_fit = len(train_files) - (len(train_files) % BATCH_SIZE)
+train_files = random.sample(train_files, num_samples_batch_fit)
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
+
+
 
 # open the log file
 run_log_file = 'runs/%s.log' % run_name
@@ -314,6 +320,7 @@ run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_na
 run_log_fd.write("HYPER PARAMETERS:\n")
 run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nSHUFFLE_SIZE = %s\n" % 
                 (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, SHUFFLE_SIZE))
+print("BATCH_SIZE = %s" % (BATCH_SIZE))
 run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
 run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS))
 run_log_fd.write("WEIGHT_DECAY = %s\nBIAS_DECAY = %s\n" % (c3d.WEIGHT_DECAY, c3d.BIAS_DECAY))
@@ -347,7 +354,7 @@ with tf.Session(config=config) as sess:
     test_dataset = tf.data.TFRecordDataset(test_filenames)
     test_dataset = test_dataset.map(model._parse_function)
     test_dataset = test_dataset.repeat(1)
-    test_dataset = test_dataset.batch(model.batch_size)
+    test_dataset = test_dataset.batch(1)
     test_iterator = test_dataset.make_initializable_iterator()
     x_test, y_true_test = test_iterator.get_next()
 
@@ -356,7 +363,7 @@ with tf.Session(config=config) as sess:
     train_dataset = train_dataset.shuffle(SHUFFLE_SIZE, reshuffle_each_iteration=True)
     train_dataset = train_dataset.map(model._parse_function)
     train_dataset = train_dataset.repeat(NUM_EPOCHS)
-    train_dataset = train_dataset.batch(model.batch_size)
+    train_dataset = train_dataset.batch(BATCH_SIZE)
     train_iterator = train_dataset.make_initializable_iterator()
     x, y_true = train_iterator.get_next()
 
@@ -366,8 +373,8 @@ with tf.Session(config=config) as sess:
     # print("reshaping x")
     # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
     # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    x = tf.reshape(x, [model.batch_size, model.frames_per_clip, 112, 112, 3])
-    x_test = tf.reshape(x_test, [model.batch_size, model.frames_per_clip, 112, 112, 3])
+    x = tf.reshape(x, [BATCH_SIZE, model.frames_per_clip, 112, 112, 3])
+    x_test = tf.reshape(x_test, [1, model.frames_per_clip, 112, 112, 3])
 
     # generate clips for each video in the batch
     # x = model._clip_image_batch(x, model.frames_per_clip, True)
@@ -379,7 +386,7 @@ with tf.Session(config=config) as sess:
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
 
-    logits = model.inference_3d(x, weights, biases, True)
+    logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
     # logits = model.c3d(x, training=True)
 
     y_pred = tf.nn.softmax(logits)
@@ -401,7 +408,7 @@ with tf.Session(config=config) as sess:
 
     # model evaluation
     # logits_test = model.c3d(x_test, training=False)
-    logits_test = model.inference_3d(x_test, weights, biases, False)
+    logits_test = model.inference_3d(x_test, weights, biases, 1, False)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
