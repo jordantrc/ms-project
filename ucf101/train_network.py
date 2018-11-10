@@ -532,7 +532,7 @@ with tf.Session(config=config) as sess:
                 train_acc_accum = 0.0
                 train_hit5_accum = 0.0
 
-            j += 1
+            j += BATCH_SIZE
         except tf.errors.OutOfRangeError:
             print("Out of range error")
             break
