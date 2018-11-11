@@ -38,6 +38,19 @@ def print_help():
     '''prints a help message'''
     print("Usage:\ntrain_network.py <run name> <sample size as decimal percentage> <classes to include> <model save dir> <tfrecord directory>")
 
+def print_class_counts(file_list):
+    '''prints the class counts in the file list'''
+    class_counts = {}
+    for f in file_list:
+        class_name = os.path.basename().split('_')[1]
+        if class_name in class_counts:
+            class_counts[class_name] += 1
+        else:
+            class_counts[class_name] = 1
+
+    for k in sort(class_counts.keys()):
+        print("%s = %s" % (k, class_counts[k]))
+
 
 def file_split(list_file, directory):
     '''returns the absolute path to the samples given train-test split file and root directory'''
@@ -272,7 +285,7 @@ if not all_classes:
     train_files_filtered = []
     test_files_filtered = []
     for c in included_classes:
-        print("c = %s" % c)
+        # print("c = %s" % c)
         for t in train_files:
             if c in t:
                 train_files_filtered.append(t)
@@ -312,6 +325,10 @@ random.shuffle(train_files)
 num_samples_batch_fit = len(train_files) - (len(train_files) % BATCH_SIZE)
 train_files = random.sample(train_files, num_samples_batch_fit)
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
+print("Training class counts:")
+print_class_counts(train_files)
+print("Test class counts:")
+print_class_counts(test_files)
 
 # open the log file
 run_log_file = 'runs/%s.log' % run_name
