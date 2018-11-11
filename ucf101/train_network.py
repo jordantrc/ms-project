@@ -457,7 +457,7 @@ with tf.Session(config=config) as sess:
     j = 0
     train_acc_accum = 0.0
     train_hit5_accum = 0.0
-    while True:
+    while True and in_epoch <= NUM_EPOCHS:
         if j != 0 and j % (len(train_files) / BATCH_SIZE) == 0 :
             # end of epoch
             # save a model checkpoint and report end of epoch information
