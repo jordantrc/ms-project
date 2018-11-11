@@ -191,7 +191,7 @@ def test_network(sess, test_files, run_name, epoch):
     '''tests the neural network'''
     sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
     k = 0
-    report_interval = int(len(test_files) / 100)
+    report_interval = max(1, int(len(test_files) / 100))
     cumulative_accuracy = 0.0
     cumulative_hit_at_5 = 0.0
     predictions = []
@@ -532,19 +532,21 @@ with tf.Session(config=config) as sess:
                     mini_batch_hit5 = 0.0
                     for k in range(MINI_BATCH_SIZE):
                         try:
-                            acc, hit_5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x])
+                            acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x])
                             # print("type(x) = %s, x = %s" % (type(x_out), x_out))
                             mini_batch_acc += acc
-                            hit5_counter = collections.Counter(hit_5_out)
+                            hit5_counter = collections.Counter(hit5_out)
                             hit5_out_trues = hit5_counter[True]
                             # print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
-                            train_hit5_accum += float(hit_5_out_trues / len(hit_5_out))
+                            train_hit5_accum += float(hit5_out_trues / len(hit5_out))
+                        
                         except tf.errors.OutOfRangeError:
-                            # if out of data, just reinitialize the iterator
+                            # if out of data, reinitialize the iterator
                             if VALIDATE_WITH_TRAIN:
                                 sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
                             else:
                                 sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
+
                     mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
                     mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
                     
