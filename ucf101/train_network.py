@@ -48,7 +48,9 @@ def print_class_counts(file_list):
         else:
             class_counts[class_name] = 1
 
-    for k in class_counts.keys().sort():
+    keys = list(class_counts.keys())
+    keys.sort()
+    for k in keys:
         print("%s = %s" % (k, class_counts[k]))
 
 
