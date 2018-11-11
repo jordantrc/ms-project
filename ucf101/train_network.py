@@ -190,6 +190,7 @@ def test_network(sess, test_files, run_name, epoch):
     '''tests the neural network'''
     sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
     k = 0
+    report_interval = int(len(test_files) / 100)
     cumulative_accuracy = 0.0
     cumulative_hit_at_5 = 0.0
     predictions = []
@@ -205,14 +206,16 @@ def test_network(sess, test_files, run_name, epoch):
             hit_5_actual = test_results[4]
             top_5_actual = test_results[5]
             logits_test_out = test_results[6]
-            print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s, hit@5 = %s, top 5 = %s" %
-                                                                            (k,
-                                                                             correct_pred_actual, 
-                                                                             y_pred_class_actual,
-                                                                             y_true_class_actual,
-                                                                             acc,
-                                                                             hit_5_actual,
-                                                                             top_5_actual))
+            if k % report_interval == 0:
+                print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s, hit@5 = %s, top 5 = %s, cum. accuracy = %s" %
+                                                                                (k,
+                                                                                 correct_pred_actual, 
+                                                                                 y_pred_class_actual,
+                                                                                 y_true_class_actual,
+                                                                                 acc,
+                                                                                 hit_5_actual,
+                                                                                 top_5_actual,
+                                                                                 cumulative_accuracy / k))
 
             # add to accumulations
             if hit_5_actual[0]:
@@ -442,7 +445,7 @@ with tf.Session(config=config) as sess:
     sess.run(init_op)
 
     # TRAINING
-    report_step = min(200, int(len(train_files) * 0.05))
+    report_step = min(20, int(len(train_files) * 0.05))
     print("Beginning training epochs, reporting every %s, mini-test batch every %s samples" % (report_step, report_step * 5))
 
     in_epoch = 1
