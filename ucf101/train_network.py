@@ -262,7 +262,7 @@ if sys.version_info[0] == 3:
 else:
     run_csv_fd = open(run_csv_file, 'wb', buffering=0)
 run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
-run_csv_writer.writerow(['test_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
+run_csv_writer.writerow(['step_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
 
 # get the list of files for train and test
 train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir)
@@ -312,8 +312,6 @@ random.shuffle(train_files)
 num_samples_batch_fit = len(train_files) - (len(train_files) % BATCH_SIZE)
 train_files = random.sample(train_files, num_samples_batch_fit)
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
-
-
 
 # open the log file
 run_log_file = 'runs/%s.log' % run_name
@@ -441,7 +439,7 @@ with tf.Session(config=config) as sess:
     train_acc_accum = 0.0
     train_hit5_accum = 0.0
     while True:
-        if j != 0 and j % len(train_files) == 0 :
+        if j != 0 and j % (len(train_files) / BATCH_SIZE) == 0 :
             # end of epoch
             # save a model checkpoint and report end of epoch information
             save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
@@ -486,7 +484,7 @@ with tf.Session(config=config) as sess:
                 train_hit5_accum += 1.0
 
             # report out results and run a test mini-batch every now and then
-            if j != 0 and j % report_step == 0:
+            if j != 0 and j % (report_step * BATCH_SIZE) == 0:
                 #print("logits = %s" % logits_out)
                 #print("x = %s" % x_actual)
                 #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
@@ -532,7 +530,7 @@ with tf.Session(config=config) as sess:
                 train_acc_accum = 0.0
                 train_hit5_accum = 0.0
 
-            j += 1
+            j += BATCH_SIZE
         except tf.errors.OutOfRangeError:
             print("Out of range error")
             break
