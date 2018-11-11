@@ -42,7 +42,7 @@ def print_class_counts(file_list):
     '''prints the class counts in the file list'''
     class_counts = {}
     for f in file_list:
-        class_name = os.path.basename().split('_')[1]
+        class_name = os.path.basename(f).split('_')[1]
         if class_name in class_counts:
             class_counts[class_name] += 1
         else:
