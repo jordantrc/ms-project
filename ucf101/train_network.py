@@ -508,7 +508,9 @@ with tf.Session(config=config) as sess:
             train_acc_accum += train_acc
 
             print("hit_5_out = %s" % hit_5_out)
-            if hit_5_out[0]:
+            # count the trues in the hit_5_out array
+            hit_5_out_trues = hit_5_out.count(True)
+            print("%s trues out of %s" % (hit_5_out_trues, len(hit_5_out)))
                 train_hit5_accum += 1.0
 
             # report out results and run a test mini-batch every now and then
