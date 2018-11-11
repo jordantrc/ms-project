@@ -508,11 +508,11 @@ with tf.Session(config=config) as sess:
             # e.g. 3 correct responses/30 batch size = 0.1
             train_acc_accum += train_acc
 
-            print("hit_5_out = %s" % hit5_out)
+            # print("hit_5_out = %s" % hit5_out)
             # count the trues in the hit_5_out array
             hit5_counter = collections.Counter(hit5_out)
             hit5_out_trues = hit5_counter[True]
-            print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
+            # print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
             train_hit5_accum += float(hit5_out_trues / len(hit5_out))
 
             # report out results and run a test mini-batch every now and then

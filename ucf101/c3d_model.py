@@ -130,7 +130,7 @@ class C3DModel():
         if train:
             dropout = self.dropout
         else:
-            dropout = 1.0
+            dropout = self.dropout
 
         # Convolution layer
         conv1 = self.conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
