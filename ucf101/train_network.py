@@ -460,15 +460,16 @@ with tf.Session(config=config) as sess:
     j = 0
     train_acc_accum = 0.0
     train_hit5_accum = 0.0
+    num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while True and in_epoch <= NUM_EPOCHS:
-        if j != 0 and j % (len(train_files) / BATCH_SIZE) == 0 :
+        if j != 0 and j % num_batches_per_epoch == 0 :
             # end of epoch
             # save a model checkpoint and report end of epoch information
             save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
             save_path = saver.save(sess, save_path)
             end = time.time()
             train_time = str(datetime.timedelta(seconds=end - start))
-            print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
+            print("END EPOCH %s, steps completed = %s, epoch training time: %s" % (in_epoch, j, train_time))
             print("model checkpoint saved to %s\n\n" % save_path)
 
             # test the network
@@ -501,9 +502,12 @@ with tf.Session(config=config) as sess:
             logits_out = train_result[8]
             hit_5_out = train_result[9]
 
-            print("train_acc = %s" % train_acc)
-
+            # print("train_acc = %s" % train_acc)
+            # train_acc is the number of correct responses divided by the batch size
+            # e.g. 3 correct responses/30 batch size = 0.1
             train_acc_accum += train_acc
+
+            print("hit_5_out = %s" % hit_5_out)
             if hit_5_out[0]:
                 train_hit5_accum += 1.0
 
