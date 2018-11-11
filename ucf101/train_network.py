@@ -511,7 +511,6 @@ with tf.Session(config=config) as sess:
             # count the trues in the hit_5_out array
             hit_5_out_trues = hit_5_out.count(True)
             print("%s trues out of %s" % (hit_5_out_trues, len(hit_5_out)))
-                train_hit5_accum += 1.0
 
             # report out results and run a test mini-batch every now and then
             if j != 0 and j % (report_step * BATCH_SIZE) == 0:
