@@ -7,6 +7,7 @@
 import os
 import sys
 import tensorflow as tf
+import collections
 import c3d
 import csv
 import time
@@ -509,8 +510,10 @@ with tf.Session(config=config) as sess:
 
             print("hit_5_out = %s" % hit_5_out)
             # count the trues in the hit_5_out array
-            hit_5_out_trues = hit_5_out.count(True)
-            print("%s trues out of %s" % (hit_5_out_trues, len(hit_5_out)))
+            hit5_counter = collections.Counter(hit_5_out)
+            hit5_out_trues = hit5_counter[True]
+            print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
+            train_hit5_accum += float(hit_5_out_trues / len(hit_5_out))
 
             # report out results and run a test mini-batch every now and then
             if j != 0 and j % (report_step * BATCH_SIZE) == 0:
