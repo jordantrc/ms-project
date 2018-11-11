@@ -501,6 +501,8 @@ with tf.Session(config=config) as sess:
             logits_out = train_result[8]
             hit_5_out = train_result[9]
 
+            print("train_acc = %s" % train_acc)
+
             train_acc_accum += train_acc
             if hit_5_out[0]:
                 train_hit5_accum += 1.0
@@ -514,7 +516,7 @@ with tf.Session(config=config) as sess:
                 #print("hit_5_out = %s, type = %s, hit_5_out[0] = %s, type = %s" % (hit_5_out, type(hit_5_out), hit_5_out[0], type(hit_5_out[0])))
                 run_time = time.time()
                 run_time_str = str(datetime.timedelta(seconds=run_time - start))
-                train_step_acc = train_acc_accum / report_step
+                train_step_acc = train_acc_accum / report_step * BATCH_SIZE
 
                 # mini batch accuracy - every 5 report step iterations
                 if j % (report_step * BATCH_SIZE * 5) == 0:
@@ -541,8 +543,8 @@ with tf.Session(config=config) as sess:
                     csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
                 
                 else:
-                    train_acc_accum = train_acc_accum / report_step * BATCH_SIZE
-                    train_hit5_accum = train_hit5_accum / report_step * BATCH_SIZE
+                    train_acc_accum = train_acc_accum / report_step / BATCH_SIZE
+                    train_hit5_accum = train_hit5_accum / report_step / BATCH_SIZE
                     print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
                          (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
                     csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
