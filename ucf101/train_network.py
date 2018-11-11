@@ -501,19 +501,19 @@ with tf.Session(config=config) as sess:
             y_pred_actual = train_result[6]
             y_pred_class_actual = train_result[7]
             logits_out = train_result[8]
-            hit_5_out = train_result[9]
+            hit5_out = train_result[9]
 
             # print("train_acc = %s" % train_acc)
             # train_acc is the number of correct responses divided by the batch size
             # e.g. 3 correct responses/30 batch size = 0.1
             train_acc_accum += train_acc
 
-            print("hit_5_out = %s" % hit_5_out)
+            print("hit_5_out = %s" % hit5_out)
             # count the trues in the hit_5_out array
-            hit5_counter = collections.Counter(hit_5_out)
+            hit5_counter = collections.Counter(hit5_out)
             hit5_out_trues = hit5_counter[True]
-            print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
-            train_hit5_accum += float(hit_5_out_trues / len(hit_5_out))
+            print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
+            train_hit5_accum += float(hit5_out_trues / len(hit5_out))
 
             # report out results and run a test mini-batch every now and then
             if j != 0 and j % (report_step * BATCH_SIZE) == 0:
@@ -535,8 +535,10 @@ with tf.Session(config=config) as sess:
                             acc, hit_5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x])
                             # print("type(x) = %s, x = %s" % (type(x_out), x_out))
                             mini_batch_acc += acc
-                            if hit_5_out[0]:
-                                mini_batch_hit5 += 1.0
+                            hit5_counter = collections.Counter(hit_5_out)
+                            hit5_out_trues = hit5_counter[True]
+                            # print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
+                            train_hit5_accum += float(hit_5_out_trues / len(hit_5_out))
                         except tf.errors.OutOfRangeError:
                             # if out of data, just reinitialize the iterator
                             if VALIDATE_WITH_TRAIN:
@@ -551,8 +553,8 @@ with tf.Session(config=config) as sess:
                     csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
                 
                 else:
-                    train_acc_accum = train_acc_accum / report_step / BATCH_SIZE
-                    train_hit5_accum = train_hit5_accum / report_step / BATCH_SIZE
+                    train_acc_accum = train_acc_accum / (report_step * BATCH_SIZE)
+                    train_hit5_accum = train_hit5_accum / (report_step * BATCH_SIZE)
                     print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
                          (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
                     csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
