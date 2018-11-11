@@ -206,7 +206,7 @@ def test_network(sess, test_files, run_name, epoch):
             hit_5_actual = test_results[4]
             top_5_actual = test_results[5]
             logits_test_out = test_results[6]
-            if k % report_interval == 0:
+            if k != 0 and k % report_interval == 0:
                 print("test [%s] correct = %s, pred/true = [%s/%s], accuracy = %s, hit@5 = %s, top 5 = %s, cum. accuracy = %s" %
                                                                                 (k,
                                                                                  correct_pred_actual, 
@@ -517,7 +517,7 @@ with tf.Session(config=config) as sess:
                 train_step_acc = train_acc_accum / report_step
 
                 # mini batch accuracy - every 5 report step iterations
-                if j % (report_step * 5) == 0:
+                if j % (report_step * BATCH_SIZE * 5) == 0:
                     mini_batch_acc = 0.0
                     mini_batch_hit5 = 0.0
                     for k in range(MINI_BATCH_SIZE):
@@ -536,14 +536,14 @@ with tf.Session(config=config) as sess:
                     mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
                     mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
                     
-                    print("\titeration %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s, y_true = %s, top 5 = %s" %
+                    print("\tstep %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s, y_true = %s, top 5 = %s" %
                          (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5, y_true_class_actual, top_5_out))
                     csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
                 
                 else:
-                    train_acc_accum = train_acc_accum / report_step
-                    train_hit5_accum = train_hit5_accum / report_step
-                    print("\titeration %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
+                    train_acc_accum = train_acc_accum / report_step * BATCH_SIZE
+                    train_hit5_accum = train_hit5_accum / report_step * BATCH_SIZE
+                    print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
                          (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
                     csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
 
@@ -554,7 +554,7 @@ with tf.Session(config=config) as sess:
 
             j += BATCH_SIZE
         except tf.errors.OutOfRangeError:
-            print("Out of range error")
+            print("Out of range error, steps = %s" % j)
             break
 
     print("end training epochs")
