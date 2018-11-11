@@ -555,8 +555,8 @@ with tf.Session(config=config) as sess:
                     csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
                 
                 else:
-                    train_acc_accum = train_acc_accum / (report_step * BATCH_SIZE)
-                    train_hit5_accum = train_hit5_accum / (report_step * BATCH_SIZE)
+                    train_acc_accum = train_acc_accum / report_step
+                    train_hit5_accum = train_hit5_accum / report_step
                     print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
                          (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
                     csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
