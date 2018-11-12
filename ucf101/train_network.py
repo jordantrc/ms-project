@@ -511,7 +511,7 @@ with tf.Session(config=config) as sess:
             # print("hit_5_out = %s" % hit5_out)
             # count the trues in the hit_5_out array
             hit5_counter = collections.Counter(hit5_out)
-            hit5_out_trues = hit5_counter[True]
+            hit5_out_trues = float(hit5_counter[True])
             # print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
             train_hit5_accum += float(hit5_out_trues / len(hit5_out))
 
@@ -522,7 +522,7 @@ with tf.Session(config=config) as sess:
                 #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
                 #print("train_acc = %s" % train_acc)
                 print("hit5_out = %s, length = %s" % (hit5_out, len(hit5_out)))
-                print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), float(hit5_out_trues / len(hit5_out))))
+                print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), hit5_out_trues / len(hit5_out)))
                 run_time = time.time()
                 run_time_str = str(datetime.timedelta(seconds=run_time - start))
                 train_step_acc = train_acc_accum / report_step * BATCH_SIZE
