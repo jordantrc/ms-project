@@ -403,7 +403,7 @@ with tf.Session(config=config) as sess:
     # x = model._clip_image_batch(x, model.frames_per_clip, True)
     # x_test = model._clip_image_batch(x_test, model.frames_per_clip, True)
 
-    print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
+    #print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
 
     y_true = tf.cast(y_true, tf.int64)
     y_true_class = tf.argmax(y_true, axis=1)
@@ -521,7 +521,7 @@ with tf.Session(config=config) as sess:
                 #print("x = %s" % x_actual)
                 #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
                 #print("train_acc = %s" % train_acc)
-                print("hit5_out = %s" % (hit5_out))
+                print("hit5_out = %s, length = %s" % (hit5_out, len(hit5_out)))
                 print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), float(hit5_out_trues / len(hit5_out))))
                 run_time = time.time()
                 run_time_str = str(datetime.timedelta(seconds=run_time - start))
