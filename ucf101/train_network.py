@@ -521,7 +521,8 @@ with tf.Session(config=config) as sess:
                 #print("x = %s" % x_actual)
                 #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
                 #print("train_acc = %s" % train_acc)
-                #print("hit_5_out = %s, type = %s, hit_5_out[0] = %s, type = %s" % (hit_5_out, type(hit_5_out), hit_5_out[0], type(hit_5_out[0])))
+                print("hit5_out = %s" % (hit5_out))
+                print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), float(hit5_out_trues / len(hit5_out))))
                 run_time = time.time()
                 run_time_str = str(datetime.timedelta(seconds=run_time - start))
                 train_step_acc = train_acc_accum / report_step * BATCH_SIZE
@@ -538,7 +539,7 @@ with tf.Session(config=config) as sess:
                             hit5_counter = collections.Counter(hit5_out)
                             hit5_out_trues = hit5_counter[True]
                             # print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
-                            train_hit5_accum += float(hit5_out_trues / len(hit5_out))
+                            mini_batch_hit5 += float(hit5_out_trues / len(hit5_out))
                         
                         except tf.errors.OutOfRangeError:
                             # if out of data, reinitialize the iterator
