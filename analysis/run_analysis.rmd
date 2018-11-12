@@ -1,0 +1,46 @@
+---
+title: "MS Project Analysis Workflow"
+output: html_notebook
+---
+
+This notebook contains the MS Project analysis workflow.
+
+```{r}
+# load the ggplot library
+if("ggplot2" %in% rownames(installed.packages()) == FALSE) {install.packages("ggplot2")}
+library(ggplot2)
+```
+
+Load a run csv file for analysis.
+```{r}
+setwd("C:/Users/Jordan/Dropbox/School/Project/datasets")
+file_to_analyze = "ucf101/train_runs/1111-3.csv"
+run_data = read.csv(file_to_analyze)
+run_data
+```
+
+```{r}
+# generate the loss chart
+train <- subset(run_data, step_type == "train")
+test <- subset(run_data, step_type == "test")
+ggplot(data=train, aes(x=iteration, y=loss, colour="loss")) + 
+  ggtitle("Loss") +
+  geom_line(color="blue") + 
+  geom_smooth(color="black", linetype="longdash")
+
+# accuracy chart
+ggplot(data=train, aes(iteration)) +
+  ggtitle("Train Accuracy") +
+  geom_smooth(aes(y = accuracy, colour="blue")) +
+  geom_smooth(aes(y = hit_at_5, colour="red")) +
+  scale_color_discrete(name="Legend", labels=c("hit@1", "hit@5"))
+
+# test chart
+ggplot(data=test, aes(epoch)) +
+  ggtitle("Test Accuracy") +
+  geom_line(aes(y = accuracy, colour="blue")) +
+  geom_line(aes(y = hit_at_5, colour="red")) +
+  scale_color_discrete(name="Legend", labels=c("hit@1", "hit@5")) +
+  ylim(0.0, 1.0)
+```
+
