@@ -34,6 +34,7 @@ VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
 VARIABLE_TYPE = 'default'
+ONE_CLIP_PER_VIDEO = True
 
 def print_help():
     '''prints a help message'''
@@ -55,7 +56,7 @@ def print_class_counts(file_list):
         print("%s = %s" % (k, class_counts[k]))
 
 
-def file_split(list_file, directory):
+def file_split(list_file, directory, one_clip_per_vid):
     '''returns the absolute path to the samples given train-test split file and root directory'''
     file_names = []
     with open(list_file, 'r') as list_file_fd:
@@ -73,6 +74,24 @@ def file_split(list_file, directory):
 
     file_paths = []
     file_list = os.listdir(directory)
+
+    if one_clip_per_vid:
+        print("file_list length pre clip sample = %s" % len(file_list))
+        new_file_list = []
+        # make a list of distinct videos
+        videos = set()
+        for f in file_list:
+            video = f.split(".avi")
+            videos.add(video)
+        # now sample one clip per video
+        for v in videos:
+            video_list = [x for x in file_list if v in x]
+            clip_sample = random.sample(video_list, 1)
+            new_file_list.append(clip_sample)
+
+        file_list = new_file_list
+        print("file_list length post clip sample = %s" % len(file_list))
+
     # print("file_list = %s..." % file_list[0:5])
     for n in file_names:
         for f in file_list:
@@ -284,8 +303,8 @@ run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
 run_csv_writer.writerow(['step_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
 
 # get the list of files for train and test
-train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir)
-test_files = file_split(TEST_SPLIT, model.tfrecord_dir)
+train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir, ONE_CLIP_PER_VIDEO)
+test_files = file_split(TEST_SPLIT, model.tfrecord_dir, ONE_CLIP_PER_VIDEO)
 
 if not all_classes:
     train_files_filtered = []

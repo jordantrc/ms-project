@@ -164,6 +164,7 @@ class C3DModel():
         pool5 = self.max_pool('pool5', conv5, k=2)
 
         # Fully connected layer
+        # this next line is only necessary if loading the sports1m model
         # pool5 = tf.transpose(pool5, perm=[0, 1, 4, 2, 3])
         # Reshape conv3 output to fit dense layer input
         # print("pool5 = %s, shape = %s" % (pool5, pool5.get_shape().as_list()))
