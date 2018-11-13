@@ -467,7 +467,7 @@ with tf.Session(config=config) as sess:
 
     # TRAINING
     report_step = min(20, int(len(train_files) * 0.05))
-    print("Beginning training epochs, reporting every %s, mini-test batch every %s samples" % (report_step, report_step * 5))
+    print("Beginning training epochs, reporting every %s batches, mini-test batch every %s batches" % (report_step, report_step * 5))
 
     in_epoch = 1
     print("START EPOCH %s" % in_epoch)
