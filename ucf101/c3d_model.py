@@ -130,7 +130,7 @@ class C3DModel():
         if train:
             dropout = self.dropout
         else:
-            dropout = self.dropout
+            dropout = 1.0
 
         # Convolution layer
         conv1 = self.conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
@@ -164,7 +164,7 @@ class C3DModel():
         pool5 = self.max_pool('pool5', conv5, k=2)
 
         # Fully connected layer
-        pool5 = tf.transpose(pool5, perm=[0, 1, 4, 2, 3])
+        # pool5 = tf.transpose(pool5, perm=[0, 1, 4, 2, 3])
         # Reshape conv3 output to fit dense layer input
         # print("pool5 = %s, shape = %s" % (pool5, pool5.get_shape().as_list()))
         dense1 = tf.reshape(pool5, [batch_size, _weights['wd1'].get_shape().as_list()[0]])
