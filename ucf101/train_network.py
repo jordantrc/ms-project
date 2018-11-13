@@ -500,7 +500,7 @@ with tf.Session(config=config) as sess:
             in_epoch += 1
 
             if in_epoch % 4 == 0:
-                model.current_learning_rate = model.current_learning_rate / 10
+                model.current_learning_rate = model.current_learning_rate
                 print("learning rate adjusted to %g" % model.current_learning_rate)
 
             print("START EPOCH %s" % in_epoch)
