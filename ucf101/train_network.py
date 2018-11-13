@@ -34,7 +34,7 @@ VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
 VARIABLE_TYPE = 'default'
-ONE_CLIP_PER_VIDEO = True
+ONE_CLIP_PER_VIDEO = False
 
 def print_help():
     '''prints a help message'''
