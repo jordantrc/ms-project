@@ -81,7 +81,7 @@ def file_split(list_file, directory, one_clip_per_vid):
         # make a list of distinct videos
         videos = set()
         for f in file_list:
-            video = f.split(".avi")
+            video, _ = f.split(".avi")
             videos.add(video)
         # now sample one clip per video
         for v in videos:
