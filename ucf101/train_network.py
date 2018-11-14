@@ -343,14 +343,15 @@ assert len(test_files) > 0 and len(train_files) > 0
 MINI_BATCH_SIZE = min(MINI_BATCH_SIZE, len(test_files))
 SHUFFLE_SIZE = min(SHUFFLE_SIZE, int(len(train_files) * 0.05))
 
+# throw out samples to fit the batch size
+num_samples_batch_fit = len(train_files) - (len(train_files) % BATCH_SIZE)
+
 if BALANCE_CLASSES:
     # balance the classes for training
     train_files = balance_classes(train_files)
 
 random.shuffle(train_files)
-# throw out samples to fit the batch size
-num_samples_batch_fit = len(train_files) - (len(train_files) % BATCH_SIZE)
-train_files = random.sample(train_files, num_samples_batch_fit)
+train_files = train_files[0: num_samples_batch_fit]
 print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
 print("Training class counts:")
 print_class_counts(train_files)
