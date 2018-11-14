@@ -93,7 +93,8 @@ def file_split(list_file, directory, one_clip_per_vid):
         file_list = new_file_list
         print("file_list length post clip sample = %s" % len(file_list))
 
-    # print("file_list = %s..." % file_list[0:5])
+    print("file_list = %s..." % file_list[0:5])
+    print("file_names = %s..." % file_names[0:5])
     for n in file_names:
         for f in file_list:
             if n in f:
