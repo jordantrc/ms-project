@@ -88,7 +88,7 @@ def file_split(list_file, directory, one_clip_per_vid):
         for v in videos:
             video_list = [x for x in file_list if v in x]
             clip_sample = random.sample(video_list, 1)
-            new_file_list.append(clip_sample)
+            new_file_list.append(clip_sample[0])
 
         file_list = new_file_list
         print("file_list length post clip sample = %s" % len(file_list))
@@ -99,7 +99,7 @@ def file_split(list_file, directory, one_clip_per_vid):
         for f in file_list:
             if n in f:
                 file_paths.append(os.path.join(directory, f))
-    # print("file_paths = %s..." % file_paths[0:5])
+    print("file_paths = %s..." % file_paths[0:5])
 
     return file_paths
 
