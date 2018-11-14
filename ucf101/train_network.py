@@ -34,7 +34,8 @@ VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
 VARIABLE_TYPE = 'default'
-ONE_CLIP_PER_VIDEO = False
+ONE_CLIP_PER_VIDEO = True
+LEARNING_RATE_DECAY = False
 
 def print_help():
     '''prints a help message'''
@@ -368,6 +369,7 @@ run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIA
 run_log_fd.write("WEIGHT_DECAY = %s\nBIAS_DECAY = %s\n" % (c3d.WEIGHT_DECAY, c3d.BIAS_DECAY))
 run_log_fd.write("VARIABLE_TYPE = %s\n" % (VARIABLE_TYPE))
 run_log_fd.write("ONE_CLIP_PER_VIDEO = %s" % (ONE_CLIP_PER_VIDEO))
+run_log_fd.write("LEARNING_RATE_DECAY = %s" % (LEARNING_RATE_DECAY))
 run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
 # Tensorflow configuration
@@ -499,8 +501,8 @@ with tf.Session(config=config) as sess:
 
             in_epoch += 1
 
-            if in_epoch % 4 == 0:
-                model.current_learning_rate = model.current_learning_rate
+            if in_epoch % 4 == 0 and LEARNING_RATE_DECAY:
+                model.current_learning_rate = model.current_learning_rate / 10
                 print("learning rate adjusted to %g" % model.current_learning_rate)
 
             print("START EPOCH %s" % in_epoch)
