@@ -35,7 +35,7 @@ BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
 VARIABLE_TYPE = 'default'
 ONE_CLIP_PER_VIDEO = False
-LEARNING_RATE_DECAY = 2
+LEARNING_RATE_DECAY = 1.0
 
 def print_help():
     '''prints a help message'''
@@ -504,7 +504,7 @@ with tf.Session(config=config) as sess:
             in_epoch += 1
 
             if in_epoch % 4 == 0:
-                model.current_learning_rate = model.current_learning_rate / LEARNING_RATE_DECAY
+                model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
                 print("learning rate adjusted to %g" % model.current_learning_rate)
 
             print("START EPOCH %s" % in_epoch)
