@@ -88,15 +88,15 @@ class C3DModel():
         features = dict()
         features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
 
-        for i in range(self.frames_per_video):
+        # choose a starting index for the clip
+        s_index = random.randint(0, self.frames_per_video - 1 - self.frames_per_clip)
+        frame_indexes = range(s_index, s_index + self.frames_per_clip)
+
+        for i in frame_indexes:
             features['frames/{:04d}'.format(i)] = tf.FixedLenFeature((), tf.string)
 
         # parse the features
         parsed_features = tf.parse_single_example(example_proto, features)
-
-        # choose a starting index for the clip
-        s_index = random.randint(0, self.frames_per_video - 1 - self.frames_per_clip)
-        frame_indexes = range(s_index, s_index + self.frames_per_clip)
 
         # decode the encoded jpegs
         images = []

@@ -116,8 +116,8 @@ def ucf101_dataset(root, output):
 
     # image resizing settings
     flip_horizontally = 0.5
-    resize_height = 112
-    resize_width = 112
+    resize_height = 128
+    resize_width = 171
     # crop_height = 112
     # crop_width = 112
 
@@ -180,11 +180,13 @@ def ucf101_dataset(root, output):
                                                                              resize_height,
                                                                              resize_width)
             label_int = classes.index(label)
+            num_images = len(images)
             print("label_int = %s, class name = %s" % (label_int, classes[label_int]))
             assert label_int >= 0
 
             features = {}
             features['label'] = _int64_feature(label_int)
+            features['num_frames'] = _int64_feature(num_images)
 
             # package up the frames from the video
             for i in range(images.shape[0]):
@@ -263,11 +265,6 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
     # get class information for the video
     video_class_name = video_class(path)
 
-    # determine if video should be flipped
-    flip_video = False
-    if random.random() <= flip:
-        flip_video = True
-
     # get metadata of video
     if hasattr(cv2, 'cv'):
         print("using cv2.cv for meta")
@@ -289,9 +286,7 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
     print("fps = %f" % (fps))
     print("length = %f" % (frame_count / fps))
 
-    sample_size = int(fps * sample_length)
-    frames_needed = c3d_model.FRAMES_PER_VIDEO
-    buf = np.empty((frames_needed, resize_height, resize_width, 3), np.dtype('uint8'))
+    buf = np.empty((frame_count, resize_height, resize_width, 3), np.dtype('uint8'))
 
     # read as many frames as possible into a list
     frame_buffer = []
@@ -299,43 +294,11 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
     while success:
         frame_buffer.append(image)
         success, image = cap.read()
+        image = process_frame(frame_buffer[frame_index], resize_width, resize_height, False)
+        buf[frames_captured] = image
+        frames_captured += 1
 
-    # determine how many frames were captured
-    frames_obtained = len(frame_buffer)
-
-    frames_captured = 0
-    if frames_obtained <= frames_needed:
-        # turn the buffer into a circular list
-        frame_buffer = cycle(frame_buffer)
-        while frames_captured < frames_needed:
-            image = process_frame(next(frame_buffer), resize_width, resize_height, flip_video)
-            buf[frames_captured] = image
-            frames_captured += 1
-
-    else:
-        indexes = list(range(frames_obtained))[::50]
-        indexes = indexes[:-1]  # chop off the last index
-        frame_index = 0
-        capture = False
-        while frames_captured < frames_needed:
-            if frame_index in indexes:
-                # start capturing
-                capture = True
-                sample_index = 0
-            elif sample_index == 50:
-                capture = False
-                sample_index = 0
-
-            if capture:
-                image = process_frame(frame_buffer[frame_index], resize_width, resize_height, flip_video)
-                buf[frames_captured] = image
-                sample_index += 1
-                frame_index += 1
-                frames_captured += 1
-            else:
-                frame_index += 1
-
-    assert frames_captured == frames_needed, "captured %s frames, needed %s" % (frames_captured, frames_needed)
+    assert frames_captured == frame_count, "captured %s frames of %s" % (frames_captured, frame_count)
 
     return video_class_name, width, height, buf
 
