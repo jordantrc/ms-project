@@ -289,14 +289,13 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
     buf = np.empty((frame_count, resize_height, resize_width, 3), np.dtype('uint8'))
 
     # read as many frames as possible into a list
-    frame_buffer = []
     success, image = cap.read()
+    frames_captured = 0
     while success:
-        frame_buffer.append(image)
-        success, image = cap.read()
-        image = process_frame(frame_buffer[frame_index], resize_width, resize_height, False)
+        image = process_frame(image, resize_width, resize_height, False)
         buf[frames_captured] = image
         frames_captured += 1
+        success, image = cap.read()
 
     assert frames_captured == frame_count, "captured %s frames of %s" % (frames_captured, frame_count)
 
