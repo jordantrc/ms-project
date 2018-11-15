@@ -219,7 +219,7 @@ def ucf101_dataset(root, output):
 
             tfrecord_writer.write(example.SerializeToString())
             tfrecord_writer.close()
-            print("images shape: %s, written to tfrecord file %s" % (c.shape, tfrecord_output_path))
+            print("images shape: %s, written to tfrecord file %s" % (images.shape, tfrecord_output_path))
 
 
 def video_class(path):
