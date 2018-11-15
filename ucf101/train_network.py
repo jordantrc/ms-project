@@ -35,7 +35,8 @@ BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
 VARIABLE_TYPE = 'default'
 ONE_CLIP_PER_VIDEO = False
-LEARNING_RATE_DECAY = 1.0
+LEARNING_RATE_DECAY = 0.1
+OPTIMIZER = 'SGD'
 
 def print_help():
     '''prints a help message'''
@@ -154,11 +155,11 @@ def tf_confusion_matrix(predictions, labels, classes):
 
     for p in predictions:
         pred = p[0]
-        y_true.append(classes[pred])
+        y_pred.append(classes[pred])
 
     for l in labels:
         label = l[0]
-        y_pred.append(classes[label])
+        y_true.append(classes[label])
 
     cm = metrics.confusion_matrix(y_true, y_pred, classes)
 
@@ -392,7 +393,6 @@ with tf.Session(config=config) as sess:
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
     train_filenames = tf.placeholder(tf.string, shape=[None])
     test_filenames = tf.placeholder(tf.string, shape=[None])
-    learning_rate = tf.placeholder(tf.float32, shape=[])
 
     # constants
     global_step = tf.Variable(0, trainable=False)
@@ -433,8 +433,8 @@ with tf.Session(config=config) as sess:
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
 
-    logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
-    # logits = model.c3d(x, training=True)
+    # logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
+    logits = model.c3d(x, training=True)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
@@ -446,11 +446,16 @@ with tf.Session(config=config) as sess:
     # loss and optimizer
     # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
     loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class, name="softmax"), name="reduce_mean")
-    #learning_rate = tf.train.exponential_decay(learning_rate=model.learning_rate, global_step=global_step, 
-    #                                           decay_steps=(4 * len(train_files)), decay_rate=0.96,
-    #                                           staircase=True)
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-    #optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
+    if OPTIMIZER == 'SGD':
+        learning_rate = tf.placeholder(tf.float32, shape=[])
+        #learning_rate = tf.train.exponential_decay(learning_rate=model.learning_rate, global_step=global_step, 
+        #                                       decay_steps=(4 * len(train_files)), decay_rate=0.96,
+        #                                       staircase=True)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
+    elif OPTIMIZER == 'Adam':
+        learning_rate = tf.placeholder(tf.float32, shape=[])
+        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+
     train_op = optimizer.minimize(loss_op, name="train")
 
     # model evaluation
@@ -515,8 +520,13 @@ with tf.Session(config=config) as sess:
                 sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
 
         try:
+            if OPTIMIZER == "SGD":
+                feed_dict = {learning_rate: model.current_learning_rate}
+            elif OPTIMIZER == "Adam":
+                feed_dict = {learning_rate: model.current_learning_rate}
+
             train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
-                                    feed_dict={learning_rate: model.current_learning_rate})
+                                    feed_dict=feed_dict)
             loss_op_out = train_result[1]
             train_acc = train_result[2]
             x_actual = train_result[3]
