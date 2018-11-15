@@ -33,7 +33,7 @@ TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
-VARIABLE_TYPE = 'weight decay'
+VARIABLE_TYPE = 'default'
 ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
@@ -524,10 +524,7 @@ with tf.Session(config=config) as sess:
                 sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
 
         try:
-            if OPTIMIZER == "SGD":
-                feed_dict = {learning_rate: model.current_learning_rate}
-            elif OPTIMIZER == "Adam":
-                feed_dict = {learning_rate: model.current_learning_rate}
+            feed_dict = {learning_rate: model.current_learning_rate}
 
             train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
                                     feed_dict=feed_dict)
