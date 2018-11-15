@@ -88,7 +88,7 @@ class C3DModel():
         features = dict()
         features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
 
-        for i in range(self.frames_per_clip):
+        for i in range(self.frames_per_video):
             features['frames/{:04d}'.format(i)] = tf.FixedLenFeature((), tf.string)
 
         # parse the features
