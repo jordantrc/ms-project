@@ -166,6 +166,12 @@ def ucf101_dataset(root, output):
 
         for i, v in enumerate(videos):
             print("######\nProcessing %s [%d of %d]:\n" % (v, i, len(videos)))
+            video_file_name = os.path.basename(v)
+            video_tfrecord_file_name = video_file_name + ".tfrecord"
+            tfrecord_output_path = os.path.join(output, video_tfrecord_file_name)
+            tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
+            assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
+
             label, image_width, image_height, images = video_file_to_ndarray(v,
                                                                              num_samples,
                                                                              sample_length,
