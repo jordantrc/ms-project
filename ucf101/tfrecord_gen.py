@@ -177,33 +177,43 @@ def ucf101_dataset(root, output):
             print("label_int = %s, class name = %s" % (label_int, classes[label_int]))
             assert label_int >= 0
 
+            featues = {}
+            features['label'] = _int64_feature(label_int)
+
+            # package up the frames from the video
+            for i in range(images.shape[0]):
+                frame = images[i]
+                # frame = tf.image.encode_jpeg(frame, quality=100)
+                frame_raw = frame.tostring()
+                features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
+
             # generate clips from the video
-            clips = clips_from_video(images, c3d_model.FRAMES_PER_CLIP)
-            print("generated %s clips of size %s" % (len(clips), c3d_model.FRAMES_PER_CLIP))
+            #clips = clips_from_video(images, c3d_model.FRAMES_PER_CLIP)
+            #print("generated %s clips of size %s" % (len(clips), c3d_model.FRAMES_PER_CLIP))
 
-            for i, c in enumerate(clips):
-                video_file_name = os.path.basename(v)
-                clip_tfrecord_file_name = video_file_name + "_clip%02d.tfrecord" % i
+            #for i, c in enumerate(clips):
+            #    video_file_name = os.path.basename(v)
+            #    clip_tfrecord_file_name = video_file_name + "_clip%02d.tfrecord" % i
 
-                tfrecord_output_path = os.path.join(output, clip_tfrecord_file_name)
-                tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
-                assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
+            #    tfrecord_output_path = os.path.join(output, clip_tfrecord_file_name)
+            #    tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_output_path)
+            #    assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
 
-                features = dict()
-                features['label'] = _int64_feature(label_int)
+            #    features = dict()
+            #    features['label'] = _int64_feature(label_int)
 
-                # package up the frames from the clip
-                for i in range(c.shape[0]):
-                    frame = c[i]
-                    # frame = tf.image.encode_jpeg(frame, quality=100)
-                    frame_raw = frame.tostring()
-                    features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
+            #    # package up the frames from the clip
+            #    for i in range(c.shape[0]):
+            #        frame = c[i]
+            #        # frame = tf.image.encode_jpeg(frame, quality=100)
+            #        frame_raw = frame.tostring()
+            #        features['frames/{:04d}'.format(i)] = _bytes_feature(frame_raw)
 
-                example = tf.train.Example(features=tf.train.Features(feature=features))
+            example = tf.train.Example(features=tf.train.Features(feature=features))
 
-                tfrecord_writer.write(example.SerializeToString())
-                tfrecord_writer.close()
-                print("clip shape: %s, written to tfrecord file %s" % (c.shape, tfrecord_output_path))
+            tfrecord_writer.write(example.SerializeToString())
+            tfrecord_writer.close()
+            print("images shape: %s, written to tfrecord file %s" % (c.shape, tfrecord_output_path))
 
 
 def video_class(path):

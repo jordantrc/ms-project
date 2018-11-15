@@ -94,9 +94,13 @@ class C3DModel():
         # parse the features
         parsed_features = tf.parse_single_example(example_proto, features)
 
+        # choose a starting index for the clip
+        s_index = random.randint(0, self.frames_per_video - 1 - self.frames_per_clip)
+        frame_indexes = range(s_index, s_index + self.frames_per_clip)
+
         # decode the encoded jpegs
         images = []
-        for i in range(self.frames_per_clip):
+        for i in frame_indexes:
             # frame = tf.image.decode_jpeg(parsed_features['frames/{:04d}'.format(i)])
             frame = tf.decode_raw(parsed_features['frames/{:04d}'.format(i)], tf.uint8)
             # normalize the frame

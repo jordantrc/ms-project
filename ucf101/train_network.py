@@ -413,7 +413,9 @@ with tf.Session(config=config) as sess:
     train_dataset = tf.data.TFRecordDataset(train_filenames)
     train_dataset = train_dataset.shuffle(SHUFFLE_SIZE, reshuffle_each_iteration=True)
     train_dataset = train_dataset.map(model._parse_function)
-    train_dataset = train_dataset.repeat(NUM_EPOCHS)
+    # 15 constant below is the approximate number of 16 frame clips per video
+    # 250 / 16 ~ 15
+    train_dataset = train_dataset.repeat(NUM_EPOCHS * 15)
     train_dataset = train_dataset.batch(BATCH_SIZE)
     train_iterator = train_dataset.make_initializable_iterator()
     x, y_true = train_iterator.get_next()
@@ -437,8 +439,8 @@ with tf.Session(config=config) as sess:
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
 
-    # logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
-    logits = model.c3d(x, training=True)
+    logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
+    # logits = model.c3d(x, training=True)
 
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
@@ -463,8 +465,8 @@ with tf.Session(config=config) as sess:
     train_op = optimizer.minimize(loss_op, name="train")
 
     # model evaluation
-    logits_test = model.c3d(x_test, training=False)
-    # logits_test = model.inference_3d(x_test, weights, biases, 1, False)
+    # logits_test = model.c3d(x_test, training=False)
+    logits_test = model.inference_3d(x_test, weights, biases, 1, False)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
