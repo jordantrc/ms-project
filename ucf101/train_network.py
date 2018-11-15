@@ -463,8 +463,8 @@ with tf.Session(config=config) as sess:
     train_op = optimizer.minimize(loss_op, name="train")
 
     # model evaluation
-    # logits_test = model.c3d(x_test, training=False)
-    logits_test = model.inference_3d(x_test, weights, biases, 1, False)
+    logits_test = model.c3d(x_test, training=False)
+    # logits_test = model.inference_3d(x_test, weights, biases, 1, False)
     y_pred_test = tf.nn.softmax(logits_test)
     y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
