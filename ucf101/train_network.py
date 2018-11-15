@@ -33,10 +33,10 @@ TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
-VARIABLE_TYPE = 'default'
+VARIABLE_TYPE = 'weight decay'
 ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
-OPTIMIZER = 'SGD'
+OPTIMIZER = 'Adam'
 
 def print_help():
     '''prints a help message'''
@@ -219,6 +219,7 @@ def test_network(sess, test_files, run_name, epoch):
     predictions = []
     labels = []
     more_data = True
+    start = time.time()
     while more_data:
         try:
             test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test])
@@ -252,8 +253,10 @@ def test_network(sess, test_files, run_name, epoch):
             # print("OutOfRangeError - k = %s" % k)
             more_data = False
             break
-
-    print("Exhausted test data")
+    end = time.time()
+    test_time = str(datetime.timedelta(seconds=end - start))
+    
+    print("Exhausted test data, time: %s" % (test_time))
     print("Cumulative test accuracy at end of epoch %s = %s" % (epoch, cumulative_accuracy / k))
     print("Cumulative test hit@5 accuracy at end of epoch %s = %s" % (epoch, cumulative_hit_at_5 / k))
     print("Confusion matrix =")
@@ -509,7 +512,7 @@ with tf.Session(config=config) as sess:
 
             in_epoch += 1
 
-            if in_epoch % 4 == 0:
+            if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
                 model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
                 print("learning rate adjusted to %g" % model.current_learning_rate)
 
