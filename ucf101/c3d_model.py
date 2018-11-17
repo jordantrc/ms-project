@@ -87,6 +87,10 @@ class C3DModel():
         """parse map function for video data"""
         features = dict()
         features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+        features['num_frames'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+
+        for i in frame_indexes:
+            features['frames/{:04d}'.format(i)] = tf.FixedLenFeature((), tf.string)        
 
         # choose a starting index for the clip
         s_index = random.randint(0, self.frames_per_video - 1 - self.frames_per_clip)

@@ -297,7 +297,7 @@ def video_file_to_ndarray(path, num_samples, sample_length, sample_randomly, fli
         frames_captured += 1
         success, image = cap.read()
 
-    assert frames_captured == frame_count, "captured %s frames of %s" % (frames_captured, frame_count)
+    assert frames_captured > frame_count * .9 and frames_captured < frame_count * 1.1, "captured %s frames of %s" % (frames_captured, frame_count)
 
     return video_class_name, width, height, buf
 
