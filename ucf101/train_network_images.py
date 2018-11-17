@@ -215,7 +215,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
 
     np_arr_data = np.array(data).astype(np.float32)
     np_arr_label = np.array(labels).astype(np.int64)
-    labels_one_hot = tf.one_hot(np_arr_label)
+    labels_one_hot = tf.one_hot(np_arr_label, depth=num_classes)
 
     return np_arr_data, labels_one_hot, next_batch_start, len(lines)
 
