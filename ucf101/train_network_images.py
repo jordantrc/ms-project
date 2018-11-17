@@ -10,6 +10,7 @@ import tensorflow as tf
 import collections
 import c3d
 import csv
+import cv2
 import time
 import datetime
 import random
