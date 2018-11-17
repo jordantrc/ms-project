@@ -149,7 +149,7 @@ def get_frames(directory, frames_per_clip):
     ret_arr = []
     s_index = 0
     for parent, dirnames, filenames in os.walk(directory):
-        if len(filenames) < frames:
+        if len(filenames) < frames_per_clip:
             return [], s_index
         filenames = sorted(filenames)
         s_index = random.randint(0, len(filenames) - frames_per_clip)
