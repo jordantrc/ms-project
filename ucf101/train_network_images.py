@@ -351,7 +351,7 @@ run_name = sys.argv[1]
 sample = float(sys.argv[2])
 included_classes = sys.argv[3]
 model_dir = sys.argv[4]
-tfrecord_dir = sys.argv[5]
+#tfrecord_dir = sys.argv[5]
 
 if ',' in included_classes:
     all_classes = False
