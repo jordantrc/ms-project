@@ -610,7 +610,7 @@ with tf.Session(config=config) as sess:
                 mini_batch_hit5 = 0.0
                 for k in range(MINI_BATCH_SIZE):
                     x, y, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
-                    feed_dict = {x_test: x, y_true_test: }
+                    feed_dict = {x_test: x, y_true_test: y}
                     acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x],
                                                                feed_dict=feed_dict)
                     # print("type(x) = %s, x = %s" % (type(x_out), x_out))
