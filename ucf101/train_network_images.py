@@ -300,8 +300,8 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     more_data = True
     start = time.time()
     while more_data:
-        x, y, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, shuffle=False)
-        feed_dict = {x_test: x, y_true_test: y}
+        x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, shuffle=False)
+        feed_dict = {x_test: x_feed, y_true_test: y_feed}
         test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test],
                                 feed_dict=feed_dict)
         acc = test_results[0]
@@ -545,7 +545,7 @@ with tf.Session(config=config) as sess:
     train_hit5_accum = 0.0
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while True and in_epoch <= NUM_EPOCHS:
-        x, y, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
         if j != 0 and j % num_samples == 0:
             # end of epoch
             # save a model checkpoint and report end of epoch information
@@ -569,7 +569,7 @@ with tf.Session(config=config) as sess:
             print("START EPOCH %s" % in_epoch)
             start = time.time()
 
-        feed_dict = {x: x, y_true: y, learning_rate: model.current_learning_rate}
+        feed_dict = {x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate}
         train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
                                 feed_dict=feed_dict)
         loss_op_out = train_result[1]
@@ -611,8 +611,8 @@ with tf.Session(config=config) as sess:
                 mini_batch_acc = 0.0
                 mini_batch_hit5 = 0.0
                 for k in range(MINI_BATCH_SIZE):
-                    x, y, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
-                    feed_dict = {x_test: x, y_true_test: y}
+                    x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+                    feed_dict = {x_test: x_feed, y_true_test: y_feed}
                     acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x],
                                                                feed_dict=feed_dict)
                     # print("type(x) = %s, x = %s" % (type(x_out), x_out))
