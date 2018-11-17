@@ -525,24 +525,25 @@ with tf.Session(config=config) as sess:
     sess.run(init_op)
 
     # TRAINING
-    report_step = min(20, int(len(train_files) * 0.05))
+    report_step = 20
     print("Beginning training epochs, reporting every %s batches, mini-test batch every %s batches" % (report_step, report_step * 5))
 
     in_epoch = 1
     print("START EPOCH %s" % in_epoch)
     start = time.time()
-    sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
-    if VALIDATE_WITH_TRAIN:
-        sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
-    else:
-        sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
+    # sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
+    # if VALIDATE_WITH_TRAIN:
+    #     sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
+    # else:
+    #     sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
 
     j = 0
     train_acc_accum = 0.0
     train_hit5_accum = 0.0
-    num_batches_per_epoch = len(train_files) / BATCH_SIZE
+    # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while True and in_epoch <= NUM_EPOCHS:
-        if j != 0 and j % num_batches_per_epoch == 0:
+        x, y, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+        if j != 0 and j % num_samples == 0:
             # end of epoch
             # save a model checkpoint and report end of epoch information
             save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
@@ -565,9 +566,7 @@ with tf.Session(config=config) as sess:
             print("START EPOCH %s" % in_epoch)
             start = time.time()
 
-        x, y, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
         feed_dict = {x: x, y_true: y, learning_rate: model.current_learning_rate}
-
         train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
                                 feed_dict=feed_dict)
         loss_op_out = train_result[1]
