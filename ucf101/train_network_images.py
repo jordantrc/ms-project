@@ -373,7 +373,7 @@ else:
 print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
 
 # create the model object
-model = C3DModel(model_dir=model_dir,tfrecord_dir=tfrecord_dir)
+model = C3DModel(model_dir=model_dir)
 
 # open the csv data file and write the header to it
 run_csv_file = 'runs/%s.csv' % run_name
