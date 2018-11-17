@@ -214,11 +214,11 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             labels.append(labels[j])
             j += 1
 
-    np_arr_data = np.array(data).astype(np.float32)
+    data = tf.stack(data)
     np_arr_label = np.array(labels).astype(np.int64)
     labels_one_hot = tf.one_hot(np_arr_label, depth=num_classes)
 
-    return np_arr_data, labels_one_hot, next_batch_start, len(lines)
+    return data, labels_one_hot, next_batch_start, len(lines)
 
 
 def tf_confusion_matrix(predictions, labels, classes):
