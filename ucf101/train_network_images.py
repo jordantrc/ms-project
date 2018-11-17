@@ -453,7 +453,7 @@ run_log_fd.write("VARIABLE_TYPE = %s\n" % (VARIABLE_TYPE))
 run_log_fd.write("ONE_CLIP_PER_VIDEO = %s" % (ONE_CLIP_PER_VIDEO))
 run_log_fd.write("LEARNING_RATE_DECAY = %s" % (LEARNING_RATE_DECAY))
 run_log_fd.write("OPTIMIZER = %s" % (OPTIMIZER))
-run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
+# run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
 # Tensorflow configuration
 config = tf.ConfigProto(allow_soft_placement=True)
