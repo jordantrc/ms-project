@@ -152,9 +152,10 @@ def get_frames(directory, frames_per_clip):
         if len(filenames) < frames_per_clip:
             return [], s_index
         filenames = sorted(filenames)
+
         s_index = random.randint(0, len(filenames) - frames_per_clip)
         for i in range(s_index, s_index + frames_per_clip):
-            image_name = str(filename) + '/' + str(filenames[i])
+            image_name = os.path.join(directory, filenames[i])
             img = Image.open(image_name)
             img_data = np.array(img)
             ret_arr.append(img_data)
