@@ -228,7 +228,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 # if normalize:
                 #     img = preprocessing.normalize(img)
                 if flip:
-                    img = cv2.flip(img, flipMode=1)
+                    img = cv2.flip(img, flipCode=1)
 
                 # crop the image
                 # img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
