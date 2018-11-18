@@ -231,6 +231,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
     data = np.array(data).astype(np.float32)
     data = np.reshape(data, (batch_size, frames_per_clip, crop_size, crop_size, 3))
     print("[get_image_batch] data = %s, np_arr_label = %s" % (np.shape(data), np.shape(np_arr_label)))
+    print("[get_image_batch] np_arr_label = %s" % (np_arr_label))
     return data, np_arr_label, next_batch_start, len(lines)
 
 
