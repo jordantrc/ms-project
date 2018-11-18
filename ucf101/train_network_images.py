@@ -229,8 +229,8 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             j += 1
 
     np_arr_label = np.array(labels).astype(np.int64)
-    print("[get_image_batch] data = %s, labels_one_hot = %s" % (np.shape(data), np.shape(labels_one_hot)))
-    return data, labels_one_hot, next_batch_start, len(lines)
+    print("[get_image_batch] data = %s, np_arr_label = %s" % (np.shape(data), np.shape(np_arr_label)))
+    return data, np_arr_label, next_batch_start, len(lines)
 
 
 def tf_confusion_matrix(predictions, labels, classes):
