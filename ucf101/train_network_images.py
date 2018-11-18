@@ -495,8 +495,8 @@ with tf.Session(config=config) as sess:
     x_test = tf.placeholder(tf.float32, shape=[1, model.frames_per_clip, 112, 112, 3])
     y_true_test = tf.placeholder(tf.int64, shape=[1])
 
-    y_true = tf.one_hot(y_true, depth=model.num_classes)
-    y_true_test = tf.one_hot(y_true_test, depth=model.num_classes)
+    y_true_one_hot = tf.one_hot(y_true, depth=model.num_classes)
+    y_true_test_one_hot = tf.one_hot(y_true_test, depth=model.num_classes)
     y_true_class = tf.argmax(y_true, axis=1)
     y_true_test_class = tf.argmax(y_true_test, axis=1)
 
