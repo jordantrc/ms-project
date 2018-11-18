@@ -200,7 +200,6 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 else:
                     scale = float(crop_size) / float(img.width)
                     img = np.array(cv2.resize(np.array(img), (crop_size, int(img.height * scale + 1)))).astype(np.float32)
-                img = np.reshape(img, [1, crop_size, crop_size, 3])
                 img = tf.image.per_image_standardization(img)
                 data.append(img)
             labels.append(label)
