@@ -211,7 +211,6 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 images.append(img)
             print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
                    (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
-            images = np.ndarray()
             data.append(images)
             labels.append(label)
             batch_index += 1
