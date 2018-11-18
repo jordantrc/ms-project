@@ -187,12 +187,13 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         if batch_index >= batch_size:
             next_batch_start = index
             break
-        print("line = %s" % lines[index])
+        print("[get_image_batch] line = %s" % lines[index])
         dirname, label = lines[index].split()
         frames, _ = get_frames(dirname, frames_per_clip)
 
         # process the images
         if len(frames) > 0:
+            print("[get_image_batch] len. frames = %s" % len(frames))
             for j in xrange(len(frames)):
                 img = Image.fromarray(frames[j].astype(np.uint8))
                 img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
@@ -571,7 +572,9 @@ with tf.Session(config=config) as sess:
             start = time.time()
 
         train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
-                                feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+                                feed_dict={x: x_feed, 
+                                           y_true: y_feed, 
+                                           learning_rate: model.current_learning_rate})
         loss_op_out = train_result[1]
         train_acc = train_result[2]
         x_actual = train_result[3]
