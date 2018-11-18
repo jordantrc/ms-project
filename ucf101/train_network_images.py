@@ -212,7 +212,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             labels.append(label)
             batch_index += 1
 
-    data = tf.concat(data)
+    data = tf.concat(data, 0)
     print("[get_image_batch] final data = %s" % (np.shape(data)))
     valid_len = len(data)
     pad_len = batch_size - valid_len
