@@ -151,10 +151,11 @@ def get_frames(directory, frames_per_clip):
     s_index = 0
     for parent, dirnames, filenames in os.walk(directory):
         if len(filenames) < frames_per_clip:
-            return [], s_index
-        filenames = sorted(filenames)
-
-        s_index = random.randint(0, len(filenames) - frames_per_clip)
+            s_index = 0
+        else:
+            s_index = random.randint(0, len(filenames) - frames_per_clip)
+        
+        filenames = cycle(sorted(filenames))
         for i in range(s_index, s_index + frames_per_clip):
             image_name = os.path.join(directory, filenames[i])
             img = Image.open(image_name)
