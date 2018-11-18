@@ -199,7 +199,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             images = []
             for j in xrange(len(frames)):
                 img = Image.fromarray(frames[j].astype(np.uint8))
-                img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
+                img = np.ndarray(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
                 # if img.width > img.height:
                 #     scale = float(crop_size) / float(img.height)
                 #     img = np.array(cv2.resize(np.array(img), (int(img.width * scale + 1), crop_size))).astype(np.float32)
@@ -209,13 +209,14 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 img = tf.image.per_image_standardization(img)
                 img = tf.reshape(img, [1, crop_size, crop_size, 3])
                 images.append(img)
-            images = np.array(images)
+            images = np.ndarray(images)
             print("[get_image_batch] images shape = %s, elem shape = %s" % (np.shape(images), np.shape(images[0])))
             data.append(images)
             labels.append(label)
             batch_index += 1
 
-    print("[get_image_batch] final data = %s" % (np.shape(data)))
+    data = np.ndarray(data)
+    print("[get_image_batch] final data = %s, elem shape = %s" % (np.shape(data), np.shape(data[0])))
     valid_len = len(data)
     pad_len = batch_size - valid_len
     if pad_len:
@@ -225,7 +226,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             labels.append(labels[j])
             j += 1
 
-    np_arr_label = np.array(labels).astype(np.int64)
+    np_arr_label = np.ndarray(labels).astype(np.int64)
     labels_one_hot = tf.one_hot(np_arr_label, depth=num_classes)
     print("[get_image_batch] len. data = %s, labels_one_hot = %s" % (len(data), tf.shape(labels_one_hot)))
     return data, labels_one_hot, next_batch_start, len(lines)
