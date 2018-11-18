@@ -196,11 +196,10 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
 
         # process the images
         if len(frames) > 0:
-            print("[get_image_batch] len. frames = %s" % len(frames))
             for j in xrange(len(frames)):
                 img = Image.fromarray(frames[j].astype(np.uint8))
                 img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
-
+                print("[get_image_batch] img shape = %s" % (np.shape(img)))
                 # if img.width > img.height:
                 #     scale = float(crop_size) / float(img.height)
                 #     img = np.array(cv2.resize(np.array(img), (int(img.width * scale + 1), crop_size))).astype(np.float32)
