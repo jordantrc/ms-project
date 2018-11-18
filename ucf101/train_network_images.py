@@ -351,7 +351,7 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     more_data = True
     start = time.time()
     while more_data:
-        x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, shuffle=False)
+        x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, crop='center' shuffle=False)
         report_interval = max(1, int(num_samples / 100))
         test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test],
                                 feed_dict={x_test: x_feed, y_true_test: y_feed})
@@ -597,7 +597,7 @@ with tf.Session(config=config) as sess:
     train_hit5_accum = 0.0
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while True and in_epoch <= NUM_EPOCHS:
-        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes, crop='random')
         if j != 0 and j % num_samples < BATCH_SIZE:
             # end of epoch
             # save a model checkpoint and report end of epoch information
