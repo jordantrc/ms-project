@@ -181,7 +181,6 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         random.shuffle(video_indices)
 
     if offset >= 0:
-        video_indices = cycle(video_indices)
         s_index = offset
     
     batch_index = 0
