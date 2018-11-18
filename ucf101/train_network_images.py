@@ -30,13 +30,13 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 NUM_EPOCHS = 16
 MINI_BATCH_SIZE = 50
-BATCH_SIZE = 15
+BATCH_SIZE = 10
 TRAIN_SPLIT = 'train-test-splits/train.list'
 TEST_SPLIT = 'train-test-splits/test.list'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
-VARIABLE_TYPE = 'default'
+VARIABLE_TYPE = 'weight decay'
 ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
@@ -555,6 +555,7 @@ with tf.Session(config=config) as sess:
     in_epoch = 1
     print("START EPOCH %s" % in_epoch)
     start = time.time()
+    epoch_start = time.time()
     # sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
     # if VALIDATE_WITH_TRAIN:
     #     sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
@@ -572,8 +573,8 @@ with tf.Session(config=config) as sess:
             # save a model checkpoint and report end of epoch information
             save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
             save_path = saver.save(sess, save_path)
-            end = time.time()
-            train_time = str(datetime.timedelta(seconds=end - start))
+            epoch_end = time.time()
+            train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
             print("END EPOCH %s, steps completed = %s, epoch training time: %s" % (in_epoch, j, train_time))
             print("model checkpoint saved to %s\n\n" % save_path)
 
@@ -588,7 +589,7 @@ with tf.Session(config=config) as sess:
                 print("learning rate adjusted to %g" % model.current_learning_rate)
 
             print("START EPOCH %s" % in_epoch)
-            start = time.time()
+            epoch_start = time.time()
 
         train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
                                 feed_dict={x: x_feed, 
@@ -669,14 +670,19 @@ with tf.Session(config=config) as sess:
     # save a model checkpoint and report end of epoch information
     save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
     save_path = saver.save(sess, save_path)
-    end = time.time()
-    train_time = str(datetime.timedelta(seconds=end - start))
+    epoch_end = time.time()
+    train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
     print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
     print("model checkpoint saved to %s\n\n" % save_path)
 
+
     # final test
-    test_results = test_network(sess, test_files, run_name, in_epoch)
+    test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
     run_csv_writer.writerow(test_results)
+    end = time.time()
+
+    total_time = str(datetime.timedelta(seconds=end - start))
+    print("END TRAINING total training time: %s" % (total_time))
 
     coord.request_stop()
     coord.join(threads)
