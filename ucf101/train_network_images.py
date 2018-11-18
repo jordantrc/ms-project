@@ -207,6 +207,11 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         frames, _ = get_frames(dirname, frames_per_clip)
         #print("[get_image_batch] len. frames = %s, shape = %s" % (len(frames), np.shape(frames)))
 
+        # flip or not
+        flip = False
+        if random.random() <= 0.5:
+            flip = True
+
         # process the images
         if len(frames) > 0:
             images = []
@@ -222,7 +227,9 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 # img = tf.image.per_image_standardization(img)
                 # if normalize:
                 #     img = preprocessing.normalize(img)
-                
+                if flip:
+                    img = cv2.flip(img, flipMode=1)
+
                 # crop the image
                 # img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
                 if crop == 'center':
@@ -597,7 +604,7 @@ with tf.Session(config=config) as sess:
     train_hit5_accum = 0.0
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while True and in_epoch <= NUM_EPOCHS:
-        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes, crop='random')
+        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
         if j != 0 and j % num_samples < BATCH_SIZE:
             # end of epoch
             # save a model checkpoint and report end of epoch information
