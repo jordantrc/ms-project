@@ -211,11 +211,12 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 images.append(img)
             print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
                    (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
+            images = tf.stack(images)
             data.append(images)
             labels.append(label)
             batch_index += 1
 
-    data = np.ndarray(data)
+    data = tf.stack(data)
     print("[get_image_batch] final data = %s, elem shape = %s" % (np.shape(data), np.shape(data[0])))
     valid_len = len(data)
     pad_len = batch_size - valid_len
