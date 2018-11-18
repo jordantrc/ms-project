@@ -175,6 +175,8 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
     with open(filename, 'r') as file_list:
         text = file_list.read()
         lines = text.split('\n')
+        if '' in lines:
+            lines.remove('')
 
     video_indices = range(len(lines))
     if shuffle:
