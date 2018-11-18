@@ -218,7 +218,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
 
     data = tf.stack(data)
     print("[get_image_batch] final data = %s, elem shape = %s" % (np.shape(data), np.shape(data[0])))
-    valid_len = len(data)
+    valid_len = tf.shape(data).aslist()[0]
     pad_len = batch_size - valid_len
     if pad_len:
         j = 0
