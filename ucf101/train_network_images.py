@@ -160,6 +160,8 @@ def get_frames(directory, frames_per_clip):
             img = Image.open(image_name)
             img_data = np.array(img)
             ret_arr.append(img_data)
+
+    ret_arr = np.stack(ret_arr)
     return ret_arr, s_index
 
 
@@ -190,6 +192,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         print("[get_image_batch] line = %s" % lines[index])
         dirname, label = lines[index].split()
         frames, _ = get_frames(dirname, frames_per_clip)
+        print("[get_image_batch] len. frames = %s, shape = %s" % (len(frames), np.shape(frames)))
 
         # process the images
         if len(frames) > 0:
@@ -197,6 +200,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             for j in xrange(len(frames)):
                 img = Image.fromarray(frames[j].astype(np.uint8))
                 img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
+
                 # if img.width > img.height:
                 #     scale = float(crop_size) / float(img.height)
                 #     img = np.array(cv2.resize(np.array(img), (int(img.width * scale + 1), crop_size))).astype(np.float32)
