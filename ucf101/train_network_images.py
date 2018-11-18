@@ -166,7 +166,7 @@ def get_frames(directory, frames_per_clip):
 def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-1, crop_size=112, shuffle=True):
     '''retrieves a batch of images'''
     # open the file containing the list of clips from which to sample
-    data = []
+    data = np.ndarray()
     labels = []
     lines = []
     s_index = 0
@@ -200,6 +200,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 else:
                     scale = float(crop_size) / float(img.width)
                     img = np.array(cv2.resize(np.array(img), (crop_size, int(img.height * scale + 1)))).astype(np.float32)
+                img = np.reshape([1, crop_size, crop_size, 3])
                 img = tf.image.per_image_standardization(img)
                 data.append(img)
             labels.append(label)
@@ -214,7 +215,6 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             labels.append(labels[j])
             j += 1
 
-    data = np.stack(data)
     np_arr_label = np.array(labels).astype(np.int64)
     labels_one_hot = tf.one_hot(np_arr_label, depth=num_classes)
 
