@@ -187,6 +187,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         if batch_index >= batch_size:
             next_batch_start = index
             break
+        print("line = %s" % lines[index])
         dirname, label = lines[index].split()
         frames, _ = get_frames(dirname, frames_per_clip)
 
