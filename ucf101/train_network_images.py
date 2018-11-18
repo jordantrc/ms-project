@@ -226,9 +226,12 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 
                 # normalize the image
                 if normalize:
-                    img_min = img.min(axis=(0, 1), keepdims=True)
-                    img_max = img.max(axis=(0, 1), keepdims=True)
-                    img = (img - img_min) / (img_max - img_min)
+                    # flatten the image
+                    img_2d = img.reshape((crop_size * crop_size, 3))
+                    # use the sklearn scale function to get mean 0 and unit variance
+                    img = preprocessing.scale(img_2d)
+                    # reshape back to 3d array
+                    img = img.reshape((crop_size, crop_size, 3))
                 images.append(img)
             # print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
             #         (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
