@@ -172,6 +172,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
     labels = []
     lines = []
     s_index = 0
+    next_batch_start = offset
     with open(filename, 'r') as file_list:
         text = file_list.read()
         lines = text.split('\n')
