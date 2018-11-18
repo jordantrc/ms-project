@@ -497,8 +497,8 @@ with tf.Session(config=config) as sess:
 
     y_true_one_hot = tf.one_hot(y_true, depth=model.num_classes)
     y_true_test_one_hot = tf.one_hot(y_true_test, depth=model.num_classes)
-    y_true_class = tf.argmax(y_true, axis=1)
-    y_true_test_class = tf.argmax(y_true_test, axis=1)
+    y_true_class = tf.argmax(y_true_one_hot, axis=1)
+    y_true_test_class = tf.argmax(y_true_test_one_hot, axis=1)
 
     logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
     # logits = model.c3d(x, training=True)
