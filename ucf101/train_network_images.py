@@ -192,7 +192,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         print("[get_image_batch] line = %s" % lines[index])
         dirname, label = lines[index].split()
         frames, _ = get_frames(dirname, frames_per_clip)
-        print("[get_image_batch] len. frames = %s, shape = %s" % (len(frames), np.shape(frames)))
+        #print("[get_image_batch] len. frames = %s, shape = %s" % (len(frames), np.shape(frames)))
 
         # process the images
         if len(frames) > 0:
@@ -209,11 +209,11 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 img = tf.image.per_image_standardization(img)
                 img = tf.reshape(img, [1, crop_size, crop_size, 3])
                 images.append(img)
+                print("[get_image_batch] line = %s" % (np.shape(images)))
             data.append(images)
             labels.append(label)
             batch_index += 1
 
-    data = tf.concat(data, 0)
     print("[get_image_batch] final data = %s" % (np.shape(data)))
     valid_len = len(data)
     pad_len = batch_size - valid_len
