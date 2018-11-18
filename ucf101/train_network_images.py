@@ -319,7 +319,7 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     start = time.time()
     while more_data:
         x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, shuffle=False)
-        report_interval = max(1, int(len(num_samples / 100)))
+        report_interval = max(1, int(num_samples / 100))
         test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test],
                                 feed_dict={x_test: x_feed, y_true_test: y_feed})
         acc = test_results[0]
