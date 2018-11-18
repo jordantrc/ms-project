@@ -192,7 +192,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         try:
             dirname, label = lines[index].split()
         except ValueError:
-            print("Error on line %s" % (lines[index]))
+            print("Error on line [%s]" % (lines[index]))
         label = int(label)
         frames, _ = get_frames(dirname, frames_per_clip)
         #print("[get_image_batch] len. frames = %s, shape = %s" % (len(frames), np.shape(frames)))
