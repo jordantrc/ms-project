@@ -28,7 +28,7 @@ from sklearn import metrics, preprocessing
 from c3d_model import C3DModel
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-NUM_EPOCHS = 16
+NUM_EPOCHS = 100
 MINI_BATCH_SIZE = 50
 BATCH_SIZE = 10
 TRAIN_SPLIT = 'train-test-splits/train.list'
@@ -36,7 +36,7 @@ TEST_SPLIT = 'train-test-splits/test.list'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
-VARIABLE_TYPE = 'weight decay'
+VARIABLE_TYPE = 'default'
 ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
