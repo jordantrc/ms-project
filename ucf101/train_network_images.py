@@ -151,16 +151,20 @@ def get_frames(directory, frames_per_clip):
     s_index = 0
     for parent, dirnames, filenames in os.walk(directory):
         if len(filenames) < frames_per_clip:
-            s_index = 0
+            filenames = cycle(sorted(filenames))
+            while len(ret_arr) < frames_per_clip:
+                image_name = os.path.join(directory, filenames[i])
+                img = Image.open(image_name)
+                img_data = np.array(img)
+                ret_arr.append(img_data)
         else:
+            filenames = sorted(filenames)
             s_index = random.randint(0, len(filenames) - frames_per_clip)
-        
-        filenames = cycle(sorted(filenames))
-        for i in range(s_index, s_index + frames_per_clip):
-            image_name = os.path.join(directory, filenames[i])
-            img = Image.open(image_name)
-            img_data = np.array(img)
-            ret_arr.append(img_data)
+            for i in range(s_index, s_index + frames_per_clip):
+                image_name = os.path.join(directory, filenames[i])
+                img = Image.open(image_name)
+                img_data = np.array(img)
+                ret_arr.append(img_data)
 
     ret_arr = np.stack(ret_arr)
     return ret_arr, s_index
