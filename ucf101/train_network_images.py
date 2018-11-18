@@ -199,7 +199,6 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             for j in xrange(len(frames)):
                 img = Image.fromarray(frames[j].astype(np.uint8))
                 img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
-                print("img len = %s, shape = %s" % (len(img), np.shape(img)))
                 # if img.width > img.height:
                 #     scale = float(crop_size) / float(img.height)
                 #     img = np.array(cv2.resize(np.array(img), (int(img.width * scale + 1), crop_size))).astype(np.float32)
@@ -211,6 +210,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             labels.append(label)
             batch_index += 1
 
+    print("[get_image_batch] data = %s" % (np.shape(data)))
     valid_len = len(data)
     pad_len = batch_size - valid_len
     if pad_len:
