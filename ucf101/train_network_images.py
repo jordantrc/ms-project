@@ -302,9 +302,8 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     start = time.time()
     while more_data:
         x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, shuffle=False)
-        feed_dict = {x_test: x_feed, y_true_test: y_feed}
         test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test],
-                                feed_dict=feed_dict)
+                                feed_dict={x_test: x_feed, y_true_test: y_feed})
         acc = test_results[0]
         y_pred_class_actual = test_results[1]
         y_true_class_actual = test_results[2]
@@ -570,9 +569,8 @@ with tf.Session(config=config) as sess:
             print("START EPOCH %s" % in_epoch)
             start = time.time()
 
-        feed_dict = {x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate}
         train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
-                                feed_dict=feed_dict)
+                                feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
         loss_op_out = train_result[1]
         train_acc = train_result[2]
         x_actual = train_result[3]
@@ -613,9 +611,8 @@ with tf.Session(config=config) as sess:
                 mini_batch_hit5 = 0.0
                 for k in range(MINI_BATCH_SIZE):
                     x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
-                    feed_dict = {x_test: x_feed, y_true_test: y_feed}
                     acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x],
-                                                               feed_dict=feed_dict)
+                                                               feed_dict={x_test: x_feed, y_true_test: y_feed})
                     # print("type(x) = %s, x = %s" % (type(x_out), x_out))
                     mini_batch_acc += acc
                     hit5_counter = collections.Counter(hit5_out)
