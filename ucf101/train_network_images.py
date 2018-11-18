@@ -24,7 +24,7 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import PIL.Image as Image
-from sklearn import metrics
+from sklearn import metrics, preprocessing
 from c3d_model import C3DModel
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
@@ -165,7 +165,7 @@ def get_frames(directory, frames_per_clip):
     return ret_arr, s_index
 
 
-def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-1, crop_size=112, shuffle=True):
+def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-1, crop_size=112, shuffle=True, normalize=True):
     '''retrieves a batch of images'''
     # open the file containing the list of clips from which to sample
     data = []
@@ -209,6 +209,8 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 #     img = np.array(cv2.resize(np.array(img), (crop_size, int(img.height * scale + 1)))).astype(np.float32)
                 # img = tf.reshape(img, [1, crop_size, crop_size, 3])
                 # img = tf.image.per_image_standardization(img)
+                if normalize:
+                    img = preprocessing.scale(img)
                 images.append(img)
             # print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
             #        (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
@@ -306,7 +308,6 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     '''tests the neural network'''
     # sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
     k = 0
-    report_interval = max(1, int(len(test_files) / 100))
     cumulative_accuracy = 0.0
     cumulative_hit_at_5 = 0.0
     predictions = []
@@ -316,6 +317,7 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     start = time.time()
     while more_data:
         x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, shuffle=False)
+        report_interval = max(1, int(len(num_samples / 100))
         test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test],
                                 feed_dict={x_test: x_feed, y_true_test: y_feed})
         acc = test_results[0]
