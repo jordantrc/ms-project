@@ -196,6 +196,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
 
         # process the images
         if len(frames) > 0:
+            images = []
             for j in xrange(len(frames)):
                 img = Image.fromarray(frames[j].astype(np.uint8))
                 img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
@@ -206,11 +207,9 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 #     scale = float(crop_size) / float(img.width)
                 #     img = np.array(cv2.resize(np.array(img), (crop_size, int(img.height * scale + 1)))).astype(np.float32)
                 img = tf.image.per_image_standardization(img)
-                print("[get_image_batch] img post-standard. = %s" % (np.shape(img)))
                 img = tf.reshape(img, [1, crop_size, crop_size, 3])
-                print("[get_image_batch] img post-reshape = %s" % (np.shape(img)))
-                data.append(img)
-                print("[get_image_batch] data = %s" % (np.shape(data)))
+                images.append(img)
+            data.append(images)
             labels.append(label)
             batch_index += 1
 
