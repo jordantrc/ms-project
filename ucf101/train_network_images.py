@@ -40,6 +40,8 @@ VARIABLE_TYPE = 'default'
 ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
+IMAGE_CROPPING = 'rescale'
+IMAGE_NORMALIZATION = False
 
 def print_help():
     '''prints a help message'''
@@ -358,7 +360,13 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     more_data = True
     start = time.time()
     while more_data:
-        x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes, offset=offset, shuffle=False)
+        # for testing, do not use random cropping
+        if IMAGE_CROPPING == 'random':
+            test_crop = 'center'
+        else:
+            test_crop = IMAGE_CROPPING
+        x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes,
+                                                              crop=test_crop, offset=offset, shuffle=False)
         report_interval = max(1, int(num_samples / 100))
         test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test],
                                 feed_dict={x_test: x_feed, y_true_test: y_feed})
@@ -514,6 +522,8 @@ run_log_fd.write("VARIABLE_TYPE = %s\n" % (VARIABLE_TYPE))
 run_log_fd.write("ONE_CLIP_PER_VIDEO = %s" % (ONE_CLIP_PER_VIDEO))
 run_log_fd.write("LEARNING_RATE_DECAY = %s" % (LEARNING_RATE_DECAY))
 run_log_fd.write("OPTIMIZER = %s" % (OPTIMIZER))
+run_log_fd.write("IMAGE_CROPPING = %s" % (IMAGE_CROPPING))
+run_log_fd.write("IMAGE_NORMALIZATION = %s" % (IMAGE_NORMALIZATION))
 # run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
 # Tensorflow configuration
@@ -604,7 +614,8 @@ with tf.Session(config=config) as sess:
     train_hit5_accum = 0.0
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while True and in_epoch <= NUM_EPOCHS:
-        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                         crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
         if j != 0 and j % num_samples < BATCH_SIZE:
             # end of epoch
             # save a model checkpoint and report end of epoch information
@@ -671,7 +682,11 @@ with tf.Session(config=config) as sess:
                 mini_batch_acc = 0.0
                 mini_batch_hit5 = 0.0
                 for k in range(MINI_BATCH_SIZE):
-                    x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, 1, model.frames_per_clip, model.num_classes)
+                    if IMAGE_CROPPING == 'random':
+                        test_crop = 'center'
+                    else:
+                        test_crop = IMAGE_CROPPING
+                    x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, 1, model.frames_per_clip, model.num_classes, crop=test_crop)
                     acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x_test],
                                                                feed_dict={x_test: x_feed, y_true_test: y_feed})
                     # print("type(x) = %s, x = %s" % (type(x_out), x_out))
