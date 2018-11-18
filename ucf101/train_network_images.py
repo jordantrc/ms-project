@@ -208,6 +208,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 #     scale = float(crop_size) / float(img.width)
                 #     img = np.array(cv2.resize(np.array(img), (crop_size, int(img.height * scale + 1)))).astype(np.float32)
                 # img = tf.reshape(img, [1, crop_size, crop_size, 3])
+                img = tf.image.per_image_standardization(img)
                 images.append(img)
             print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
                    (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
@@ -490,8 +491,6 @@ with tf.Session(config=config) as sess:
     x_test = tf.placeholder(tf.float32, shape=[1, model.frames_per_clip, 112, 112, 3])
     y_true_test = tf.placeholder(tf.int64, shape=[1])
 
-    x = tf.image.per_image_standardization(x)
-    x_test = tf.image.per_image_standardization(x_test)
     y_true = tf.one_hot(y_true, depth=model.num_classes)
     y_true_test = tf.one_hot(y_true_test, depth=model.num_classes)
     y_true_class = tf.argmax(y_true, axis=1)
