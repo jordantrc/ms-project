@@ -166,7 +166,7 @@ def get_frames(directory, frames_per_clip):
 def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-1, crop_size=112, shuffle=True):
     '''retrieves a batch of images'''
     # open the file containing the list of clips from which to sample
-    data = np.ndarray()
+    data = []
     labels = []
     lines = []
     s_index = 0
@@ -215,6 +215,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             labels.append(labels[j])
             j += 1
 
+    print("date = %s, shape = %s, type = %s" % (date, np.shape(date), type(date)))
     np_arr_label = np.array(labels).astype(np.int64)
     labels_one_hot = tf.one_hot(np_arr_label, depth=num_classes)
 
