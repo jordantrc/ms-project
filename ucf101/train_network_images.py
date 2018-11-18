@@ -172,7 +172,7 @@ def get_frames(directory, frames_per_clip):
     return ret_arr, s_index
 
 
-def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-1, crop_size=112, shuffle=True, normalize=True):
+def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-1, crop_size=112, crop='center', shuffle=True, normalize=True):
     '''retrieves a batch of images'''
     # open the file containing the list of clips from which to sample
     data = []
@@ -212,7 +212,6 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             images = []
             for j in xrange(len(frames)):
                 img = Image.fromarray(frames[j].astype(np.uint8))
-                img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
                 # if img.width > img.height:
                 #     scale = float(crop_size) / float(img.height)
                 #     img = np.array(cv2.resize(np.array(img), (int(img.width * scale + 1), crop_size))).astype(np.float32)
@@ -224,10 +223,23 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 # if normalize:
                 #     img = preprocessing.normalize(img)
                 
+                # crop the image
+                # img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
+                if crop == 'center':
+                    # center crop
+                    crop_x = int((img.shape[0] - crop_size) / 2)
+                    crop_y = int((img.shape[1] - crop_size) / 2)
+                    img = img[crop_x:crop_x + crop_size, crop_y:crop_y + crop_size, :].astype(np.float32)
+                elif crop == 'rescale':
+                    # rescale to crop size
+                    img = np.array(cv2.resize(np.array(img), (crop_size, crop_size))).astype(np.float32)
+                elif crop == 'random':
+                    crop_x = random.randint(0, img.shape[0] - crop_size)
+                    crop_y = random.randint(0, img.shape[1] - crop_size)
+                    img = img[crop_x:crop_x + crop_size, crop_y:crop_y + crop_size, :].astype(np.float32)
+
                 # normalize the image
                 if normalize:
-                    # scale between -0.5 and 0.5
-                    img = (img / 255.0) - 0.5
                     # flatten the image
                     img_2d = img.reshape((crop_size * crop_size, 3))
                     # use the sklearn scale function to get mean 0 and unit variance
