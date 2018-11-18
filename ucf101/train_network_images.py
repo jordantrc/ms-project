@@ -226,6 +226,8 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 
                 # normalize the image
                 if normalize:
+                    # scale between -0.5 and 0.5
+                    img = (img / 255.0) - 0.5
                     # flatten the image
                     img_2d = img.reshape((crop_size * crop_size, 3))
                     # use the sklearn scale function to get mean 0 and unit variance
