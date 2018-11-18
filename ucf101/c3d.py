@@ -3,8 +3,8 @@ import tensorflow as tf
 
 # t = number of frames, h = height, w = width, c = number of channels
 INPUT_DATA_SIZE = {"t": 250, "h": 112, "w": 112, "c": 3}
-WEIGHT_STDDEV = 0.1
-BIAS = 0.1
+WEIGHT_STDDEV = 0.04
+BIAS = 0.04
 WEIGHT_DECAY = 0.0005
 BIAS_DECAY = 0.0
 
