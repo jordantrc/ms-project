@@ -191,6 +191,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
             break
         print("[get_image_batch] line = %s" % lines[index])
         dirname, label = lines[index].split()
+        label = int(label)
         frames, _ = get_frames(dirname, frames_per_clip)
         #print("[get_image_batch] len. frames = %s, shape = %s" % (len(frames), np.shape(frames)))
 
