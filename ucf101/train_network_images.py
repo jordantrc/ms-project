@@ -152,8 +152,10 @@ def get_frames(directory, frames_per_clip):
     for parent, dirnames, filenames in os.walk(directory):
         if len(filenames) < frames_per_clip:
             filenames = cycle(sorted(filenames))
-            while len(ret_arr) < frames_per_clip:
-                image_name = os.path.join(directory, filenames[i])
+            for filename in filenames:
+                if len(ret_arr) == frames_per_clip:
+                    break
+                image_name = os.path.join(directory, filename)
                 img = Image.open(image_name)
                 img_data = np.array(img)
                 ret_arr.append(img_data)
