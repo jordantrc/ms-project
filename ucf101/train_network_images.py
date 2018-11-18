@@ -189,7 +189,7 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
         if batch_index >= batch_size:
             next_batch_start = index
             break
-        print("[get_image_batch] line = %s" % lines[index])
+        #print("[get_image_batch] line = %s" % lines[index])
         dirname, label = lines[index].split()
         label = int(label)
         frames, _ = get_frames(dirname, frames_per_clip)
@@ -210,13 +210,13 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 # img = tf.reshape(img, [1, crop_size, crop_size, 3])
                 # img = tf.image.per_image_standardization(img)
                 images.append(img)
-            print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
+            #print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
                    (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
             data.append(images)
             labels.append(label)
             batch_index += 1
 
-    print("[get_image_batch] final data = %s, elem shape = %s" % (np.shape(data), np.shape(data[0])))
+    #print("[get_image_batch] final data = %s, elem shape = %s" % (np.shape(data), np.shape(data[0])))
     valid_len = len(data)
     pad_len = batch_size - valid_len
     if pad_len:
@@ -230,8 +230,8 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
     np_arr_label = np.reshape(np_arr_label, (batch_size))
     data = np.array(data).astype(np.float32)
     data = np.reshape(data, (batch_size, frames_per_clip, crop_size, crop_size, 3))
-    print("[get_image_batch] data = %s, np_arr_label = %s" % (np.shape(data), np.shape(np_arr_label)))
-    print("[get_image_batch] np_arr_label = %s" % (np_arr_label))
+    #print("[get_image_batch] data = %s, np_arr_label = %s" % (np.shape(data), np.shape(np_arr_label)))
+    #print("[get_image_batch] np_arr_label = %s" % (np_arr_label))
     return data, np_arr_label, next_batch_start, len(lines)
 
 
@@ -560,7 +560,7 @@ with tf.Session(config=config) as sess:
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while True and in_epoch <= NUM_EPOCHS:
         x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
-        if j != 0 and j % num_samples == 0:
+        if j != 0 and j % num_samples < BATCH_SIZE:
             # end of epoch
             # save a model checkpoint and report end of epoch information
             save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
