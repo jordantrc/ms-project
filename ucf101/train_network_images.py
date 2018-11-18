@@ -210,8 +210,8 @@ def get_image_batch(filename, batch_size, frames_per_clip, num_classes, offset=-
                 # img = tf.reshape(img, [1, crop_size, crop_size, 3])
                 # img = tf.image.per_image_standardization(img)
                 images.append(img)
-            #print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
-                   (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
+            # print("[get_image_batch] images shape = %s, type = %s, elem shape = %s, type = %s" %
+            #        (np.shape(images), type(images), np.shape(images[0]), type(images[0])))
             data.append(images)
             labels.append(label)
             batch_index += 1
