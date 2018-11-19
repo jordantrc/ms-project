@@ -610,7 +610,7 @@ with tf.Session(config=config) as sess:
 
     step = 0
     _, _, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
-    max_steps = int(num_samples * NUM_EPOCHS / BATCH_SIZE)
+    max_steps = int((num_samples * NUM_EPOCHS / BATCH_SIZE) * sample)
 
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while step < max_steps:
