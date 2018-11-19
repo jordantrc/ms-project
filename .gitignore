@@ -8,3 +8,4 @@
 *.log
 *.xlsx
 *.nb.html
+**/.ipynb_checkpoints

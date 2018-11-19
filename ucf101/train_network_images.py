@@ -589,7 +589,7 @@ with tf.Session(config=config) as sess:
     # eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
     # eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
 
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    init_op = tf.global_variables_initializer()
 
     saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
     sess.run(init_op)
@@ -631,7 +631,7 @@ with tf.Session(config=config) as sess:
 
         if step % 10 == 0:
             # save a model checkpoint
-            save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+            save_path = os.path.join(model.model_dir, "model_step_%s.ckpt" % step)
             save_path = saver.save(sess, save_path)
             
             # train accuracy

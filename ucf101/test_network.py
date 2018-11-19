@@ -91,16 +91,12 @@ def plot_confusion_matrix(cm, classes, filename,
 
 
 # specify a model to load or use the default
-if len(sys.argv) == 2:
-    model_to_load = sys.argv[1]
+if len(sys.argv) == 3:
+    run_name = sys.argv[1]
+    model_to_load = sys.argv[2]
 else:
-    model_dir = "/home/jordanc/datasets/UCF-101/model_ckpts"
-    # generate list of model checkpoints, get the latest
-    models = os.listdir(model_dir)
-    models.sort()
-    latest_model = models[-1]
-    latest_model = latest_model[:latest_model.index('.ckpt') + len('.ckpt')]
-    model_to_load = os.path.join(model_dir, latest_model)
+    print("Provide run name and model")
+    sys.exit(1)
 
 # get the list of class names
 class_names = []
@@ -115,6 +111,10 @@ with open(CLASS_LIST) as class_fd:
 assert len(class_names) == NUM_CLASSES
 
 model = c3d_model.C3DModel()
+
+run_log_file = 'runs/test_%s.log' % run_name
+run_log_fd = open(run_log_file, 'w', 0)
+run_log_fd.write("run name = %s" % run_name, sample, included_classes)
 
 with tf.Session() as sess:
     coord = tf.train.Coordinator()
@@ -143,6 +143,7 @@ with tf.Session() as sess:
     offset = 0
     predictions = []
     labels = []
+    run_log_fd.write("true_class,predicted_class,hit_at_5")
     while step < int(num_samples / BATCH_SIZE):
         x_feed, y_feed, offset, _ = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
                                                     offset=offset, crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
