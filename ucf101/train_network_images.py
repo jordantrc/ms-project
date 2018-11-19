@@ -28,7 +28,7 @@ from sklearn import metrics, preprocessing
 from c3d_model import C3DModel
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 16
 MINI_BATCH_SIZE = 50
 BATCH_SIZE = 10
 TRAIN_SPLIT = 'train-test-splits/train.list'
@@ -542,17 +542,15 @@ with tf.Session(config=config) as sess:
 
     # placeholders and constants
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
-    train_filenames = tf.placeholder(tf.string, shape=[None])
-    test_filenames = tf.placeholder(tf.string, shape=[None])
     x = tf.placeholder(tf.float32, shape=[BATCH_SIZE, model.frames_per_clip, 112, 112, 3])
     y_true = tf.placeholder(tf.int64, shape=[BATCH_SIZE])
-    x_test = tf.placeholder(tf.float32, shape=[1, model.frames_per_clip, 112, 112, 3])
-    y_true_test = tf.placeholder(tf.int64, shape=[1])
+    # x_test = tf.placeholder(tf.float32, shape=[1, model.frames_per_clip, 112, 112, 3])
+    # y_true_test = tf.placeholder(tf.int64, shape=[1])
 
     y_true_one_hot = tf.one_hot(y_true, depth=model.num_classes)
-    y_true_test_one_hot = tf.one_hot(y_true_test, depth=model.num_classes)
+    # y_true_test_one_hot = tf.one_hot(y_true_test, depth=model.num_classes)
     y_true_class = tf.argmax(y_true_one_hot, axis=1)
-    y_true_test_class = tf.argmax(y_true_test_one_hot, axis=1)
+    # y_true_test_class = tf.argmax(y_true_test_one_hot, axis=1)
 
     logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
     # logits = model.c3d(x, training=True)
@@ -581,14 +579,14 @@ with tf.Session(config=config) as sess:
 
     # model evaluation
     # logits_test = model.c3d(x_test, training=False)
-    logits_test = model.inference_3d(x_test, weights, biases, 1, False)
-    y_pred_test = tf.nn.softmax(logits_test)
-    y_pred_test_class = tf.argmax(y_pred_test, axis=1)
+    # logits_test = model.inference_3d(x_test, weights, biases, 1, False)
+    # y_pred_test = tf.nn.softmax(logits_test)
+    # y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
-    eval_hit_5 = tf.nn.in_top_k(logits_test, y_true_test_class, 5)
-    eval_top_5 = tf.nn.top_k(logits_test, k=5)
-    eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
-    eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
+    # eval_hit_5 = tf.nn.in_top_k(logits_test, y_true_test_class, 5)
+    # eval_top_5 = tf.nn.top_k(logits_test, k=5)
+    # eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
+    # eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
 
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
@@ -609,132 +607,174 @@ with tf.Session(config=config) as sess:
     # else:
     #     sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
 
-    j = 0
-    train_acc_accum = 0.0
-    train_hit5_accum = 0.0
+    step = 0
+    _, _, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+    max_steps = int(num_samples * NUM_EPOCHS / BATCH_SIZE)
+
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
-    while True and in_epoch <= NUM_EPOCHS:
-        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
-                                                         crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
-        if j != 0 and j % num_samples < BATCH_SIZE:
-            # end of epoch
-            # save a model checkpoint and report end of epoch information
-            save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
-            save_path = saver.save(sess, save_path)
-            epoch_end = time.time()
-            train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
-            print("END EPOCH %s, steps completed = %s, epoch training time: %s" % (in_epoch, j, train_time))
-            print("model checkpoint saved to %s\n\n" % save_path)
-
-            # test the network
-            test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
-            run_csv_writer.writerow(test_results)
-
+    while step < max_steps:
+        if step % int(num_samples / BATCH_SIZE) == 0:
             in_epoch += 1
-
             if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
                 model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
                 print("learning rate adjusted to %g" % model.current_learning_rate)
 
-            print("START EPOCH %s" % in_epoch)
-            epoch_start = time.time()
+        step_start = time.time()
+        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                         crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
+        sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+        step_end = time.time()
+        print("epoch = %s step %s - %ss" % (in_epoch, step, step_end - step_start))
 
-        train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
-                                feed_dict={x: x_feed, 
-                                           y_true: y_feed, 
-                                           learning_rate: model.current_learning_rate})
-        loss_op_out = train_result[1]
-        train_acc = train_result[2]
-        x_actual = train_result[3]
-        y_true_actual = train_result[4]
-        y_true_class_actual = train_result[5]
-        y_pred_actual = train_result[6]
-        y_pred_class_actual = train_result[7]
-        logits_out = train_result[8]
-        hit5_out = train_result[9]
-
-        # print("train_acc = %s" % train_acc)
-        # train_acc is the number of correct responses divided by the batch size
-        # e.g. 3 correct responses/30 batch size = 0.1
-        train_acc_accum += train_acc
-
-        # print("hit_5_out = %s" % hit5_out)
-        # count the trues in the hit_5_out array
-        hit5_counter = collections.Counter(hit5_out)
-        hit5_out_trues = float(hit5_counter[True])
-        # print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
-        train_hit5_accum += float(hit5_out_trues / len(hit5_out))
-
-        # report out results and run a test mini-batch every now and then
-        if j != 0 and j % (report_step * BATCH_SIZE) == 0:
-            #print("logits = %s" % logits_out)
-            #print("x = %s" % x_actual)
-            #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
-            #print("train_acc = %s" % train_acc)
-            print("hit5_out = %s, length = %s" % (hit5_out, len(hit5_out)))
-            print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), hit5_out_trues / len(hit5_out)))
-            run_time = time.time()
-            run_time_str = str(datetime.timedelta(seconds=run_time - start))
-            train_step_acc = train_acc_accum / report_step * BATCH_SIZE
-
-            # mini batch accuracy - every 5 report step iterations
-            if j % (report_step * BATCH_SIZE * 5) == 0:
-                mini_batch_acc = 0.0
-                mini_batch_hit5 = 0.0
-                for k in range(MINI_BATCH_SIZE):
-                    if IMAGE_CROPPING == 'random':
-                        test_crop = 'center'
-                    else:
-                        test_crop = IMAGE_CROPPING
-                    x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, 1, model.frames_per_clip, model.num_classes, crop=test_crop)
-                    acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x_test],
-                                                               feed_dict={x_test: x_feed, y_true_test: y_feed})
-                    # print("type(x) = %s, x = %s" % (type(x_out), x_out))
-                    mini_batch_acc += acc
-                    hit5_counter = collections.Counter(hit5_out)
-                    hit5_out_trues = hit5_counter[True]
-                    # print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
-                    mini_batch_hit5 += float(hit5_out_trues / len(hit5_out))
-
-                mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
-                mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
-                
-                print("\tstep %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s, y_true = %s, top 5 = %s" %
-                     (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5, y_true_class_actual, top_5_out))
-                csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
+        if step % 10 == 0:
+            # save a model checkpoint
+            save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+            save_path = saver.save(sess, save_path)
             
-            else:
-                train_acc_accum = train_acc_accum / report_step
-                train_hit5_accum = train_hit5_accum / report_step
-                print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
-                     (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
-                csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
+            # train accuracy
+            acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+            print("Train accuracy = %s" % acc)
 
-            # write the csv data to 
-            run_csv_writer.writerow(csv_row)
-            train_acc_accum = 0.0
-            train_hit5_accum = 0.0
+            # validation accuracy
+            x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                             crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
+            acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+            print("Validation accuracy = %s" % acc)
 
-        j += BATCH_SIZE
+        step += 1
 
-    print("end training epochs")
-    # end of epoch
-    # save a model checkpoint and report end of epoch information
-    save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
-    save_path = saver.save(sess, save_path)
-    epoch_end = time.time()
-    train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
-    print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
-    print("model checkpoint saved to %s\n\n" % save_path)
+    # validate the model
+    _, _, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+    step = 0
+    cum_accuracy = 0.0
+    while step < num_samples:
+        x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                         crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
+        acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+        print("step %s - accuracy = %s" % (step, acc))
+        cum_accuracy += acc
+        step += 1
 
+    print("Cumulative accuracy = %s, steps = %s" % (cum_accuracy, step))
 
-    # final test
-    test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
-    run_csv_writer.writerow(test_results)
-    end = time.time()
+        # if j != 0 and j % num_samples < BATCH_SIZE:
+        #     # end of epoch
+        #     # save a model checkpoint and report end of epoch information
+        #     save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+        #     save_path = saver.save(sess, save_path)
+        #     epoch_end = time.time()
+        #     train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
+        #     print("END EPOCH %s, steps completed = %s, epoch training time: %s" % (in_epoch, j, train_time))
+        #     print("model checkpoint saved to %s\n\n" % save_path)
 
-    total_time = str(datetime.timedelta(seconds=end - start))
-    print("END TRAINING total training time: %s" % (total_time))
+        #     # test the network
+        #     test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
+        #     run_csv_writer.writerow(test_results)
+
+        #     in_epoch += 1
+
+        #     if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
+        #         model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
+        #         print("learning rate adjusted to %g" % model.current_learning_rate)
+
+        #     print("START EPOCH %s" % in_epoch)
+        #     epoch_start = time.time()
+
+        # train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
+        #                         feed_dict={x: x_feed, 
+        #                                    y_true: y_feed, 
+        #                                    learning_rate: model.current_learning_rate})
+        # loss_op_out = train_result[1]
+        # train_acc = train_result[2]
+        # x_actual = train_result[3]
+        # y_true_actual = train_result[4]
+        # y_true_class_actual = train_result[5]
+        # y_pred_actual = train_result[6]
+        # y_pred_class_actual = train_result[7]
+        # logits_out = train_result[8]
+        # hit5_out = train_result[9]
+
+        # # print("train_acc = %s" % train_acc)
+        # # train_acc is the number of correct responses divided by the batch size
+        # # e.g. 3 correct responses/30 batch size = 0.1
+        # train_acc_accum += train_acc
+
+        # # print("hit_5_out = %s" % hit5_out)
+        # # count the trues in the hit_5_out array
+        # hit5_counter = collections.Counter(hit5_out)
+        # hit5_out_trues = float(hit5_counter[True])
+        # # print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
+        # train_hit5_accum += float(hit5_out_trues / len(hit5_out))
+
+        # # report out results and run a test mini-batch every now and then
+        # if j != 0 and j % (report_step * BATCH_SIZE) == 0:
+        #     #print("logits = %s" % logits_out)
+        #     #print("x = %s" % x_actual)
+        #     #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
+        #     #print("train_acc = %s" % train_acc)
+        #     print("hit5_out = %s, length = %s" % (hit5_out, len(hit5_out)))
+        #     print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), hit5_out_trues / len(hit5_out)))
+        #     run_time = time.time()
+        #     run_time_str = str(datetime.timedelta(seconds=run_time - start))
+        #     train_step_acc = train_acc_accum / report_step * BATCH_SIZE
+
+        #     # mini batch accuracy - every 5 report step iterations
+        #     if j % (report_step * BATCH_SIZE * 5) == 0:
+        #         mini_batch_acc = 0.0
+        #         mini_batch_hit5 = 0.0
+        #         for k in range(MINI_BATCH_SIZE):
+        #             if IMAGE_CROPPING == 'random':
+        #                 test_crop = 'center'
+        #             else:
+        #                 test_crop = IMAGE_CROPPING
+        #             x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, 1, model.frames_per_clip, model.num_classes, crop=test_crop)
+        #             acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x_test],
+        #                                                        feed_dict={x_test: x_feed, y_true_test: y_feed})
+        #             # print("type(x) = %s, x = %s" % (type(x_out), x_out))
+        #             mini_batch_acc += acc
+        #             hit5_counter = collections.Counter(hit5_out)
+        #             hit5_out_trues = hit5_counter[True]
+        #             # print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
+        #             mini_batch_hit5 += float(hit5_out_trues / len(hit5_out))
+
+        #         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
+        #         mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
+                
+        #         print("\tstep %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s, y_true = %s, top 5 = %s" %
+        #              (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5, y_true_class_actual, top_5_out))
+        #         csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
+            
+        #     else:
+        #         train_acc_accum = train_acc_accum / report_step
+        #         train_hit5_accum = train_hit5_accum / report_step
+        #         print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
+        #              (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
+        #         csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
+
+        #     # write the csv data to 
+        #     run_csv_writer.writerow(csv_row)
+        #     train_acc_accum = 0.0
+        #     train_hit5_accum = 0.0
+
+        # j += BATCH_SIZE
+
+    # print("end training epochs")
+    # # end of epoch
+    # # save a model checkpoint and report end of epoch information
+    # save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+    # save_path = saver.save(sess, save_path)
+    # epoch_end = time.time()
+    # train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
+    # print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
+    # print("model checkpoint saved to %s\n\n" % save_path)
+
+    # # final test
+    # test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
+    # run_csv_writer.writerow(test_results)
+    # end = time.time()
+
+    # total_time = str(datetime.timedelta(seconds=end - start))
+    # print("END TRAINING total training time: %s" % (total_time))
 
     coord.request_stop()
     coord.join(threads)
