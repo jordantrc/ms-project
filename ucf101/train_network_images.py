@@ -657,7 +657,7 @@ with tf.Session(config=config) as sess:
         x_feed, y_feed, offset, _ = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
                                                     offset=offset, crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
                                                     shuffle=False)
-        y_pred_out, hit_5_out = sess.run([y_pred, hit_5], feed_dict={x: x_feed})
+        y_pred_out, hit_5_out = sess.run([y_pred, hit_5], feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
 
         for i in BATCH_SIZE:
             run_log_fd.write("%s,%s,%s" % (true_class[i], y_pred_out[i], hit_5_out[i]))
