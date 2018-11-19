@@ -18,11 +18,16 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn import metrics
 
+from train_network_images import get_image_batch
+
 
 CLASS_LIST = "/home/jordanc/datasets/UCF-101/classInd.txt"
-DROPOUT = 1.0
 NUM_CLASSES = 101
-TEST_DIR = "/home/jordanc/datasets/UCF-101/tfrecords/test"
+BATCH_SIZE = 10
+TEST_SPLIT = "train-test-splits/test.list"
+TEST_IMAGE_CROPPING = 'center'
+IMAGE_NORMALIZATION = True
+
 
 def tf_confusion_matrix(predictions, labels, classes):
     """
@@ -45,6 +50,7 @@ def tf_confusion_matrix(predictions, labels, classes):
     cm = metrics.confusion_matrix(y_true, y_pred, classes)
 
     return cm
+
 
 def plot_confusion_matrix(cm, classes, filename,
                           normalize=True,
@@ -108,58 +114,20 @@ with open(CLASS_LIST) as class_fd:
 
 assert len(class_names) == NUM_CLASSES
 
-# get the list of test files
-test_files = os.listdir(TEST_DIR)
-test_files = [os.path.join(TEST_DIR, x) for x in test_files]
+model = c3d_model.C3DModel()
 
 with tf.Session() as sess:
-    # init variables
-    # tf.set_random_seed(1234)
-    # weights, biases = c3d.get_variables(c3d_model.NUM_CLASSES)
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
+    weights, biases = c3d.get_variables(model.num_classes)
 
-    # placeholders
-    # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
-    test_filenames = tf.placeholder(tf.string, shape=[None])
+    x = tf.placeholder(tf.float32, shape=[BATCH_SIZE, model.frames_per_clip, 112, 112, 3])
 
-    # using tf.data.TFRecordDataset iterator
-    dataset = tf.data.TFRecordDataset(test_filenames)
-    dataset = dataset.map(c3d_model._parse_function)
-    dataset = dataset.repeat(1)
-    dataset = dataset.batch(c3d_model.BATCH_SIZE)
-    iterator = dataset.make_initializable_iterator()
-    x, y_true = iterator.get_next()
+    logits = model.inference_3d(x, weights, biases, BATCH_SIZE, False)
+    y_pred = tf.nn.softmax(logits)
+    y_pred_class = tf.argmax(y_pred, axis=1)
 
-    # print("x = %s, shape = %s" % (x, x.get_shape().as_list()))
-    # convert x to float, reshape to 5d
-    # x = tf.cast(x, tf.float32)
-    # print("reshaping x")
-    # print("x pre-reshape = %s, shape = %s" % (x, x.get_shape().as_list()))
-    # print("x pre-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-    x = tf.reshape(x, [c3d_model.BATCH_SIZE, c3d_model.FRAMES_PER_VIDEO, 112, 112, 3])
-
-    # generate clips for each video in the batch
-    x = c3d_model._clip_image_batch(x, c3d_model.FRAMES_PER_CLIP, True)
-
-    print("x post-clip = %s, shape = %s" % (x, x.get_shape().as_list()))
-
-    # y_true_class = tf.argmax(y_true, axis=1)
-
-    # logits = c3d_model.inference_3d(x, c3d_model.DROPOUT, c3d_model.BATCH_SIZE, weights, biases)
-
-    # y_pred = tf.nn.softmax(logits)
-    # y_pred_class = tf.argmax(y_pred, axis=1)
-
-    # loss and optimizer
-    # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    # optimizer = tf.train.AdamOptimizer(learning_rate=1.0)
-
-    # train_op = optimizer.minimize(loss_op)
-
-    # evaluate the model
-    # correct_pred = tf.equal(y_pred_class, y_true_class)
-    # accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-
-    init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    init_op = tf.global_variables_initializer()
 
     # restore the model
     saver = tf.train.Saver()
@@ -168,35 +136,26 @@ with tf.Session() as sess:
 
     # test a single run through of the test data
     sess.run(init_op)
-    sess.run(iterator.initializer, feed_dict={test_filenames: test_files})
 
-    i = 0
+    step = 0
     cumulative_accuracy = 0.0
+    _, _, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+    offset = 0
     predictions = []
     labels = []
-    while True:
-        try:
-            test_results = sess.run([accuracy, y_pred_class, y_true_class, correct_pred])
-            acc = test_results[0]
-            y_pred_class_actual = test_results[1]
-            y_true_class_actual = test_results[2]
-            correct_pred_actual = test_results[3]
-            print("[%s] correct = %s, pred/true = [%s/%s], accuracy = %s" % (i, correct_pred_actual, 
-                                                                             y_pred_class_actual,
-                                                                             y_true_class_actual,
-                                                                             acc))
+    while step < int(num_samples / BATCH_SIZE):
+        x_feed, y_feed, offset, _ = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                    offset=offset, crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
+                                                    shuffle=False)
+        y_pred_out, hit_5_out = sess.run([y_pred, hit_5], feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
 
-            # add to accumulations
-            cumulative_accuracy += float(acc)
-            predictions.append(y_pred_class_actual)
-            labels.append(y_true_class_actual)
-
-            i += 1
-        except tf.errors.OutOfRangeError:
-            break
+        for i in range(BATCH_SIZE):
+            run_log_fd.write("%s,%s,%s" % (y_feed[i], np.argmax(y_pred_out[i]), hit_5_out[i]))
+            print("true class = %s, prediction = %s, hit@5 = %s" % (y_feed[i], np.argmax(y_pred_out[i]), hit_5_out[i]))
+        step += 1
     
     print("Exhausted test data")
-    print("Cumulative accuracy = %s" % (cumulative_accuracy / i))
+    print("Cumulative accuracy = %s" % (cumulative_accuracy / step))
     print("Confusion matrix =")
     cm = tf_confusion_matrix(predictions, labels, class_names)
-    plot_confusion_matrix(cm, class_names, "confusion_matrix.jpg")
+    plot_confusion_matrix(cm, class_names, "confusion_matrix.pdf")

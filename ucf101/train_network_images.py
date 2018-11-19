@@ -646,24 +646,6 @@ with tf.Session(config=config) as sess:
 
         step += 1
 
-    # validate the model
-    _, _, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
-    run_log_fd.write("VALIDATION:")
-    run_log_fd.write("true_class,pred_class,hit_in_5")
-    step = 0
-    cum_accuracy = 0.0
-    offset = 0
-    while step < int(num_samples / BATCH_SIZE):
-        x_feed, y_feed, offset, _ = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
-                                                    offset=offset, crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
-                                                    shuffle=False)
-        y_pred_out, hit_5_out = sess.run([y_pred, hit_5], feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
-
-        for i in range(BATCH_SIZE):
-            run_log_fd.write("%s,%s,%s" % (y_feed[i], np.argmax(y_pred_out[i]), hit_5_out[i]))
-            print("true class = %s, prediction = %s, hit@5 = %s" % (y_feed[i], np.argmax(y_pred_out[i]), hit_5_out[i]))
-        step += 1
-
         # if j != 0 and j % num_samples < BATCH_SIZE:
         #     # end of epoch
         #     # save a model checkpoint and report end of epoch information
