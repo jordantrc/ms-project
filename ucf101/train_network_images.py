@@ -596,7 +596,7 @@ with tf.Session(config=config) as sess:
 
     # TRAINING
     report_step = 20
-    print("Beginning training epochs, reporting every %s batches, mini-test batch every %s batches" % (report_step, report_step * 5))
+    print("Beginning training")
 
     in_epoch = 1
     print("START EPOCH %s" % in_epoch)
@@ -611,11 +611,13 @@ with tf.Session(config=config) as sess:
     step = 0
     _, _, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
     max_steps = int((num_samples * NUM_EPOCHS / BATCH_SIZE) * sample)
+    print("max_steps = %s" % max_steps)
 
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while step < max_steps:
         if step != 0 and step % int(num_samples / BATCH_SIZE) == 0:
             in_epoch += 1
+            print("START EPOCH %s" % in_epoch)
             if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
                 model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
                 print("learning rate adjusted to %g" % model.current_learning_rate)
