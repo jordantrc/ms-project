@@ -624,7 +624,7 @@ with tf.Session(config=config) as sess:
                                                          crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
         sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
         step_end = time.time()
-        print("step %s - %ss" % (in_epoch, step, step_end - step_start))
+        print("step %s - %.3fs" % (in_epoch, step, step_end - step_start))
 
         if step % 10 == 0:
             # save a model checkpoint
