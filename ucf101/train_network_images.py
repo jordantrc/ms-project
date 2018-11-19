@@ -613,7 +613,7 @@ with tf.Session(config=config) as sess:
 
     # num_batches_per_epoch = len(train_files) / BATCH_SIZE
     while step < max_steps:
-        if step % int(num_samples / BATCH_SIZE) == 0:
+        if step != 0 and step % int(num_samples / BATCH_SIZE) == 0:
             in_epoch += 1
             if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
                 model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
@@ -624,7 +624,7 @@ with tf.Session(config=config) as sess:
                                                          crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
         sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
         step_end = time.time()
-        print("step %s - %.3fs" % (in_epoch, step, step_end - step_start))
+        print("step %s - %.3fs" % (step, step_end - step_start))
 
         if step % 10 == 0:
             # save a model checkpoint
