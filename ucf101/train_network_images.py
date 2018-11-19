@@ -659,7 +659,7 @@ with tf.Session(config=config) as sess:
                                                     shuffle=False)
         y_pred_out, hit_5_out = sess.run([y_pred, hit_5], feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
 
-        for i in BATCH_SIZE:
+        for i in range(BATCH_SIZE):
             run_log_fd.write("%s,%s,%s" % (true_class[i], y_pred_out[i], hit_5_out[i]))
             print("true class = %s, prediction = %s, hit@5 = %s" % (true_class[i], y_pred_out[i], hit_5_out[i]))
         step += 1
