@@ -40,8 +40,8 @@ VARIABLE_TYPE = 'default'
 ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
-IMAGE_CROPPING = 'rescale'
-IMAGE_NORMALIZATION = False
+IMAGE_CROPPING = 'random'
+IMAGE_NORMALIZATION = True
 
 def print_help():
     '''prints a help message'''
@@ -509,7 +509,7 @@ run_csv_writer.writerow(['step_type', 'epoch', 'iteration', 'loss', 'accuracy', 
 
 # open the log file
 run_log_file = 'runs/%s.log' % run_name
-run_log_fd = open(run_log_file, 'w', buffering=1)
+run_log_fd = open(run_log_file, 'w', 0)
 run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
 run_log_fd.write("HYPER PARAMETERS:\n")
 run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nSHUFFLE_SIZE = %s\n" % 
@@ -624,7 +624,7 @@ with tf.Session(config=config) as sess:
                                                          crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
         sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
         step_end = time.time()
-        print("epoch = %s step %s - %ss" % (in_epoch, step, step_end - step_start))
+        print("step %s - %ss" % (in_epoch, step, step_end - step_start))
 
         if step % 10 == 0:
             # save a model checkpoint
@@ -645,17 +645,21 @@ with tf.Session(config=config) as sess:
 
     # validate the model
     _, _, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+    run_log_fd.write("VALIDATION:")
+    run_log_fd.write("true_class,pred_class,hit_in_5")
     step = 0
     cum_accuracy = 0.0
-    while step < num_samples:
-        x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
-                                                         crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
-        acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
-        print("step %s - accuracy = %s" % (step, acc))
-        cum_accuracy += acc
-        step += 1
+    offset = 0
+    while step < int(num_samples / BATCH_SIZE):
+        x_feed, y_feed, offset, _ = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                    offset=offset, crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
+                                                    shuffle=False)
+        y_pred_out, hit_5_out = sess.run([y_pred, hit_5], feed_dict={x: x_feed})
 
-    print("Cumulative accuracy = %s, steps = %s" % (cum_accuracy, step))
+        for i in BATCH_SIZE:
+            run_log_fd.write("%s,%s,%s" % (true_class[i], y_pred_out[i], hit_5_out[i]))
+            print("true class = %s, prediction = %s, hit@5 = %s" % (true_class[i], y_pred_out[i], hit_5_out[i]))
+        step += 1
 
         # if j != 0 and j % num_samples < BATCH_SIZE:
         #     # end of epoch
