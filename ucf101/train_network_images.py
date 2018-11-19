@@ -41,6 +41,7 @@ ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
 IMAGE_CROPPING = 'random'
+TEST_IMAGE_CROPPING = 'center'
 IMAGE_NORMALIZATION = True
 
 def print_help():
@@ -637,7 +638,7 @@ with tf.Session(config=config) as sess:
 
             # validation accuracy
             x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
-                                                             crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
+                                                             crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
             acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
             print("Validation accuracy = %s" % acc)
 
@@ -652,7 +653,7 @@ with tf.Session(config=config) as sess:
     offset = 0
     while step < int(num_samples / BATCH_SIZE):
         x_feed, y_feed, offset, _ = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
-                                                    offset=offset, crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
+                                                    offset=offset, crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
                                                     shuffle=False)
         y_pred_out, hit_5_out = sess.run([y_pred, hit_5], feed_dict={x: x_feed})
 
