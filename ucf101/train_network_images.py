@@ -566,7 +566,7 @@ def main():
                 'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
                 'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
                 'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
-                'wdout': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
+                'wdout': weight_variable('wdout', [4096, model.num_classes], WEIGHT_STDDEV),
             }
             biases = {
                 'bc1': bias_variable('bc1', [64], BIAS),
@@ -579,7 +579,7 @@ def main():
                 'bc5b': bias_variable('bc5b', [512], BIAS),
                 'bd1': bias_variable('bd1', [4096], BIAS),
                 'bd2': bias_variable('bd2', [4096], BIAS),
-                'bdout': bias_variable('bdout', [num_classes], BIAS),
+                'bdout': bias_variable('bdout', [model.num_classes], BIAS),
             }
 
         # placeholders and constants
