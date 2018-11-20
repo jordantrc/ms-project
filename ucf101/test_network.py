@@ -143,7 +143,7 @@ with tf.Session() as sess:
     offset = 0
     predictions = []
     labels = []
-    run_log_fd.write("true_class,predicted_class,hit_at_5")
+    run_log_fd.write("true_class,predicted_class")
     while step < int(num_samples / BATCH_SIZE):
         x_feed, y_feed, offset, _ = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
                                                     offset=offset, crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION,
@@ -152,10 +152,18 @@ with tf.Session() as sess:
 
         for i in range(BATCH_SIZE):
             prediction = np.argmax(y_pred_out[i])
-            run_log_fd.write("%s,%s" % (y_feed[i], prediction))
-            print("true class = %s, prediction = %s" % (y_feed[i], prediction))
-            if y_feed[i] == prediction:
+            label = y_feed[i]
+            predictions.append(prediction)
+            labels.append(label)
+
+            run_log_fd.write("%s,%s" % (label, prediction))
+
+            if label == prediction:
+                print("[+] true class = %s, prediction = %s" % (label, prediction))
                 cumulative_accuracy += 1.0
+            else:
+                print("[-] true class = %s, prediction = %s" % (label, prediction))
+
         step += 1
     
     print("Exhausted test data")
