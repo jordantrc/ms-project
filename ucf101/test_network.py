@@ -151,8 +151,8 @@ with tf.Session() as sess:
         y_pred_out = sess.run(y_pred, feed_dict={x: x_feed})
 
         for i in range(BATCH_SIZE):
-            run_log_fd.write("%s,%s,%s" % (y_feed[i], np.argmax(y_pred_out[i]), hit_5_out[i]))
-            print("true class = %s, prediction = %s, hit@5 = %s" % (y_feed[i], np.argmax(y_pred_out[i]), hit_5_out[i]))
+            run_log_fd.write("%s,%s" % (y_feed[i], np.argmax(y_pred_out[i])))
+            print("true class = %s, prediction = %s" % (y_feed[i], np.argmax(y_pred_out[i])))
         step += 1
     
     print("Exhausted test data")
