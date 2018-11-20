@@ -43,6 +43,8 @@ OPTIMIZER = 'Adam'
 IMAGE_CROPPING = 'random'
 TEST_IMAGE_CROPPING = 'center'
 IMAGE_NORMALIZATION = True
+WEIGHT_STDDEV = 0.04
+BIAS = 0.04
 
 def print_help():
     '''prints a help message'''
@@ -350,6 +352,17 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.close()
 
 
+def weight_variable(name, shape, stddev):
+    # creates a variable (weight or bias) with given name and shape
+    initial = tf.truncated_normal_initializer(stddev=stddev)
+    return tf.get_variable(name, shape, initializer=initial)
+
+
+def bias_variable(name, shape, val):
+    initial = tf.constant(val, name=name, shape=shape)
+    return tf.Variable(initial)
+
+
 def test_network(sess, model, test_file_name, run_name, epoch):
     '''tests the neural network'''
     # sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
@@ -537,10 +550,34 @@ with tf.Session(config=config) as sess:
     # tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
-    if VARIABLE_TYPE == 'default':
-        weights, biases = c3d.get_variables(model.num_classes)
-    elif VARIABLE_TYPE == 'weight decay':
-        weights, biases = c3d.get_variables(model.num_classes, var_type="weight decay")
+
+    with tf.variable_scope('var_name') as var_scope:
+        weights = {
+            'wc1': weight_variable('wc1', [3, 3, 3, 3, 64], WEIGHT_STDDEV),
+            'wc2': weight_variable('wc2', [3, 3, 3, 64, 128], WEIGHT_STDDEV),
+            'wc3a': weight_variable('wc3a', [3, 3, 3, 128, 256], WEIGHT_STDDEV),
+            'wc3b': weight_variable('wc3b', [3, 3, 3, 256, 256], WEIGHT_STDDEV),
+            'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512], WEIGHT_STDDEV),
+            'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+            'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+            'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+            'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
+            'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
+            'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
+        }
+        biases = {
+            'bc1': bias_variable('bc1', [64], BIAS),
+            'bc2': bias_variable('bc2', [128], BIAS),
+            'bc3a': bias_variable('bc3a', [256], BIAS),
+            'bc3b': bias_variable('bc3b', [256], BIAS),
+            'bc4a': bias_variable('bc4a', [512], BIAS),
+            'bc4b': bias_variable('bc4b', [512], BIAS),
+            'bc5a': bias_variable('bc5a', [512], BIAS),
+            'bc5b': bias_variable('bc5b', [512], BIAS),
+            'bd1': bias_variable('bd1', [4096], BIAS),
+            'bd2': bias_variable('bd2', [4096], BIAS),
+            'out': bias_variable('bdout', [num_classes], BIAS),
+        }
 
     # placeholders and constants
     # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
