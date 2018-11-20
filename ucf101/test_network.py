@@ -40,12 +40,10 @@ def tf_confusion_matrix(predictions, labels, classes):
     y_pred = []
 
     for p in predictions:
-        pred = p[0]
-        y_true.append(classes[pred])
+        y_true.append(classes[p])
 
     for l in labels:
-        label = l[0]
-        y_pred.append(classes[label])
+        y_pred.append(classes[l])
 
     cm = metrics.confusion_matrix(y_true, y_pred, classes)
 
