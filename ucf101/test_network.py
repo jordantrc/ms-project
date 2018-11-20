@@ -114,7 +114,7 @@ model = c3d_model.C3DModel()
 
 run_log_file = 'runs/test_%s.log' % run_name
 run_log_fd = open(run_log_file, 'w', 0)
-run_log_fd.write("run name = %s" % run_name, sample, included_classes)
+run_log_fd.write("run name = %s" % run_name)
 
 with tf.Session() as sess:
     coord = tf.train.Coordinator()
