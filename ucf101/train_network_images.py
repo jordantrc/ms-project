@@ -688,7 +688,7 @@ def main():
 
             if step % 100 == 0 or step == max_steps:
                  # save a model checkpoint
-                save_path = os.path.join(model.model_dir, "model_step_%s.ckpt" % step)
+                save_path = os.path.join(model.model_dir, "model_%s_step_%s.ckpt" % (run_name, step))
                 save_path = saver.save(sess, save_path)
 
             step += 1
