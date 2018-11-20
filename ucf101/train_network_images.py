@@ -426,386 +426,393 @@ def test_network(sess, model, test_file_name, run_name, epoch):
     return ['test', epoch, "", "", cumulative_accuracy / k, cumulative_hit_at_5 / k]
 
 
-# get the list of classes
-class_names = get_class_list(CLASS_INDEX_FILE)
-all_classes = True
+def main():
+    '''main function'''
 
-# argument collection
-run_name = sys.argv[1]
-sample = float(sys.argv[2])
-included_classes = sys.argv[3]
-model_dir = sys.argv[4]
-#tfrecord_dir = sys.argv[5]
-
-if ',' in included_classes:
-    all_classes = False
-    included_classes = [x.strip() for x in sys.argv[3].split(',')]
-    for c in included_classes:
-        assert c in class_names, "%s is not a valid class" % c
-
-elif included_classes.isdigit():
-    all_classes = False
-    included_classes = random.sample(class_names, int(included_classes))
-
-elif included_classes == "all":
+    # get the list of classes
+    class_names = get_class_list(CLASS_INDEX_FILE)
     all_classes = True
 
-else:
-    print("Invalid value for class inclusion [%s]" % included_classes)
-    sys.exit(1)
+    # argument collection
+    run_name = sys.argv[1]
+    sample = float(sys.argv[2])
+    included_classes = sys.argv[3]
+    model_dir = sys.argv[4]
+    #tfrecord_dir = sys.argv[5]
 
-print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
+    if ',' in included_classes:
+        all_classes = False
+        included_classes = [x.strip() for x in sys.argv[3].split(',')]
+        for c in included_classes:
+            assert c in class_names, "%s is not a valid class" % c
 
-# create the model object
-model = C3DModel(model_dir=model_dir)
+    elif included_classes.isdigit():
+        all_classes = False
+        included_classes = random.sample(class_names, int(included_classes))
 
-# open the csv data file and write the header to it
-run_csv_file = 'runs/%s.csv' % run_name
-if sys.version_info[0] == 3:
-    run_csv_fd = open(run_csv_file, 'w', newline='', buffering=1)
-else:
-    run_csv_fd = open(run_csv_file, 'wb', buffering=0)
-run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
-run_csv_writer.writerow(['step_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
+    elif included_classes == "all":
+        all_classes = True
 
-# get the list of files for train and test
-#train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir, ONE_CLIP_PER_VIDEO)
-#test_files = file_split(TEST_SPLIT, model.tfrecord_dir, ONE_CLIP_PER_VIDEO)
+    else:
+        print("Invalid value for class inclusion [%s]" % included_classes)
+        sys.exit(1)
 
-#if not all_classes:
-#    train_files_filtered = []
-#    test_files_filtered = []
-#     for c in included_classes:
-#         # print("c = %s" % c)
-#         for t in train_files:
-#             if c in t:
-#                 train_files_filtered.append(t)
+    print("Beginning run %s using %s sample size and %s classes" % (run_name, sample, included_classes))
 
-#         for t in test_files:
-#             if c in t:
-#                 test_files_filtered.append(t)
+    # create the model object
+    model = C3DModel(model_dir=model_dir)
 
-#     train_files = train_files_filtered
-#     test_files = test_files_filtered
-#     # print("train files = %s" % train_files)
-#     # print("test files = %s" % test_files)
-# assert len(test_files) > 0 and len(train_files) > 0, 'test = %s, train = %s' % (len(test_files), len(train_files))
+    # open the csv data file and write the header to it
+    run_csv_file = 'runs/%s.csv' % run_name
+    if sys.version_info[0] == 3:
+        run_csv_fd = open(run_csv_file, 'w', newline='', buffering=1)
+    else:
+        run_csv_fd = open(run_csv_file, 'wb', buffering=0)
+    run_csv_writer = csv.writer(run_csv_fd, dialect='excel')
+    run_csv_writer.writerow(['step_type', 'epoch', 'iteration', 'loss', 'accuracy', 'hit_at_5'])
 
-# # sample from the test and train files if necessary
-# if sample < 1.0:
-#     sample_size = int(len(train_files) * sample)
-#     train_files = random.sample(train_files, sample_size)
-#     print("%s training samples" % sample_size)
+    # get the list of files for train and test
+    #train_files = file_split(TRAIN_SPLIT, model.tfrecord_dir, ONE_CLIP_PER_VIDEO)
+    #test_files = file_split(TEST_SPLIT, model.tfrecord_dir, ONE_CLIP_PER_VIDEO)
 
-#     sample_size_test = int(len(test_files) * sample)
-#     test_files = random.sample(test_files, sample_size_test)
-#     print("%s testing samples" % sample_size_test)
+    #if not all_classes:
+    #    train_files_filtered = []
+    #    test_files_filtered = []
+    #     for c in included_classes:
+    #         # print("c = %s" % c)
+    #         for t in train_files:
+    #             if c in t:
+    #                 train_files_filtered.append(t)
 
-# assert len(test_files) > 0 and len(train_files) > 0
+    #         for t in test_files:
+    #             if c in t:
+    #                 test_files_filtered.append(t)
 
-# # reset size of mini-batch based on the number of test files
-# MINI_BATCH_SIZE = min(MINI_BATCH_SIZE, len(test_files))
-# SHUFFLE_SIZE = min(SHUFFLE_SIZE, int(len(train_files) * 0.05))
+    #     train_files = train_files_filtered
+    #     test_files = test_files_filtered
+    #     # print("train files = %s" % train_files)
+    #     # print("test files = %s" % test_files)
+    # assert len(test_files) > 0 and len(train_files) > 0, 'test = %s, train = %s' % (len(test_files), len(train_files))
 
-# # throw out samples to fit the batch size
-# num_samples_batch_fit = len(train_files) - (len(train_files) % BATCH_SIZE)
+    # # sample from the test and train files if necessary
+    # if sample < 1.0:
+    #     sample_size = int(len(train_files) * sample)
+    #     train_files = random.sample(train_files, sample_size)
+    #     print("%s training samples" % sample_size)
 
-# if BALANCE_CLASSES:
-#     # balance the classes for training
-#     train_files = balance_classes(train_files)
+    #     sample_size_test = int(len(test_files) * sample)
+    #     test_files = random.sample(test_files, sample_size_test)
+    #     print("%s testing samples" % sample_size_test)
 
-# random.shuffle(train_files)
-# train_files = train_files[0: num_samples_batch_fit]
-# print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
-# print("Training class counts:")
-# print_class_counts(train_files)
-# print("Test class counts:")
-# print_class_counts(test_files)
+    # assert len(test_files) > 0 and len(train_files) > 0
 
-# open the log file
-run_log_file = 'runs/%s.log' % run_name
-run_log_fd = open(run_log_file, 'w', 0)
-run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
-run_log_fd.write("HYPER PARAMETERS:\n")
-run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nSHUFFLE_SIZE = %s\n" % 
-                (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, SHUFFLE_SIZE))
-print("BATCH_SIZE = %s" % (BATCH_SIZE))
-run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
-run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS))
-run_log_fd.write("WEIGHT_DECAY = %s\nBIAS_DECAY = %s\n" % (c3d.WEIGHT_DECAY, c3d.BIAS_DECAY))
-run_log_fd.write("VARIABLE_TYPE = %s\n" % (VARIABLE_TYPE))
-run_log_fd.write("ONE_CLIP_PER_VIDEO = %s" % (ONE_CLIP_PER_VIDEO))
-run_log_fd.write("LEARNING_RATE_DECAY = %s" % (LEARNING_RATE_DECAY))
-run_log_fd.write("OPTIMIZER = %s" % (OPTIMIZER))
-run_log_fd.write("IMAGE_CROPPING = %s" % (IMAGE_CROPPING))
-run_log_fd.write("IMAGE_NORMALIZATION = %s" % (IMAGE_NORMALIZATION))
-# run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
+    # # reset size of mini-batch based on the number of test files
+    # MINI_BATCH_SIZE = min(MINI_BATCH_SIZE, len(test_files))
+    # SHUFFLE_SIZE = min(SHUFFLE_SIZE, int(len(train_files) * 0.05))
 
-# Tensorflow configuration
-config = tf.ConfigProto(allow_soft_placement=True)
+    # # throw out samples to fit the batch size
+    # num_samples_batch_fit = len(train_files) - (len(train_files) % BATCH_SIZE)
 
-with tf.Session(config=config) as sess:
-    #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
-    # init variables
-    # tf.set_random_seed(1234)
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(coord=coord)
+    # if BALANCE_CLASSES:
+    #     # balance the classes for training
+    #     train_files = balance_classes(train_files)
 
-    with tf.variable_scope('var_name') as var_scope:
-        weights = {
-            'wc1': weight_variable('wc1', [3, 3, 3, 3, 64], WEIGHT_STDDEV),
-            'wc2': weight_variable('wc2', [3, 3, 3, 64, 128], WEIGHT_STDDEV),
-            'wc3a': weight_variable('wc3a', [3, 3, 3, 128, 256], WEIGHT_STDDEV),
-            'wc3b': weight_variable('wc3b', [3, 3, 3, 256, 256], WEIGHT_STDDEV),
-            'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512], WEIGHT_STDDEV),
-            'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
-            'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
-            'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
-            'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
-            'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
-            'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
-        }
-        biases = {
-            'bc1': bias_variable('bc1', [64], BIAS),
-            'bc2': bias_variable('bc2', [128], BIAS),
-            'bc3a': bias_variable('bc3a', [256], BIAS),
-            'bc3b': bias_variable('bc3b', [256], BIAS),
-            'bc4a': bias_variable('bc4a', [512], BIAS),
-            'bc4b': bias_variable('bc4b', [512], BIAS),
-            'bc5a': bias_variable('bc5a', [512], BIAS),
-            'bc5b': bias_variable('bc5b', [512], BIAS),
-            'bd1': bias_variable('bd1', [4096], BIAS),
-            'bd2': bias_variable('bd2', [4096], BIAS),
-            'out': bias_variable('bdout', [num_classes], BIAS),
-        }
+    # random.shuffle(train_files)
+    # train_files = train_files[0: num_samples_batch_fit]
+    # print("Training samples = %s, testing samples = %s" % (len(train_files), len(test_files)))
+    # print("Training class counts:")
+    # print_class_counts(train_files)
+    # print("Test class counts:")
+    # print_class_counts(test_files)
 
-    # placeholders and constants
-    # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
-    x = tf.placeholder(tf.float32, shape=[BATCH_SIZE, model.frames_per_clip, 112, 112, 3])
-    y_true = tf.placeholder(tf.int64, shape=[BATCH_SIZE])
-    # x_test = tf.placeholder(tf.float32, shape=[1, model.frames_per_clip, 112, 112, 3])
-    # y_true_test = tf.placeholder(tf.int64, shape=[1])
+    # open the log file
+    run_log_file = 'runs/%s.log' % run_name
+    run_log_fd = open(run_log_file, 'w', 0)
+    run_log_fd.write("run name = %s\nsample = %s\nincluded_classes = %s\n" % (run_name, sample, included_classes))
+    run_log_fd.write("HYPER PARAMETERS:\n")
+    run_log_fd.write("NUM_EPOCHS = %s\nMINI_BATCH_SIZE = %s\nTRAIN_SPLIT = %s\nTEST_SPLIT = %s\nSHUFFLE_SIZE = %s\n" % 
+                    (NUM_EPOCHS, MINI_BATCH_SIZE, TRAIN_SPLIT, TEST_SPLIT, SHUFFLE_SIZE))
+    print("BATCH_SIZE = %s" % (BATCH_SIZE))
+    run_log_fd.write("VALIDATE_WITH_TRAIN = %s\nBALANCE_CLASSES = %s\n" % (VALIDATE_WITH_TRAIN, BALANCE_CLASSES))
+    run_log_fd.write("WEIGHT_STDDEV = %s\nBIAS = %s\n" % (c3d.WEIGHT_STDDEV, c3d.BIAS))
+    run_log_fd.write("WEIGHT_DECAY = %s\nBIAS_DECAY = %s\n" % (c3d.WEIGHT_DECAY, c3d.BIAS_DECAY))
+    run_log_fd.write("VARIABLE_TYPE = %s\n" % (VARIABLE_TYPE))
+    run_log_fd.write("ONE_CLIP_PER_VIDEO = %s" % (ONE_CLIP_PER_VIDEO))
+    run_log_fd.write("LEARNING_RATE_DECAY = %s" % (LEARNING_RATE_DECAY))
+    run_log_fd.write("OPTIMIZER = %s" % (OPTIMIZER))
+    run_log_fd.write("IMAGE_CROPPING = %s" % (IMAGE_CROPPING))
+    run_log_fd.write("IMAGE_NORMALIZATION = %s" % (IMAGE_NORMALIZATION))
+    # run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
-    y_true_one_hot = tf.one_hot(y_true, depth=model.num_classes)
-    # y_true_test_one_hot = tf.one_hot(y_true_test, depth=model.num_classes)
-    y_true_class = tf.argmax(y_true_one_hot, axis=1)
-    # y_true_test_class = tf.argmax(y_true_test_one_hot, axis=1)
+    # Tensorflow configuration
+    config = tf.ConfigProto(allow_soft_placement=True)
 
-    logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
-    # logits = model.c3d(x, training=True)
+    with tf.Session(config=config) as sess:
+        #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+        # init variables
+        # tf.set_random_seed(1234)
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(coord=coord)
 
-    y_pred = tf.nn.softmax(logits)
-    y_pred_class = tf.argmax(y_pred, axis=1)
-    correct_pred = tf.equal(y_pred_class, y_true_class)
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-    hit_5 = tf.nn.in_top_k(logits, y_true_class, 5)
-    top_5 = tf.nn.top_k(logits, k=5)
+        with tf.variable_scope('var_name') as var_scope:
+            weights = {
+                'wc1': weight_variable('wc1', [3, 3, 3, 3, 64], WEIGHT_STDDEV),
+                'wc2': weight_variable('wc2', [3, 3, 3, 64, 128], WEIGHT_STDDEV),
+                'wc3a': weight_variable('wc3a', [3, 3, 3, 128, 256], WEIGHT_STDDEV),
+                'wc3b': weight_variable('wc3b', [3, 3, 3, 256, 256], WEIGHT_STDDEV),
+                'wc4a': weight_variable('wc4a', [3, 3, 3, 256, 512], WEIGHT_STDDEV),
+                'wc4b': weight_variable('wc4b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+                'wc5a': weight_variable('wc5a', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+                'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
+                'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
+                'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
+                'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
+            }
+            biases = {
+                'bc1': bias_variable('bc1', [64], BIAS),
+                'bc2': bias_variable('bc2', [128], BIAS),
+                'bc3a': bias_variable('bc3a', [256], BIAS),
+                'bc3b': bias_variable('bc3b', [256], BIAS),
+                'bc4a': bias_variable('bc4a', [512], BIAS),
+                'bc4b': bias_variable('bc4b', [512], BIAS),
+                'bc5a': bias_variable('bc5a', [512], BIAS),
+                'bc5b': bias_variable('bc5b', [512], BIAS),
+                'bd1': bias_variable('bd1', [4096], BIAS),
+                'bd2': bias_variable('bd2', [4096], BIAS),
+                'out': bias_variable('bdout', [num_classes], BIAS),
+            }
 
-    # loss and optimizer
-    # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class, name="softmax"), name="reduce_mean")
-    if OPTIMIZER == 'SGD':
-        learning_rate = tf.placeholder(tf.float32, shape=[])
-        #learning_rate = tf.train.exponential_decay(learning_rate=model.learning_rate, global_step=global_step, 
-        #                                       decay_steps=(4 * len(train_files)), decay_rate=0.96,
-        #                                       staircase=True)
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
-    elif OPTIMIZER == 'Adam':
-        learning_rate = tf.placeholder(tf.float32, shape=[])
-        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        # placeholders and constants
+        # y_true = tf.placeholder(tf.float32, shape=[None, NUM_CLASSES], name='y_true')
+        x = tf.placeholder(tf.float32, shape=[BATCH_SIZE, model.frames_per_clip, 112, 112, 3])
+        y_true = tf.placeholder(tf.int64, shape=[BATCH_SIZE])
+        # x_test = tf.placeholder(tf.float32, shape=[1, model.frames_per_clip, 112, 112, 3])
+        # y_true_test = tf.placeholder(tf.int64, shape=[1])
 
-    train_op = optimizer.minimize(loss_op, name="train")
+        y_true_one_hot = tf.one_hot(y_true, depth=model.num_classes)
+        # y_true_test_one_hot = tf.one_hot(y_true_test, depth=model.num_classes)
+        y_true_class = tf.argmax(y_true_one_hot, axis=1)
+        # y_true_test_class = tf.argmax(y_true_test_one_hot, axis=1)
 
-    # model evaluation
-    # logits_test = model.c3d(x_test, training=False)
-    # logits_test = model.inference_3d(x_test, weights, biases, 1, False)
-    # y_pred_test = tf.nn.softmax(logits_test)
-    # y_pred_test_class = tf.argmax(y_pred_test, axis=1)
+        logits = model.inference_3d(x, weights, biases, BATCH_SIZE, True)
+        # logits = model.c3d(x, training=True)
 
-    # eval_hit_5 = tf.nn.in_top_k(logits_test, y_true_test_class, 5)
-    # eval_top_5 = tf.nn.top_k(logits_test, k=5)
-    # eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
-    # eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
+        y_pred = tf.nn.softmax(logits)
+        y_pred_class = tf.argmax(y_pred, axis=1)
+        correct_pred = tf.equal(y_pred_class, y_true_class)
+        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+        hit_5 = tf.nn.in_top_k(logits, y_true_class, 5)
+        top_5 = tf.nn.top_k(logits, k=5)
 
-    init_op = tf.global_variables_initializer()
+        # loss and optimizer
+        # loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+        loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true_class, name="softmax"), name="reduce_mean")
+        if OPTIMIZER == 'SGD':
+            learning_rate = tf.placeholder(tf.float32, shape=[])
+            #learning_rate = tf.train.exponential_decay(learning_rate=model.learning_rate, global_step=global_step, 
+            #                                       decay_steps=(4 * len(train_files)), decay_rate=0.96,
+            #                                       staircase=True)
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
+        elif OPTIMIZER == 'Adam':
+            learning_rate = tf.placeholder(tf.float32, shape=[])
+            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
-    saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
-    sess.run(init_op)
+        train_op = optimizer.minimize(loss_op, name="train")
 
-    # TRAINING
-    report_step = 20
-    print("Beginning training")
+        # model evaluation
+        # logits_test = model.c3d(x_test, training=False)
+        # logits_test = model.inference_3d(x_test, weights, biases, 1, False)
+        # y_pred_test = tf.nn.softmax(logits_test)
+        # y_pred_test_class = tf.argmax(y_pred_test, axis=1)
 
-    in_epoch = 1
-    print("START EPOCH %s" % in_epoch)
-    start = time.time()
-    epoch_start = time.time()
-    # sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
-    # if VALIDATE_WITH_TRAIN:
-    #     sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
-    # else:
-    #     sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
+        # eval_hit_5 = tf.nn.in_top_k(logits_test, y_true_test_class, 5)
+        # eval_top_5 = tf.nn.top_k(logits_test, k=5)
+        # eval_correct_pred = tf.equal(y_pred_test_class, y_true_test_class)
+        # eval_accuracy = tf.reduce_mean(tf.cast(eval_correct_pred, tf.float32))
 
-    step = 0
-    _, _, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
-    max_steps = int((num_samples * NUM_EPOCHS / BATCH_SIZE) * sample)
-    print("max_steps = %s" % max_steps)
+        init_op = tf.global_variables_initializer()
 
-    # num_batches_per_epoch = len(train_files) / BATCH_SIZE
-    while step < max_steps:
-        if step != 0 and step % int(num_samples / BATCH_SIZE) == 0:
-            in_epoch += 1
-            print("START EPOCH %s" % in_epoch)
-            if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
-                model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
-                print("learning rate adjusted to %g" % model.current_learning_rate)
+        saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
+        sess.run(init_op)
 
-        step_start = time.time()
-        x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
-                                                         crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
-        sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
-        step_end = time.time()
-        print("step %s - %.3fs" % (step, step_end - step_start))
+        # TRAINING
+        report_step = 20
+        print("Beginning training")
 
-        if step % 10 == 0:
-            # save a model checkpoint
-            save_path = os.path.join(model.model_dir, "model_step_%s.ckpt" % step)
-            save_path = saver.save(sess, save_path)
-            
-            # train accuracy
-            acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
-            print("Train accuracy = %s" % acc)
+        in_epoch = 1
+        print("START EPOCH %s" % in_epoch)
+        start = time.time()
+        epoch_start = time.time()
+        # sess.run(train_iterator.initializer, feed_dict={train_filenames: train_files})
+        # if VALIDATE_WITH_TRAIN:
+        #     sess.run(test_iterator.initializer, feed_dict={test_filenames: train_files})
+        # else:
+        #     sess.run(test_iterator.initializer, feed_dict={test_filenames: test_files})
 
-            # validation accuracy
-            x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
-                                                             crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
-            acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
-            print("Validation accuracy = %s" % acc)
+        step = 0
+        _, _, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes)
+        max_steps = int((num_samples * NUM_EPOCHS / BATCH_SIZE) * sample)
+        print("max_steps = %s" % max_steps)
 
-        step += 1
+        # num_batches_per_epoch = len(train_files) / BATCH_SIZE
+        while step < max_steps:
+            if step != 0 and step % int(num_samples / BATCH_SIZE) == 0:
+                in_epoch += 1
+                print("START EPOCH %s" % in_epoch)
+                if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
+                    model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
+                    print("learning rate adjusted to %g" % model.current_learning_rate)
 
-        # if j != 0 and j % num_samples < BATCH_SIZE:
-        #     # end of epoch
-        #     # save a model checkpoint and report end of epoch information
-        #     save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
-        #     save_path = saver.save(sess, save_path)
-        #     epoch_end = time.time()
-        #     train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
-        #     print("END EPOCH %s, steps completed = %s, epoch training time: %s" % (in_epoch, j, train_time))
-        #     print("model checkpoint saved to %s\n\n" % save_path)
+            step_start = time.time()
+            x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                             crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
+            sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+            step_end = time.time()
+            print("step %s - %.3fs" % (step, step_end - step_start))
 
-        #     # test the network
-        #     test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
-        #     run_csv_writer.writerow(test_results)
-
-        #     in_epoch += 1
-
-        #     if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
-        #         model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
-        #         print("learning rate adjusted to %g" % model.current_learning_rate)
-
-        #     print("START EPOCH %s" % in_epoch)
-        #     epoch_start = time.time()
-
-        # train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
-        #                         feed_dict={x: x_feed, 
-        #                                    y_true: y_feed, 
-        #                                    learning_rate: model.current_learning_rate})
-        # loss_op_out = train_result[1]
-        # train_acc = train_result[2]
-        # x_actual = train_result[3]
-        # y_true_actual = train_result[4]
-        # y_true_class_actual = train_result[5]
-        # y_pred_actual = train_result[6]
-        # y_pred_class_actual = train_result[7]
-        # logits_out = train_result[8]
-        # hit5_out = train_result[9]
-
-        # # print("train_acc = %s" % train_acc)
-        # # train_acc is the number of correct responses divided by the batch size
-        # # e.g. 3 correct responses/30 batch size = 0.1
-        # train_acc_accum += train_acc
-
-        # # print("hit_5_out = %s" % hit5_out)
-        # # count the trues in the hit_5_out array
-        # hit5_counter = collections.Counter(hit5_out)
-        # hit5_out_trues = float(hit5_counter[True])
-        # # print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
-        # train_hit5_accum += float(hit5_out_trues / len(hit5_out))
-
-        # # report out results and run a test mini-batch every now and then
-        # if j != 0 and j % (report_step * BATCH_SIZE) == 0:
-        #     #print("logits = %s" % logits_out)
-        #     #print("x = %s" % x_actual)
-        #     #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
-        #     #print("train_acc = %s" % train_acc)
-        #     print("hit5_out = %s, length = %s" % (hit5_out, len(hit5_out)))
-        #     print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), hit5_out_trues / len(hit5_out)))
-        #     run_time = time.time()
-        #     run_time_str = str(datetime.timedelta(seconds=run_time - start))
-        #     train_step_acc = train_acc_accum / report_step * BATCH_SIZE
-
-        #     # mini batch accuracy - every 5 report step iterations
-        #     if j % (report_step * BATCH_SIZE * 5) == 0:
-        #         mini_batch_acc = 0.0
-        #         mini_batch_hit5 = 0.0
-        #         for k in range(MINI_BATCH_SIZE):
-        #             if IMAGE_CROPPING == 'random':
-        #                 test_crop = 'center'
-        #             else:
-        #                 test_crop = IMAGE_CROPPING
-        #             x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, 1, model.frames_per_clip, model.num_classes, crop=test_crop)
-        #             acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x_test],
-        #                                                        feed_dict={x_test: x_feed, y_true_test: y_feed})
-        #             # print("type(x) = %s, x = %s" % (type(x_out), x_out))
-        #             mini_batch_acc += acc
-        #             hit5_counter = collections.Counter(hit5_out)
-        #             hit5_out_trues = hit5_counter[True]
-        #             # print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
-        #             mini_batch_hit5 += float(hit5_out_trues / len(hit5_out))
-
-        #         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
-        #         mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
+            if step % 10 == 0:
+                # save a model checkpoint
+                save_path = os.path.join(model.model_dir, "model_step_%s.ckpt" % step)
+                save_path = saver.save(sess, save_path)
                 
-        #         print("\tstep %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s, y_true = %s, top 5 = %s" %
-        #              (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5, y_true_class_actual, top_5_out))
-        #         csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
-            
-        #     else:
-        #         train_acc_accum = train_acc_accum / report_step
-        #         train_hit5_accum = train_hit5_accum / report_step
-        #         print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
-        #              (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
-        #         csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
+                # train accuracy
+                acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+                print("Train accuracy = %s" % acc)
 
-        #     # write the csv data to 
-        #     run_csv_writer.writerow(csv_row)
-        #     train_acc_accum = 0.0
-        #     train_hit5_accum = 0.0
+                # validation accuracy
+                x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
+                                                                 crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
+                acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+                print("Validation accuracy = %s" % acc)
 
-        # j += BATCH_SIZE
+            step += 1
 
-    # print("end training epochs")
-    # # end of epoch
-    # # save a model checkpoint and report end of epoch information
-    # save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
-    # save_path = saver.save(sess, save_path)
-    # epoch_end = time.time()
-    # train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
-    # print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
-    # print("model checkpoint saved to %s\n\n" % save_path)
+            # if j != 0 and j % num_samples < BATCH_SIZE:
+            #     # end of epoch
+            #     # save a model checkpoint and report end of epoch information
+            #     save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+            #     save_path = saver.save(sess, save_path)
+            #     epoch_end = time.time()
+            #     train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
+            #     print("END EPOCH %s, steps completed = %s, epoch training time: %s" % (in_epoch, j, train_time))
+            #     print("model checkpoint saved to %s\n\n" % save_path)
 
-    # # final test
-    # test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
-    # run_csv_writer.writerow(test_results)
-    # end = time.time()
+            #     # test the network
+            #     test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
+            #     run_csv_writer.writerow(test_results)
 
-    # total_time = str(datetime.timedelta(seconds=end - start))
-    # print("END TRAINING total training time: %s" % (total_time))
+            #     in_epoch += 1
 
-    coord.request_stop()
-    coord.join(threads)
-    sess.close()
+            #     if in_epoch % 4 == 0 and OPTIMIZER != 'Adam':
+            #         model.current_learning_rate = model.current_learning_rate * LEARNING_RATE_DECAY
+            #         print("learning rate adjusted to %g" % model.current_learning_rate)
 
-run_csv_fd.close()
-run_log_fd.close()
+            #     print("START EPOCH %s" % in_epoch)
+            #     epoch_start = time.time()
+
+            # train_result = sess.run([train_op, loss_op, accuracy, x, y_true, y_true_class, y_pred, y_pred_class, logits, hit_5], 
+            #                         feed_dict={x: x_feed, 
+            #                                    y_true: y_feed, 
+            #                                    learning_rate: model.current_learning_rate})
+            # loss_op_out = train_result[1]
+            # train_acc = train_result[2]
+            # x_actual = train_result[3]
+            # y_true_actual = train_result[4]
+            # y_true_class_actual = train_result[5]
+            # y_pred_actual = train_result[6]
+            # y_pred_class_actual = train_result[7]
+            # logits_out = train_result[8]
+            # hit5_out = train_result[9]
+
+            # # print("train_acc = %s" % train_acc)
+            # # train_acc is the number of correct responses divided by the batch size
+            # # e.g. 3 correct responses/30 batch size = 0.1
+            # train_acc_accum += train_acc
+
+            # # print("hit_5_out = %s" % hit5_out)
+            # # count the trues in the hit_5_out array
+            # hit5_counter = collections.Counter(hit5_out)
+            # hit5_out_trues = float(hit5_counter[True])
+            # # print("%s trues out of %s" % (hit5_out_trues, len(hit5_out)))
+            # train_hit5_accum += float(hit5_out_trues / len(hit5_out))
+
+            # # report out results and run a test mini-batch every now and then
+            # if j != 0 and j % (report_step * BATCH_SIZE) == 0:
+            #     #print("logits = %s" % logits_out)
+            #     #print("x = %s" % x_actual)
+            #     #print("y_true = %s, y_true_class = %s, y_pred = %s, y_pred_class = %s" % (y_true_actual, y_true_class_actual, y_pred_actual, y_pred_class_actual))
+            #     #print("train_acc = %s" % train_acc)
+            #     print("hit5_out = %s, length = %s" % (hit5_out, len(hit5_out)))
+            #     print("%s trues out of %s, %s accuracy" % (hit5_out_trues, len(hit5_out), hit5_out_trues / len(hit5_out)))
+            #     run_time = time.time()
+            #     run_time_str = str(datetime.timedelta(seconds=run_time - start))
+            #     train_step_acc = train_acc_accum / report_step * BATCH_SIZE
+
+            #     # mini batch accuracy - every 5 report step iterations
+            #     if j % (report_step * BATCH_SIZE * 5) == 0:
+            #         mini_batch_acc = 0.0
+            #         mini_batch_hit5 = 0.0
+            #         for k in range(MINI_BATCH_SIZE):
+            #             if IMAGE_CROPPING == 'random':
+            #                 test_crop = 'center'
+            #             else:
+            #                 test_crop = IMAGE_CROPPING
+            #             x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, 1, model.frames_per_clip, model.num_classes, crop=test_crop)
+            #             acc, hit5_out, top_5_out, x_out = sess.run([eval_accuracy, eval_hit_5, eval_top_5, x_test],
+            #                                                        feed_dict={x_test: x_feed, y_true_test: y_feed})
+            #             # print("type(x) = %s, x = %s" % (type(x_out), x_out))
+            #             mini_batch_acc += acc
+            #             hit5_counter = collections.Counter(hit5_out)
+            #             hit5_out_trues = hit5_counter[True]
+            #             # print("%s trues out of %s" % (hit5_out_trues, len(hit_5_out)))
+            #             mini_batch_hit5 += float(hit5_out_trues / len(hit5_out))
+
+            #         mini_batch_acc = mini_batch_acc / MINI_BATCH_SIZE
+            #         mini_batch_hit5 = mini_batch_hit5 / MINI_BATCH_SIZE
+                    
+            #         print("\tstep %s - epoch %s run time = %s, loss = %s, mini-batch accuracy = %s, hit@5 = %s, y_true = %s, top 5 = %s" %
+            #              (j, in_epoch, run_time_str, loss_op_out, mini_batch_acc, mini_batch_hit5, y_true_class_actual, top_5_out))
+            #         csv_row = ['mini-batch', in_epoch, j, loss_op_out, mini_batch_acc, mini_batch_hit5]
+                
+            #     else:
+            #         train_acc_accum = train_acc_accum / report_step
+            #         train_hit5_accum = train_hit5_accum / report_step
+            #         print("\tstep %s - epoch %s run time = %s, loss = %s, train accuracy = %s, hit@5 = %s" %
+            #              (j, in_epoch, run_time_str, loss_op_out, train_acc_accum, train_hit5_accum))
+            #         csv_row = ['train', in_epoch, j, loss_op_out, train_acc_accum, train_hit5_accum]
+
+            #     # write the csv data to 
+            #     run_csv_writer.writerow(csv_row)
+            #     train_acc_accum = 0.0
+            #     train_hit5_accum = 0.0
+
+            # j += BATCH_SIZE
+
+        # print("end training epochs")
+        # # end of epoch
+        # # save a model checkpoint and report end of epoch information
+        # save_path = os.path.join(model.model_dir, "model_epoch_%s.ckpt" % in_epoch)
+        # save_path = saver.save(sess, save_path)
+        # epoch_end = time.time()
+        # train_time = str(datetime.timedelta(seconds=epoch_end - epoch_start))
+        # print("END EPOCH %s, iterations = %s, epoch training time: %s" % (in_epoch, j, train_time))
+        # print("model checkpoint saved to %s\n\n" % save_path)
+
+        # # final test
+        # test_results = test_network(sess, model, TEST_SPLIT, run_name, in_epoch)
+        # run_csv_writer.writerow(test_results)
+        # end = time.time()
+
+        # total_time = str(datetime.timedelta(seconds=end - start))
+        # print("END TRAINING total training time: %s" % (total_time))
+
+        coord.request_stop()
+        coord.join(threads)
+        sess.close()
+
+    run_csv_fd.close()
+    run_log_fd.close()
+
+
+if __name__ == "__main__":
+    main()
