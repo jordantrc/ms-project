@@ -677,7 +677,8 @@ def main():
                 y_true_class_out = results[1]
                 y_pred_class_out = results[2]
                 logits_out = results[3][0]
-                print("Train accuracy = %s, y_true = %s, y_prediction = %s, logits = %s" % (acc, y_true_class_out, y_pred_class_out, logits_out))
+                #print("Train accuracy = %s, y_true = %s, y_prediction = %s, logits = %s" % (acc, y_true_class_out, y_pred_class_out, logits_out))
+                print("Train accuracy = %s" % acc)
 
                 # validation accuracy
                 x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
