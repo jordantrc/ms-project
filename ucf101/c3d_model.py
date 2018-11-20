@@ -135,10 +135,10 @@ class C3DModel():
 
     def inference_3d(self, _X, _weights, _biases, batch_size, train):
 
-        if train:
-            dropout = self.dropout
-        else:
+        if not train:
             dropout = 0.6
+        else:
+            dropout = self.dropout
 
         # Convolution layer
         conv1 = self.conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])

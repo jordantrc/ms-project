@@ -671,8 +671,13 @@ def main():
 
             if step % 10 == 0:
                 # train accuracy
-                acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
-                print("Train accuracy = %s" % acc)
+                results = sess.run([accuracy, y_true_class, y_pred_class, logits], 
+                                   feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+                acc = results[0]
+                y_true_class_out = results[1]
+                y_pred_class_out = results[2]
+                logits_out = results[3]
+                print("Train accuracy = %s, y_true = %s, y_prediction = %s, logits = %s" % (acc, y_true_class_out, y_pred_class_out, logits_out))
 
                 # validation accuracy
                 x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
