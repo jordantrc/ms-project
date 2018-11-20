@@ -40,7 +40,7 @@ VARIABLE_TYPE = 'default'
 ONE_CLIP_PER_VIDEO = False
 LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
-IMAGE_CROPPING = 'random'
+IMAGE_CROPPING = 'center'
 TEST_IMAGE_CROPPING = 'center'
 IMAGE_NORMALIZATION = True
 WEIGHT_STDDEV = 0.04
@@ -566,7 +566,7 @@ def main():
                 'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
                 'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
                 'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
-                'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
+                'wdout': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
             }
             biases = {
                 'bc1': bias_variable('bc1', [64], BIAS),
@@ -579,7 +579,7 @@ def main():
                 'bc5b': bias_variable('bc5b', [512], BIAS),
                 'bd1': bias_variable('bd1', [4096], BIAS),
                 'bd2': bias_variable('bd2', [4096], BIAS),
-                'out': bias_variable('bdout', [num_classes], BIAS),
+                'bdout': bias_variable('bdout', [num_classes], BIAS),
             }
 
         # placeholders and constants
@@ -632,13 +632,12 @@ def main():
 
         init_op = tf.global_variables_initializer()
 
-        saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
-        sess.run(init_op)
-
+        saver = tf.train.Saver(weights.values() + biases.values())
+        
         # TRAINING
+        sess.run(init_op)
         report_step = 20
         print("Beginning training")
-
         in_epoch = 1
         print("START EPOCH %s" % in_epoch)
         start = time.time()
@@ -668,13 +667,9 @@ def main():
                                                              crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
             sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
             step_end = time.time()
-            print("step %s - %.3fs" % (step, step_end - step_start))
+            print("epoch %s step %s - %.3fs" % (in_epoch, step, step_end - step_start))
 
             if step % 10 == 0:
-                # save a model checkpoint
-                save_path = os.path.join(model.model_dir, "model_step_%s.ckpt" % step)
-                save_path = saver.save(sess, save_path)
-                
                 # train accuracy
                 acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
                 print("Train accuracy = %s" % acc)
@@ -684,6 +679,11 @@ def main():
                                                                  crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
                 acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
                 print("Validation accuracy = %s" % acc)
+
+            if step % 100 == 0 or step == max_steps:
+                 # save a model checkpoint
+                save_path = os.path.join(model.model_dir, "model_step_%s.ckpt" % step)
+                save_path = saver.save(sess, save_path)
 
             step += 1
 

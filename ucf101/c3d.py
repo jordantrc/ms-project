@@ -69,7 +69,7 @@ def get_variables(num_classes, var_type="default"):
                 'wc5b': weight_variable('wc5b', [3, 3, 3, 512, 512], WEIGHT_STDDEV),
                 'wd1': weight_variable('wd1', [8192, 4096], WEIGHT_STDDEV),
                 'wd2': weight_variable('wd2', [4096, 4096], WEIGHT_STDDEV),
-                'out': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
+                'wdout': weight_variable('wdout', [4096, num_classes], WEIGHT_STDDEV),
             }
             biases = {
                 'bc1': bias_variable('bc1', [64], BIAS),
@@ -82,7 +82,7 @@ def get_variables(num_classes, var_type="default"):
                 'bc5b': bias_variable('bc5b', [512], BIAS),
                 'bd1': bias_variable('bd1', [4096], BIAS),
                 'bd2': bias_variable('bd2', [4096], BIAS),
-                'out': bias_variable('bdout', [num_classes], BIAS),
+                'bdout': bias_variable('bdout', [num_classes], BIAS),
             }
 
     elif var_type == "weight decay":

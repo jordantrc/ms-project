@@ -186,7 +186,7 @@ class C3DModel():
         dense2 = tf.nn.dropout(dense2, dropout)
 
         # Output: class prediction
-        out = tf.matmul(dense2, _weights['out']) + _biases['out']
+        out = tf.matmul(dense2, _weights['wdout']) + _biases['bdout']
 
         return out
 
