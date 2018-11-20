@@ -542,6 +542,7 @@ def main():
     run_log_fd.write("OPTIMIZER = %s" % (OPTIMIZER))
     run_log_fd.write("IMAGE_CROPPING = %s" % (IMAGE_CROPPING))
     run_log_fd.write("IMAGE_NORMALIZATION = %s" % (IMAGE_NORMALIZATION))
+    run_log_fd.write("learning rate = %s" % (model.learning_rate))
     # run_log_fd.write("Training samples = %s, testing samples = %s\n" % (len(train_files), len(test_files)))
 
     # Tensorflow configuration
@@ -614,8 +615,7 @@ def main():
             #                                       staircase=True)
             optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
         elif OPTIMIZER == 'Adam':
-            learning_rate = tf.placeholder(tf.float32, shape=[])
-            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+            optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate)
 
         train_op = optimizer.minimize(loss_op, name="train")
 
@@ -672,7 +672,7 @@ def main():
             if step % 10 == 0:
                 # train accuracy
                 results = sess.run([accuracy, y_true_class, y_pred_class, logits], 
-                                   feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+                                   feed_dict={x: x_feed, y_true: y_feed})
                 acc = results[0]
                 y_true_class_out = results[1]
                 y_pred_class_out = results[2]
@@ -683,7 +683,7 @@ def main():
                 # validation accuracy
                 x_feed, y_feed, _, num_samples = get_image_batch(TEST_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
                                                                  crop=TEST_IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
-                acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed, learning_rate: model.current_learning_rate})
+                acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed})
                 print("Validation accuracy = %s" % acc)
 
             if step % 100 == 0 or step == max_steps:
