@@ -676,7 +676,7 @@ def main():
                 acc = results[0]
                 y_true_class_out = results[1]
                 y_pred_class_out = results[2]
-                logits_out = results[3]
+                logits_out = results[3][0]
                 print("Train accuracy = %s, y_true = %s, y_prediction = %s, logits = %s" % (acc, y_true_class_out, y_pred_class_out, logits_out))
 
                 # validation accuracy
