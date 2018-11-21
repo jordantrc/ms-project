@@ -42,9 +42,10 @@ LEARNING_RATE_DECAY = 0.1
 OPTIMIZER = 'Adam'
 IMAGE_CROPPING = 'center'
 TEST_IMAGE_CROPPING = 'center'
-IMAGE_NORMALIZATION = False
+IMAGE_NORMALIZATION = True
 WEIGHT_STDDEV = 0.04
 BIAS = 0.04
+LEARNING_RATE = 1e-3
 
 def print_help():
     '''prints a help message'''
@@ -552,8 +553,8 @@ def main():
         #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
         # init variables
         # tf.set_random_seed(1234)
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord=coord)
+        # coord = tf.train.Coordinator()
+        # threads = tf.train.start_queue_runners(coord=coord)
 
         with tf.variable_scope('var_name') as var_scope:
             weights = {
@@ -615,7 +616,7 @@ def main():
             #                                       staircase=True)
             optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
         elif OPTIMIZER == 'Adam':
-            optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate)
+            optimizer = tf.train.AdamOptimizer(LEARNING_RATE)
 
         train_op = optimizer.minimize(loss_op, name="train")
 
@@ -686,7 +687,7 @@ def main():
                 acc = sess.run(accuracy, feed_dict={x: x_feed, y_true: y_feed})
                 print("Validation accuracy = %s" % acc)
 
-            if step % 100 == 0 or step == max_steps:
+            if step % 100 == 0 or step == max_steps - 1:
                  # save a model checkpoint
                 save_path = os.path.join(model.model_dir, "model_%s_step_%s.ckpt" % (run_name, step))
                 save_path = saver.save(sess, save_path)
@@ -812,9 +813,9 @@ def main():
         # total_time = str(datetime.timedelta(seconds=end - start))
         # print("END TRAINING total training time: %s" % (total_time))
 
-        coord.request_stop()
-        coord.join(threads)
-        sess.close()
+        #coord.request_stop()
+        #coord.join(threads)
+        # sess.close()
 
     run_csv_fd.close()
     run_log_fd.close()

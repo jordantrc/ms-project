@@ -23,7 +23,7 @@ class C3DModel():
                  dropout=0.5,
                  frames_per_video=FRAMES_PER_VIDEO,
                  frames_per_clip=FRAMES_PER_CLIP,
-                 learning_rate=1e-2):
+                 learning_rate=1e-3):
         '''initializes the object'''
         self.num_classes = num_classes
         self.model_dir = model_dir
