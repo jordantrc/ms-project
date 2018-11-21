@@ -383,6 +383,7 @@ def test_network(sess, model, test_file_name, run_name, epoch):
             test_crop = IMAGE_CROPPING
         x_feed, y_feed, offset, num_samples = get_image_batch(test_file_name, 1, model.frames_per_clip, model.num_classes,
                                                               crop=test_crop, offset=offset, shuffle=False)
+        print("x_feed = %s" % x_feed)
         report_interval = max(1, int(num_samples / 100))
         test_results = sess.run([eval_accuracy, y_pred_test_class, y_true_test_class, eval_correct_pred, eval_hit_5, eval_top_5, logits_test],
                                 feed_dict={x_test: x_feed, y_true_test: y_feed})
