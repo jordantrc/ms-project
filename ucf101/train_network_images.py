@@ -667,7 +667,7 @@ def main():
             step_start = time.time()
             x_feed, y_feed, _, num_samples = get_image_batch(TRAIN_SPLIT, BATCH_SIZE, model.frames_per_clip, model.num_classes,
                                                              crop=IMAGE_CROPPING, normalize=IMAGE_NORMALIZATION)
-            print("x_feed = %s" % str(x_feed.shape))
+            # print("x_feed = %s" % str(x_feed.shape))
             sess.run(train_op, feed_dict={x: x_feed, y_true: y_feed})
             step_end = time.time()
             print("epoch %s step %s - %.3fs" % (in_epoch, step, step_end - step_start))

@@ -14,7 +14,7 @@ library(ggplot2)
 Load a run csv file for analysis.
 ```{r}
 setwd("C:/Users/Jordan/Dropbox/School/Project/datasets")
-file_to_analyze = "ucf101/train_runs/1111-3.csv"
+file_to_analyze = "ucf101/train_runs/1114-1.csv"
 run_data = read.csv(file_to_analyze)
 run_data
 ```
