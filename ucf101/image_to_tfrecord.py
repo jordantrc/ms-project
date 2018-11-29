@@ -54,7 +54,7 @@ def main():
 			frame_stack = np.stack(frames, axis=0)
 			frames_raw = frame_stack.tostring()
 			# use compression to save space
-			frames_raw = zlib.compress(frames_raw)
+			# frames_raw = zlib.compress(frames_raw)
 			features['frames'] = _bytes_feature(frames_raw)
 
 			example = tf.train.Example(features=tf.train.Features(feature=features))

@@ -322,8 +322,8 @@ def get_frame_data(filename, num_frames_per_clip=16):
   features = tf.parse_single_example(serialized_example, features=feature_dict)
 
   # reshape the images into an ndarray, first decompress the image data
-  frame_stack = zlib.decompress(features['frames'])
-  frame_stack = tf.decode_raw(frame_stack, tf.uint8)
+  #frame_stack = zlib.decompress(features['frames'])
+  frame_stack = tf.decode_raw(features['frames'], tf.uint8)
   num_frames = features['num_frames']
   height = features['height']
   width = features['width']
