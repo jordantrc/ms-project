@@ -305,6 +305,7 @@ def get_frame_data(filename, num_frames_per_clip=16):
   ret_arr = []
   s_index = 0
   reader = tf.TFRecordReader()
+  filename_queue = tf.train.string_input_producer([filename], num_epochs=1)
 
   # open the tfrecord file for reading
   feature_dict = dict()
@@ -316,7 +317,7 @@ def get_frame_data(filename, num_frames_per_clip=16):
   feature_dict['frames'] = tf.FixedLenFeature((), tf.string)
 
   # read the tfrecord file
-  _, serialized_example = reader.read(filename)
+  _, serialized_example = reader.read(filename_queue)
   # Decode the record read by the reader
   features = tf.parse_single_example(serialized_example, features=feature_dict)
 
