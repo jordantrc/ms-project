@@ -13,8 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 
-# taken from:
-# http://www.apache.org/licenses/LICENSE-2.0
 # modified by Jordan Chadwick
 # jordanc@wildcats.unh.edu
 
@@ -31,6 +29,8 @@ import tensorflow as tf
 import input_data
 import c3d_model
 import numpy as np
+
+from itertools import cycle
 
 # Basic model parameters as external flags.
 flags = tf.app.flags
@@ -151,21 +151,52 @@ def run_test():
   print("done")
 
 
-def get_frame_data(filename, num_frames=16):
+def get_frame_data(filename, num_frames_per_clip=16):
   '''opens the tfrecord and returns the number of frames required'''
   
   ret_arr = []
   s_index = 0
+  reader = tf.TFRecordReader()
 
   # open the tfrecord file for reading
-  features = dict()
-  features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  features['num_frames'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  features['frames'] = tf.FixedLenFeature((), tf.string)
+  feature_dict = dict()
+  feature_dict['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['num_frames'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['height'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['width'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['channels'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['frames'] = tf.FixedLenFeature((), tf.string)
 
-  # TODO finish this function
+  # read the tfrecord file
+  _, serialized_example = reader.read(filename)
+  # Decode the record read by the reader
+  features = tf.parse_single_example(serialized_example, features=feature_dict)
 
-  
+  # reshape the images into an ndarray
+  frame_stack = tf.decode_raw(features['frames'], tf.uint8)
+  num_frames = features['num_frames']
+  height = features['height']
+  width = features['width']
+  channels = features['channels']
+  frames = tf.reshape(frame_stack, [num_frames, height, width, channels])
+
+  # sample num_frames_per_clip frames from the frame stack
+  if num_frames == num_frames_per_clip:
+    ret_arr = frames
+  elif num_frames < num_frames_per_clip:
+    # oversample
+    frames = cycle(frames)
+    i = 0
+    while len(ret_arr) < num_frames_per_clip:
+      ret_arr.append(frames[i])
+      i += 1
+  elif num_frames > num_frames_per_clip:
+    # pick a random starting index
+    s_index = random.randint(0, num_frames - num_frames_per_clip)
+    ret_arr = frames[s_index:s_index + num_frames_per_clip]
+
+  assert len(ret_arr) == num_frames_per_clip
+
   return ret_arr, s_index
 
 
