@@ -9,6 +9,7 @@ import tensorflow as tf
 import random
 import c3d
 import zlib
+import numpy as np
 
 from itertools import cycle
 
