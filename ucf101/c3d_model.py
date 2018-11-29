@@ -10,6 +10,7 @@ import random
 import c3d
 import zlib
 import numpy as np
+import time
 
 from itertools import cycle
 
