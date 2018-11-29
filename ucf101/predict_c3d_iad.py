@@ -129,7 +129,7 @@ def run_test():
     # Fill a feed dictionary with the actual set of images and labels
     # for this particular training step.
     start_time = time.time()
-    test_images, test_labels, next_start_pos, _, valid_len = read_clip_and_label(
+    test_images, test_labels, next_start_pos, _, valid_len = c3d_model.read_clip_and_label(
                                                                                 test_list_file,
                                                                                 FLAGS.batch_size * gpu_num,
                                                                                 start_pos=next_start_pos
@@ -149,118 +149,6 @@ def run_test():
               predict_score[i][top1_predicted_label]))
   write_file.close()
   print("done")
-
-
-def get_frame_data(filename, num_frames_per_clip=16):
-  '''opens the tfrecord and returns the number of frames required'''
-  
-  ret_arr = []
-  s_index = 0
-  reader = tf.TFRecordReader()
-
-  # open the tfrecord file for reading
-  feature_dict = dict()
-  feature_dict['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  feature_dict['num_frames'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  feature_dict['height'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  feature_dict['width'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  feature_dict['channels'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  feature_dict['frames'] = tf.FixedLenFeature((), tf.string)
-
-  # read the tfrecord file
-  _, serialized_example = reader.read(filename)
-  # Decode the record read by the reader
-  features = tf.parse_single_example(serialized_example, features=feature_dict)
-
-  # reshape the images into an ndarray
-  frame_stack = tf.decode_raw(features['frames'], tf.uint8)
-  num_frames = features['num_frames']
-  height = features['height']
-  width = features['width']
-  channels = features['channels']
-  frames = tf.reshape(frame_stack, [num_frames, height, width, channels])
-
-  # sample num_frames_per_clip frames from the frame stack
-  if num_frames == num_frames_per_clip:
-    ret_arr = frames
-  elif num_frames < num_frames_per_clip:
-    # oversample
-    frames = cycle(frames)
-    i = 0
-    while len(ret_arr) < num_frames_per_clip:
-      ret_arr.append(frames[i])
-      i += 1
-  elif num_frames > num_frames_per_clip:
-    # pick a random starting index
-    s_index = random.randint(0, num_frames - num_frames_per_clip)
-    ret_arr = frames[s_index:s_index + num_frames_per_clip]
-
-  assert len(ret_arr) == num_frames_per_clip
-
-  return ret_arr, s_index
-
-
-def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
-  '''this function modified to work with tfrecord files'''
-  lines = open(filename,'r')
-  read_dirnames = []
-  data = []
-  label = []
-  batch_index = 0
-  next_batch_start = -1
-  lines = list(lines)
-  np_mean = np.load('crop_mean.npy').reshape([num_frames_per_clip, crop_size, crop_size, 3])
-  # Forcing shuffle, if start_pos is not specified
-  if start_pos < 0:
-    shuffle = True
-  if shuffle:
-    video_indices = range(len(lines))
-    random.seed(time.time())
-    random.shuffle(video_indices)
-  else:
-    # Process videos sequentially
-    video_indices = range(start_pos, len(lines))
-  for index in video_indices:
-    if(batch_index >= batch_size):
-      next_batch_start = index
-      break
-    line = lines[index].strip('\n').split()
-    filename = line[0]
-    tmp_label = line[1]
-    if not shuffle:
-      print("Loading a video clip from {}...".format(filename))
-    tmp_data, _ = get_frame_data(filename, num_frames_per_clip)
-    img_datas = []
-    if(len(tmp_data)!=0):
-      for j in xrange(len(tmp_data)):
-        img = Image.fromarray(tmp_data[j].astype(np.uint8))
-        if(img.width>img.height):
-          scale = float(crop_size)/float(img.height)
-          img = np.array(cv2.resize(np.array(img),(int(img.width * scale + 1), crop_size))).astype(np.float32)
-        else:
-          scale = float(crop_size)/float(img.width)
-          img = np.array(cv2.resize(np.array(img),(crop_size, int(img.height * scale + 1)))).astype(np.float32)
-        crop_x = int((img.shape[0] - crop_size)/2)
-        crop_y = int((img.shape[1] - crop_size)/2)
-        img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:] - np_mean[j]
-        img_datas.append(img)
-      data.append(img_datas)
-      label.append(int(tmp_label))
-      batch_index = batch_index + 1
-      read_dirnames.append(dirname)
-
-  # pad (duplicate) data/label if less than batch_size
-  valid_len = len(data)
-  pad_len = batch_size - valid_len
-  if pad_len:
-    for i in range(pad_len):
-      data.append(img_datas)
-      label.append(int(tmp_label))
-
-  np_arr_data = np.array(data).astype(np.float32)
-  np_arr_label = np.array(label).astype(np.int64)
-
-  return np_arr_data, np_arr_label, next_batch_start, read_dirnames, valid_len
 
 
 def main(_):

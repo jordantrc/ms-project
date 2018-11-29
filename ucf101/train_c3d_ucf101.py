@@ -13,6 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 
+# modified by Jordan Chadwick
+# jordanc@wildcats.unh.edu
+
 """Trains and Evaluates the MNIST network using a feed dictionary."""
 # pylint: disable=missing-docstring
 import os
@@ -33,7 +36,7 @@ flags.DEFINE_integer('max_steps', 5000, 'Number of steps to run trainer.')
 flags.DEFINE_integer('batch_size', 10, 'Batch size.')
 FLAGS = flags.FLAGS
 MOVING_AVERAGE_DECAY = 0.9999
-model_save_dir = './models'
+model_save_dir = '/home/jordanc/datasets/UCF-101/model_ckpts/'
 
 def placeholder_inputs(batch_size):
   """Generate placeholder variables to represent the input tensors.
@@ -113,7 +116,7 @@ def run_training():
   # Create model directory
   if not os.path.exists(model_save_dir):
       os.makedirs(model_save_dir)
-  use_pretrained_model = True 
+  use_pretrained_model = False
   model_filename = "./sports1m_finetuning_ucf101.model"
 
   with tf.Graph().as_default():
@@ -129,6 +132,7 @@ def run_training():
     tower_grads1 = []
     tower_grads2 = []
     logits = []
+    activations = []
     opt_stable = tf.train.AdamOptimizer(1e-4)
     opt_finetuning = tf.train.AdamOptimizer(1e-3)
     with tf.variable_scope('var_name') as var_scope:
@@ -163,7 +167,8 @@ def run_training():
         
         varlist2 = [ weights['out'],biases['out'] ]
         varlist1 = list( set(weights.values() + biases.values()) - set(varlist2) )
-        logit = c3d_model.inference_c3d(
+        # compute the logits get the activations
+        logit, activation = c3d_model.inference_c3d(
                         images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:],
                         0.5,
                         FLAGS.batch_size,
@@ -181,6 +186,7 @@ def run_training():
         tower_grads1.append(grads1)
         tower_grads2.append(grads2)
         logits.append(logit)
+        activations.append(activation)
     logits = tf.concat(logits,0)
     accuracy = tower_acc(logits, labels_placeholder)
     tf.summary.scalar('accuracy', accuracy)
@@ -211,14 +217,14 @@ def run_training():
     test_writer = tf.summary.FileWriter('./visual_logs/test', sess.graph)
     for step in xrange(FLAGS.max_steps):
       start_time = time.time()
-      train_images, train_labels, _, _, _ = input_data.read_clip_and_label(
+      train_images, train_labels, _, _, _, sample_names = c3d_model.read_clip_and_label(
                       filename='list/train.list',
                       batch_size=FLAGS.batch_size * gpu_num,
                       num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                       crop_size=c3d_model.CROP_SIZE,
                       shuffle=True
                       )
-      sess.run(train_op, feed_dict={
+      _, activations_out = sess.run([train_op, activations] feed_dict={
                       images_placeholder: train_images,
                       labels_placeholder: train_labels
                       })
@@ -226,14 +232,14 @@ def run_training():
       print('Step %d: %.3f sec' % (step, duration))
 
       # Save a checkpoint and evaluate the model periodically.
-      if (step) % 10 == 0 or (step + 1) == FLAGS.max_steps:
+      if (step) % 100 == 0 or (step + 1) == FLAGS.max_steps:
         saver.save(sess, os.path.join(model_save_dir, 'c3d_ucf_model'), global_step=step)
         print('Training Data Eval:')
         summary, acc = sess.run(
-                        [merged, accuracy],
-                        feed_dict={images_placeholder: train_images,
-                            labels_placeholder: train_labels
-                            })
+                                [merged, accuracy],
+                                feed_dict={images_placeholder: train_images,
+                                labels_placeholder: train_labels
+                                })
         print ("accuracy: " + "{:.5f}".format(acc))
         train_writer.add_summary(summary, step)
         print('Validation Data Eval:')
@@ -252,6 +258,7 @@ def run_training():
                                         })
         print ("accuracy: " + "{:.5f}".format(acc))
         test_writer.add_summary(summary, step)
+
   print("done")
 
 def main(_):

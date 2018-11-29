@@ -8,6 +8,7 @@
 import tensorflow as tf
 import random
 import c3d
+import zlib
 
 NUM_CLASSES = 101
 FRAMES_PER_VIDEO = 250
@@ -238,7 +239,7 @@ def conv3d(name, l_input, w, b):
 def max_pool(name, l_input, k):
   return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME', name=name)
 
-def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
+def inference_c3d(_X, _dropout, batch_size, _weights, _biases, depth=4):
 
   # Convolution Layer
   conv1 = conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
@@ -272,6 +273,7 @@ def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
   pool5 = max_pool('pool5', conv5, k=2)
 
   # Fully connected layer
+  # the following line is only necessary if the sports1m pretrained model is in-use
   # pool5 = tf.transpose(pool5, perm=[0,1,4,2,3])
   dense1 = tf.reshape(pool5, [batch_size, _weights['wd1'].get_shape().as_list()[0]]) # Reshape conv3 output to fit dense layer input
   dense1 = tf.matmul(dense1, _weights['wd1']) + _biases['bd1']
@@ -285,4 +287,122 @@ def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
   # Output: class prediction
   out = tf.matmul(dense2, _weights['out']) + _biases['out']
 
-  return out
+  # list of convolutional layers to select from
+  layers = [conv1, conv2, conv3, conv4, conv5]
+
+  return out, layers[depth]
+
+def get_frame_data(filename, num_frames_per_clip=16):
+  '''opens the tfrecord and returns the number of frames required'''
+  
+  ret_arr = []
+  s_index = 0
+  reader = tf.TFRecordReader()
+
+  # open the tfrecord file for reading
+  feature_dict = dict()
+  feature_dict['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['num_frames'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['height'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['width'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['channels'] = tf.FixedLenFeature((), tf.int64, default_value=0)
+  feature_dict['frames'] = tf.FixedLenFeature((), tf.string)
+
+  # read the tfrecord file
+  _, serialized_example = reader.read(filename)
+  # Decode the record read by the reader
+  features = tf.parse_single_example(serialized_example, features=feature_dict)
+
+  # reshape the images into an ndarray, first decompress the image data
+  frame_stack = zlib.decompress(features['frames'])
+  frame_stack = tf.decode_raw(frame_stack, tf.uint8)
+  num_frames = features['num_frames']
+  height = features['height']
+  width = features['width']
+  channels = features['channels']
+  frames = tf.reshape(frame_stack, [num_frames, height, width, channels])
+
+  # sample num_frames_per_clip frames from the frame stack
+  if num_frames == num_frames_per_clip:
+    ret_arr = frames
+  elif num_frames < num_frames_per_clip:
+    # oversample
+    frames = cycle(frames)
+    i = 0
+    while len(ret_arr) < num_frames_per_clip:
+      ret_arr.append(frames[i])
+      i += 1
+  elif num_frames > num_frames_per_clip:
+    # pick a random starting index
+    s_index = random.randint(0, num_frames - num_frames_per_clip)
+    ret_arr = frames[s_index:s_index + num_frames_per_clip]
+
+  assert len(ret_arr) == num_frames_per_clip
+
+  return ret_arr, s_index
+
+
+def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
+  '''this function modified to work with tfrecord files'''
+  lines = open(filename,'r')
+  read_dirnames = []
+  data = []
+  label = []
+  sample_names = []
+  batch_index = 0
+  next_batch_start = -1
+  lines = list(lines)
+  np_mean = np.load('crop_mean.npy').reshape([num_frames_per_clip, crop_size, crop_size, 3])
+  # Forcing shuffle, if start_pos is not specified
+  if start_pos < 0:
+    shuffle = True
+  if shuffle:
+    video_indices = range(len(lines))
+    random.seed(time.time())
+    random.shuffle(video_indices)
+  else:
+    # Process videos sequentially
+    video_indices = range(start_pos, len(lines))
+  for index in video_indices:
+    if(batch_index >= batch_size):
+      next_batch_start = index
+      break
+    line = lines[index].strip('\n').split()
+    filename = line[0]
+    sample_name = os.path.basename(filename)
+    tmp_label = line[1]
+    if not shuffle:
+      print("Loading a video clip from {}...".format(filename))
+    tmp_data, _ = get_frame_data(filename, num_frames_per_clip)
+    img_datas = []
+    if(len(tmp_data)!=0):
+      for j in xrange(len(tmp_data)):
+        img = Image.fromarray(tmp_data[j].astype(np.uint8))
+        if(img.width>img.height):
+          scale = float(crop_size)/float(img.height)
+          img = np.array(cv2.resize(np.array(img),(int(img.width * scale + 1), crop_size))).astype(np.float32)
+        else:
+          scale = float(crop_size)/float(img.width)
+          img = np.array(cv2.resize(np.array(img),(crop_size, int(img.height * scale + 1)))).astype(np.float32)
+        crop_x = int((img.shape[0] - crop_size)/2)
+        crop_y = int((img.shape[1] - crop_size)/2)
+        img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:] - np_mean[j]
+        img_datas.append(img)
+      data.append(img_datas)
+      label.append(int(tmp_label))
+      sample_names.append(sample_name)
+      batch_index = batch_index + 1
+      read_dirnames.append(dirname)
+
+  # pad (duplicate) data/label if less than batch_size
+  valid_len = len(data)
+  pad_len = batch_size - valid_len
+  if pad_len:
+    for i in range(pad_len):
+      data.append(img_datas)
+      label.append(int(tmp_label))
+
+  np_arr_data = np.array(data).astype(np.float32)
+  np_arr_label = np.array(label).astype(np.int64)
+
+  return np_arr_data, np_arr_label, next_batch_start, read_dirnames, valid_len, sample_names

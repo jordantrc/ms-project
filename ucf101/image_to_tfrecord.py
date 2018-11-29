@@ -4,6 +4,7 @@
 
 import os
 import sys
+import zlib
 import numpy as np
 import tensorflow as tf
 
@@ -31,18 +32,29 @@ def main():
 			label = video_name.split('_')[1]
 			label_int = classes.index(label)
 			num_frames = len(files)
-			features = {'label': _int64_feature(label_int), 'num_frames': _int64_feature(num_frames)}
+			features = {'label': _int64_feature(label_int), 
+						'num_frames': _int64_feature(num_frames)
+						}
 
 			# read each image and add it to the tfrecord
 			frames = []
 			for f in files:
 				path = os.path.join(root, f)
-				frame = np.asarray(Image.open(path)).astype(np.uint8)
+				img = Image.open(path)
+				features['height'] = _int64_feature(img.height)
+				features['width'] = _int64_feature(img.width)
+				if img.mode == 'RGB':
+					features['channels'] = _int64_feature(3)
+				else:
+					assert False, "unhandled image mode %s" % img.mode
+				frame = np.asarray(img).astype(np.uint8)
 				frames.append(frame)
 
 			# stack the frames into one large array
 			frame_stack = np.stack(frames, axis=0)
 			frames_raw = frame_stack.tostring()
+			# use compression to save space
+			frames_raw = zlib.compress(frames_raw)
 			features['frames'] = _bytes_feature(frames_raw)
 
 			example = tf.train.Example(features=tf.train.Features(feature=features))
