@@ -28,6 +28,8 @@ import c3d_model
 import math
 import numpy as np
 
+from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
+
 # Basic model parameters as external flags.
 flags = tf.app.flags
 gpu_num = 2
@@ -112,6 +114,9 @@ def _variable_with_weight_decay(name, shape, wd):
 def run_training():
   # Get the sets of images and labels for training, validation, and
   # Tell TensorFlow that the model will be built into the default Graph.
+
+  # get the list of classes
+  classes = get_class_list(CLASS_INDEX_FILE)
 
   # Create model directory
   if not os.path.exists(model_save_dir):
@@ -218,7 +223,9 @@ def run_training():
     for step in xrange(FLAGS.max_steps):
       start_time = time.time()
       train_images, train_labels, _, _, _, sample_names = c3d_model.read_clip_and_label(
-                      filename='list/train.list',
+                      directory='/home/jordanc/datasets/UCF-101/tfrecords/',
+                      filename='train-test-splits/trainlist-tfrecord01.txt',
+                      classes=classes,
                       batch_size=FLAGS.batch_size * gpu_num,
                       num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                       crop_size=c3d_model.CROP_SIZE,
@@ -228,6 +235,7 @@ def run_training():
                       images_placeholder: train_images,
                       labels_placeholder: train_labels
                       })
+      print("len sample_names = %s, len activations_out = %s" % (len(sample_names), len(activations_out)))
       duration = time.time() - start_time
       print('Step %d: %.3f sec' % (step, duration))
 

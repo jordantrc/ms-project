@@ -73,8 +73,12 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 
 def run_test():
+
+  # get the list of classes
+  classes = get_class_list(CLASS_INDEX_FILE)
+
   model_name = "./sports1m_finetuning_ucf101.model"
-  test_list_file = 'list/test.list'
+  test_list_file = 'train-test-splits/trainlist-tfrecord01.txt'
   num_test_videos = len(list(open(test_list_file,'r')))
   print("Number of test videos={}".format(num_test_videos))
 
@@ -129,11 +133,17 @@ def run_test():
     # Fill a feed dictionary with the actual set of images and labels
     # for this particular training step.
     start_time = time.time()
-    test_images, test_labels, next_start_pos, _, valid_len = c3d_model.read_clip_and_label(
-                                                                                test_list_file,
-                                                                                FLAGS.batch_size * gpu_num,
-                                                                                start_pos=next_start_pos
-                                                                                )
+    test_images,
+    test_labels,
+    next_start_pos, _,
+    valid_len,
+    sample_names = c3d_model.read_clip_and_label(
+                                                 directory='/home/jordanc/datasets/UCF-101/tfrecords/',
+                                                 filename=test_list_file,
+                                                 classes=classes,
+                                                 FLAGS.batch_size * gpu_num,
+                                                 start_pos=next_start_pos
+                                                 )
     predict_score = norm_score.eval(
             session=sess,
             feed_dict={images_placeholder: test_images}

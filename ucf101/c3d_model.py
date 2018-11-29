@@ -10,6 +10,10 @@ import random
 import c3d
 import zlib
 
+from itertools import cycle
+
+from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
+
 NUM_CLASSES = 101
 FRAMES_PER_VIDEO = 250
 NUM_FRAMES_PER_CLIP = 16
@@ -342,10 +346,10 @@ def get_frame_data(filename, num_frames_per_clip=16):
   return ret_arr, s_index
 
 
-def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
+def read_clip_and_label(directory, filename, classes, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
   '''this function modified to work with tfrecord files'''
   lines = open(filename,'r')
-  read_dirnames = []
+  read_filenames = []
   data = []
   label = []
   sample_names = []
@@ -370,7 +374,9 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
     line = lines[index].strip('\n').split()
     filename = line[0]
     sample_name = os.path.basename(filename)
-    tmp_label = line[1]
+    filename = os.path.join(directory, filename + ".tfrecord")
+    tmp_label = sample_name.split('_')[1]
+    tmp_label = classes.index(tmp_label)
     if not shuffle:
       print("Loading a video clip from {}...".format(filename))
     tmp_data, _ = get_frame_data(filename, num_frames_per_clip)
