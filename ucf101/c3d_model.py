@@ -11,6 +11,7 @@ import c3d
 import zlib
 import numpy as np
 import time
+import os
 
 from itertools import cycle
 
