@@ -15,8 +15,6 @@ import os
 
 from itertools import cycle
 
-from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
-
 NUM_CLASSES = 101
 FRAMES_PER_VIDEO = 250
 NUM_FRAMES_PER_CLIP = 16
