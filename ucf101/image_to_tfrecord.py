@@ -52,6 +52,7 @@ def main():
 
 			# stack the frames into one large array
 			frame_stack = np.stack(frames, axis=0)
+			frame_stack = frame_stack.flatten()
 			print("frame_stack shape = %s" % str(frame_stack.shape))
 			frames_raw = frame_stack.tostring()
 			# use compression to save space
