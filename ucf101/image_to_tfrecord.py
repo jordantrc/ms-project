@@ -7,7 +7,7 @@ import sys
 import tensorflow as tf
 
 from PIL import Image
-from tfrecord_gen import get_class_list, _int64_feature, _bytes_feature
+from tfrecord_gen import CLASS_INDEX_FILE, get_class_list, _int64_feature, _bytes_feature
 
 def main():
 	'''main function'''
