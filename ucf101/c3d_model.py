@@ -285,4 +285,4 @@ def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
   # Output: class prediction
   out = tf.matmul(dense2, _weights['out']) + _biases['out']
 
-return out
+  return out
