@@ -312,7 +312,7 @@ def get_frame_data(filename, num_frames_per_clip=16):
   feature_dict['height'] = tf.FixedLenFeature((), tf.int64, default_value=0)
   feature_dict['width'] = tf.FixedLenFeature((), tf.int64, default_value=0)
   feature_dict['channels'] = tf.FixedLenFeature((), tf.int64, default_value=0)
-  feature_dict['frames'] = tf.FixedLenFeature((), tf.string)
+  feature_dict['frames'] = tf.FixedLenFeature([], tf.string)
 
   # read the tfrecord file
   _, serialized_example = reader.read(filename_queue)
