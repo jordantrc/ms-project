@@ -23,7 +23,7 @@ def main():
 			# /home/jordanc/datasets/UCF-101/UCF-101/BreastStroke/v_BreastStroke_g23_c02
 			files.sort()
 			video_name = os.path.basename(root)
-			tfrecord_path = os.path.join(root, video_name + ".tfrecord")
+			tfrecord_path = os.path.join(tfrecord_dir, video_name + ".tfrecord")
 			tfrecord_writer = tf.python_io.TFRecordWriter(tfrecord_path)
 			assert tfrecord_writer is not None, "tfrecord_writer instantiation failed"
 
