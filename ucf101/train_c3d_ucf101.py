@@ -20,10 +20,9 @@
 # pylint: disable=missing-docstring
 import os
 import time
-import numpy
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
-import input_data
+# import input_data
 import c3d_model
 import math
 import numpy as np
