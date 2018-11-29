@@ -24,7 +24,7 @@ class C3DModel():
                  tfrecord_dir="/home/jordanc/datasets/UCF-101/tfrecords",
                  dropout=0.5,
                  frames_per_video=FRAMES_PER_VIDEO,
-                 frames_per_clip=FRAMES_PER_CLIP,
+                 frames_per_clip=NUM_FRAMES_PER_CLIP,
                  learning_rate=1e-3):
         '''initializes the object'''
         self.num_classes = num_classes
