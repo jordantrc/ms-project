@@ -34,12 +34,16 @@ def main():
 			features = {'label': _int64_feature(label_int), 'num_frames': _int64_feature(num_frames)}
 
 			# read each image and add it to the tfrecord
+			frames = []
 			for f in files:
 				path = os.path.join(root, f)
-				frame = np.asarray(Image.open(path)).astype(np.float32)
-				frame_raw = frame.tostring()
-				frame_index, _ = f.split('.')
-				features['frames/%s' % frame_index] = _bytes_feature(frame_raw)
+				frame = np.asarray(Image.open(path)).astype(np.uint8)
+				frames.append(frame)
+
+			# stack the frames into one large array
+			frame_stack = np.stack(frames, axis=0)
+			frames_raw = frame_stack.tostring()
+			features['frames'] = _bytes_feature(frames_raw)
 
 			example = tf.train.Example(features=tf.train.Features(feature=features))
 			tfrecord_writer.write(example.SerializeToString())
