@@ -322,7 +322,7 @@ def get_frame_data(filename, num_frames_per_clip=16):
   # reshape the images into an ndarray, first decompress the image data
   #frame_stack = zlib.decompress(features['frames'])
   frame_stack = tf.decode_raw(features['frames'], tf.uint8)
-  print("frame_stack type = %s, shape = %s" % type(frame_stack, tf.shape(frame_stack)))
+  print("frame_stack type = %s, shape = %s" % type(frame_stack, str(tf.shape(frame_stack))))
   num_frames = features['num_frames']
   height = features['height']
   width = features['width']
