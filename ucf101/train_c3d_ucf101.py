@@ -231,10 +231,10 @@ def run_training():
                       crop_size=c3d_model.CROP_SIZE,
                       shuffle=True
                       )
-      _, activations_out = sess.run([train_op, activations] feed_dict={
-                      images_placeholder: train_images,
-                      labels_placeholder: train_labels
-                      })
+      _, activations_out = sess.run([train_op, activations], feed_dict={
+                                                                        images_placeholder: train_images,
+                                                                        labels_placeholder: train_labels
+                                                                        })
       print("len sample_names = %s, len activations_out = %s" % (len(sample_names), len(activations_out)))
       duration = time.time() - start_time
       print('Step %d: %.3f sec' % (step, duration))
