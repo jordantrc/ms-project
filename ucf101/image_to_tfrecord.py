@@ -30,7 +30,7 @@ def main():
 			label = video_name.split('_')[1]
 			label_int = classes.index(label)
 			num_frames = len(files)
-			features = {'label': _int64_feature(label_int), 'num_frames': _int64_feature(num_classes)}
+			features = {'label': _int64_feature(label_int), 'num_frames': _int64_feature(num_frames)}
 
 			# read each image and add it to the tfrecord
 			for f in files:
