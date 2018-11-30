@@ -68,7 +68,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 
 def run_test():
-  model_name = "/home/jordanc/datasets/UCF-101/model_ckpts/c3d_ucf_model-4999"
+  model_name = "models/c3d_ucf_model-4999"
   test_list_file = 'list/testlist01.txt'
   num_test_videos = len(list(open(test_list_file,'r')))
   print("Number of test videos={}".format(num_test_videos))
