@@ -193,6 +193,7 @@ def run_training():
         logits.append(logit)
         activations.append(activation)
     logits = tf.concat(logits,0)
+    activations = tf.concat(activations, 0)
     accuracy = tower_acc(logits, labels_placeholder)
     tf.summary.scalar('accuracy', accuracy)
     grads1 = average_gradients(tower_grads1)
@@ -250,9 +251,9 @@ def run_training():
         print ("accuracy: " + "{:.5f}".format(acc))
         train_writer.add_summary(summary, step)
         print('Validation Data Eval:')
-        val_images, val_labels, _, _, _ = c3d_model.read_clip_and_label(
+        val_images, val_labels, _, _, _, _ = c3d_model.read_clip_and_label(
                         directory='/home/jordanc/datasets/UCF-101/UCF-101/',
-                        filename='train-test-split/testlist01.txt',
+                        filename='train-test-splits/testlist01.txt',
                         batch_size=FLAGS.batch_size * gpu_num,
                         num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                         crop_size=c3d_model.CROP_SIZE,
