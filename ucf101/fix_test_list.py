@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 import sys
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
