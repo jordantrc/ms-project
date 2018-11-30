@@ -327,7 +327,8 @@ def get_frame_data(filename, num_frames_per_clip=16):
   height = features['height']
   width = features['width']
   channels = features['channels']
-  frames = tf.parallel_stack(frame_stack, [num_frames, height, width, channels])
+  frame_shape = tf.parallel_stack([num_frames, height, width, channels])
+  frames = tf.reshape(frame_stack, frame_shape)
 
   # sample num_frames_per_clip frames from the frame stack
   if num_frames == num_frames_per_clip:
