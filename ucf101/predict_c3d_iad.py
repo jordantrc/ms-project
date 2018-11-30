@@ -26,7 +26,7 @@ import os.path
 import time
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
-import input_data
+#import input_data
 import c3d_model
 import numpy as np
 
