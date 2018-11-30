@@ -114,11 +114,14 @@ def run_test():
             'out': _variable_with_weight_decay('bout', [c3d_model.NUM_CLASSES], 0.04, 0.0),
             }
   logits = []
+  activations = []
   for gpu_index in range(0, gpu_num):
     with tf.device('/gpu:%d' % gpu_index):
-      logit = c3d_model.inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
+      logit, activation = c3d_model.inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
       logits.append(logit)
+      activations.append(activation)
   logits = tf.concat(logits,0)
+  activations = tf.concat(activations, 0)
   norm_score = tf.nn.softmax(logits)
   saver = tf.train.Saver()
   sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
@@ -145,8 +148,7 @@ def run_test():
                                                  batch_size=FLAGS.batch_size * gpu_num,
                                                  start_pos=next_start_pos
                                                  )
-    predict_score = norm_score.eval(
-            session=sess,
+    predict_score, activations_out = sess.run([norm_score, activations],
             feed_dict={images_placeholder: test_images}
             )
     for i in range(0, valid_len):
