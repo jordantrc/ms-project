@@ -11,4 +11,7 @@ lines = text.split('\n')
 
 #with open(filename, 'w+') as fd:
 for l in lines:
-	print("line = %s" % l)
+	if len(l) > 0:
+		label, folder = l.split('/')
+		label_int = int(classes.index(label))
+	print("%s/%s %s" % (label, folder, label_int))
