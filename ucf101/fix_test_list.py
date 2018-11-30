@@ -12,6 +12,7 @@ with open(filename) as fd:
 
 with open(filename, 'w') as fd:
 	for l in lines:
+		print(l)
 		directory, file = l.split('/')
 		label = file.split('_')[1]
 		int_label = classes.index(label)
