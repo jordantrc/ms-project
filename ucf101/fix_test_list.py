@@ -15,4 +15,4 @@ with open(filename, 'w') as fd:
 		directory, file = l.split('/')
 		label = file.split('_')[1]
 		int_label = classes.index(label)
-		fd.write(directory + "/" + file + " " + int_label + "\n")
+		fd.write(directory + "/" + file + " " + str(int_label) + "\n")
