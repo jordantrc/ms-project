@@ -13,6 +13,7 @@ import numpy as np
 import time
 import os
 
+from PIL import Image
 from itertools import cycle
 
 NUM_CLASSES = 101
