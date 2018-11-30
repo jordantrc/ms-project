@@ -13,6 +13,6 @@ lines = text.split('\n')
 for l in lines:
 	if len(l) > 0:
 		label, folder = l.split('/')
-		print("%s/%s" % (label, folder))
+		# print("%s/%s" % (label, folder))
 		label_int = classes.index(label)
 		print(label + "/" + folder + " " + str(label_int))
