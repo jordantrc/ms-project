@@ -138,16 +138,17 @@ def run_test():
     # Fill a feed dictionary with the actual set of images and labels
     # for this particular training step.
     start_time = time.time()
-    test_images,
-    test_labels,
-    next_start_pos, _,
-    valid_len,
-    sample_names = c3d_model.read_clip_and_label(
+    sample_output = c3d_model.read_clip_and_label(
                                                  directory='/home/jordanc/datasets/UCF-101/UCF-101/',
                                                  filename=test_list_file,
                                                  batch_size=FLAGS.batch_size * gpu_num,
                                                  start_pos=next_start_pos
                                                  )
+    test_images = sample_output[0]
+    test_labels = sample_output[1]
+    next_start_pos = sample_output[2]
+    valid_len = sample_output[4]
+    sample_names = sample_output[5]
     predict_score, activations_out = sess.run([norm_score, activations],
             feed_dict={images_placeholder: test_images}
             )
