@@ -465,6 +465,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
       next_batch_start = index
       break
     line = lines[index].strip('\n').split()
+    print("line = %s" % line)
     dirname = line[0]
     dirname, _ = dirname.split('.')
     sample_name = dirname.split('/')[1]
