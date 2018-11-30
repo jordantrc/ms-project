@@ -26,6 +26,7 @@ import tensorflow as tf
 import c3d_model
 import math
 import numpy as np
+import cv2
 
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
