@@ -234,7 +234,7 @@ def run_training():
                                                                         images_placeholder: train_images,
                                                                         labels_placeholder: train_labels
                                                                         })
-      print("len sample_names = %s, len activations_out = %s" % (len(sample_names), len(activations_out)))
+      print("len sample_names = %s, shape activations_out = %s" % (len(sample_names), str(activations_out.shape)))
       duration = time.time() - start_time
       print('Step %d: %.3f sec' % (step, duration))
 
@@ -250,8 +250,9 @@ def run_training():
         print ("accuracy: " + "{:.5f}".format(acc))
         train_writer.add_summary(summary, step)
         print('Validation Data Eval:')
-        val_images, val_labels, _, _, _ = input_data.read_clip_and_label(
-                        filename='list/test.list',
+        val_images, val_labels, _, _, _ = c3d_model.read_clip_and_label(
+                        directory='/home/jordanc/datasets/UCF-101/UCF-101/',
+                        filename='train-test-split/testlist01.txt',
                         batch_size=FLAGS.batch_size * gpu_num,
                         num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                         crop_size=c3d_model.CROP_SIZE,
