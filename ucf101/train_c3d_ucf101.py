@@ -235,8 +235,8 @@ def run_training():
                                                                         images_placeholder: train_images,
                                                                         labels_placeholder: train_labels
                                                                         })
-      print("len sample_names = %s, activations: type = %s, shape = %s, elem shape = %s" %
-            (len(sample_names), type(activations), activations.shape, str(activations_out[0].shape)))
+      print("len sample_names = %s, activations: type = %s, len = %s, elem shape = %s" %
+            (len(sample_names), type(activations_out), len(activations_out), str(activations_out[0].shape)))
       duration = time.time() - start_time
       print('Step %d: %.3f sec' % (step, duration))
 
