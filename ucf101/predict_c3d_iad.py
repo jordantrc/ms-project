@@ -140,7 +140,7 @@ def run_test():
     sample_names = c3d_model.read_clip_and_label(
                                                  directory='/home/jordanc/datasets/UCF-101/UCF-101/',
                                                  filename=test_list_file,
-                                                 FLAGS.batch_size * gpu_num,
+                                                 batch_size=FLAGS.batch_size * gpu_num,
                                                  start_pos=next_start_pos
                                                  )
     predict_score = norm_score.eval(
