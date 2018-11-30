@@ -32,6 +32,8 @@ import numpy as np
 
 from itertools import cycle
 
+from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
+
 # Basic model parameters as external flags.
 flags = tf.app.flags
 gpu_num = 2
