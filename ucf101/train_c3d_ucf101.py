@@ -223,7 +223,7 @@ def run_training():
       start_time = time.time()
       train_images, train_labels, _, _, _, sample_names = c3d_model.read_clip_and_label(
                       directory='/home/jordanc/datasets/UCF-101/UCF-101/',
-                      filename='train-test-splits/trainlist-tfrecord01.txt',
+                      filename='train-test-splits/trainlist01.txt',
                       batch_size=FLAGS.batch_size * gpu_num,
                       num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                       crop_size=c3d_model.CROP_SIZE,
