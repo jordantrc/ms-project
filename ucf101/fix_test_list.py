@@ -12,7 +12,7 @@ lines = text.split('\n')
 #with open(filename, 'w+') as fd:
 for l in lines:
 	if len(l) > 0:
-		label, folder = l.split('/')
+		label, folder = l.strip().split('/')
 		# print("%s/%s" % (label, folder))
 		class_name = str(classes.index(label))
 		string = label + '/' + folder + '/' + class_name
