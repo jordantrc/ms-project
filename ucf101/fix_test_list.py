@@ -14,6 +14,6 @@ for l in lines:
 	if len(l) > 0:
 		label, folder = l.split('/')
 		# print("%s/%s" % (label, folder))
-		label_int = str(classes.index(label))
-		string = label + '/' + folder + '/' + label_int
+		class_name = str(classes.index(label))
+		string = label + '/' + folder + '/' + class_name
 		print(string)
