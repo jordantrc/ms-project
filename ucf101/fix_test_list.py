@@ -15,4 +15,4 @@ for l in lines:
 		label, folder = l.split('/')
 		print("%s/%s" % (label, folder))
 		label_int = classes.index(label)
-		print("%s/%s %s" % (label, folder, label_int))
+		print(label + "/" + folder + " " + str(label_int))
