@@ -138,6 +138,7 @@ def run_training():
     tower_grads2 = []
     logits = []
     activations = []
+    sample_activations = {}
     opt_stable = tf.train.AdamOptimizer(1e-4)
     opt_finetuning = tf.train.AdamOptimizer(1e-3)
     with tf.variable_scope('var_name') as var_scope:
@@ -240,6 +241,10 @@ def run_training():
       duration = time.time() - start_time
       print('Step %d: %.3f sec' % (step, duration))
 
+      # save the activation for each sample name to the sample_activations dict
+      for i, s in enumerate(sample_names):
+        sample_activations[s] = activations_out[i]
+
       # Save a checkpoint and evaluate the model periodically.
       if (step) % 100 == 0 or (step + 1) == FLAGS.max_steps:
         saver.save(sess, os.path.join(model_save_dir, 'c3d_ucf_model'), global_step=step)
@@ -270,6 +275,9 @@ def run_training():
         test_writer.add_summary(summary, step)
 
   print("done")
+
+  # train the 2D CNN
+
 
 def main(_):
   run_training()

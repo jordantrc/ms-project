@@ -77,8 +77,8 @@ def run_test():
   # get the list of classes
   classes = get_class_list(CLASS_INDEX_FILE)
 
-  model_name = "./sports1m_finetuning_ucf101.model"
-  test_list_file = 'train-test-splits/trainlist-tfrecord01.txt'
+  model_name = "/home/jordanc/datasets/UCF-101/model_ckpts/c3d_ucf_model-4999"
+  test_list_file = 'train-test-splits/testlist01.txt'
   num_test_videos = len(list(open(test_list_file,'r')))
   print("Number of test videos={}".format(num_test_videos))
 
@@ -138,7 +138,7 @@ def run_test():
     next_start_pos, _,
     valid_len,
     sample_names = c3d_model.read_clip_and_label(
-                                                 directory='/home/jordanc/datasets/UCF-101/tfrecords/',
+                                                 directory='/home/jordanc/datasets/UCF-101/UCF-101/',
                                                  filename=test_list_file,
                                                  classes=classes,
                                                  FLAGS.batch_size * gpu_num,
