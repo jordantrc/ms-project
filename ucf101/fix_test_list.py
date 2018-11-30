@@ -10,11 +10,12 @@ with open(filename) as fd:
 	text = fd.read()
 	lines = text.split('\n')
 
-with open(filename, 'w') as fd:
-	for l in lines:
-		if len(l) > 0:
-			directory, file = l.split('/')
-			label = file.split('_')[1]
-			int_label = classes.index(label)
-			print("directory = %s, file = %s, label = %s" % (directory, file, str(int_label)))
-			fd.write(directory + "/" + file + " " + str(int_label) + "\n")
+#with open(filename, 'w+') as fd:
+for l in lines:
+	print("line = %s" % l)
+	if len(l) > 0:
+		directory, file = l.split('/')
+		label = file.split('_')[1]
+		int_label = classes.index(label)
+		print("directory = %s, file = %s, label = %s" % (directory, file, str(int_label)))
+		#fd.write(directory + "/" + file + " " + str(int_label) + "\n")
