@@ -16,4 +16,5 @@ with open(filename, 'w') as fd:
 			directory, file = l.split('/')
 			label = file.split('_')[1]
 			int_label = classes.index(label)
+			print("directory = %s, file = %s, label = %s" % (directory, file, str(int_label)))
 			fd.write(directory + "/" + file + " " + str(int_label) + "\n")
