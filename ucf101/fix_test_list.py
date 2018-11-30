@@ -11,4 +11,4 @@ lines = text.split('\n')
 
 #with open(filename, 'w+') as fd:
 for l in lines:
-	print "line = %s" % l
+	print("line = %s" % l)
