@@ -12,6 +12,7 @@ import zlib
 import numpy as np
 import time
 import os
+import cv2
 
 from PIL import Image
 from itertools import cycle
