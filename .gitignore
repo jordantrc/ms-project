@@ -9,3 +9,4 @@
 *.xlsx
 *.nb.html
 **/.ipynb_checkpoints
+*.txt
