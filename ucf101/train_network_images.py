@@ -175,8 +175,10 @@ def get_frames(directory, frames_per_clip):
                 img = Image.open(image_name)
                 img_data = np.array(img)
                 ret_arr.append(img_data)
-
-    ret_arr = np.stack(ret_arr)
+    try:
+        ret_arr = np.stack(ret_arr)
+    except ValueError:
+        print("directory = %s, ret_arr = %s" % (directory, ret_arr))
     return ret_arr, s_index
 
 
