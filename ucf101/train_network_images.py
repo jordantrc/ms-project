@@ -30,7 +30,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 NUM_EPOCHS = 5
 MINI_BATCH_SIZE = 50
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
 TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
