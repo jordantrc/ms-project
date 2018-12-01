@@ -28,11 +28,11 @@ from sklearn import metrics, preprocessing
 from c3d_model import C3DModel
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-NUM_EPOCHS = 16
+NUM_EPOCHS = 5
 MINI_BATCH_SIZE = 50
 BATCH_SIZE = 1
-TRAIN_SPLIT = 'train-test-splits/train.list'
-TEST_SPLIT = 'train-test-splits/test.list'
+TRAIN_SPLIT = 'train-test-splits/trainlist01.txt'
+TEST_SPLIT = 'train-test-splits/testlist01.txt'
 VALIDATE_WITH_TRAIN = True
 BALANCE_CLASSES = True
 SHUFFLE_SIZE = 1000
