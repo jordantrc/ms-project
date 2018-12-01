@@ -156,7 +156,8 @@ def get_frames(directory, frames_per_clip):
     ret_arr = []
     s_index = 0
     for parent, dirnames, filenames in os.walk(directory):
-        print("directory = %s filenames = %s" % (directory, filenames))
+        if len(filenames) == 0:
+            print("directory = %s filenames = %s" % (directory, filenames))
         if len(filenames) < frames_per_clip:
             filenames = cycle(sorted(filenames))
             for filename in filenames:
