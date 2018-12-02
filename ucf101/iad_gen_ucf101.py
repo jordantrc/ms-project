@@ -222,6 +222,7 @@ def run_test():
       logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
       logits.append(logit)
       layers.append(layer)
+  print("layer type = %s" % type(layers))
   logits = tf.concat(logits, 0)
   layers = tf.concat(layers, 0)
   norm_score = tf.nn.softmax(logits)
