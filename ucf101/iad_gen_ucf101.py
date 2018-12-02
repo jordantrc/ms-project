@@ -80,7 +80,7 @@ def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_
     -sess: the tensorflow Session
     -c3d_model: the c3d network model
   '''
-  assert len(layers) / 5 == len(sample_names), "layers list and sample_names list have different lengths (%s, %s)" %
+  assert (len(layers) / 5) == len(sample_names), "layers list and sample_names list have different lengths (%s, %s)" %
                                                (len(layers) / 5, len(sample_names))
   print("sample_names = %s" % (sample_names))
 
