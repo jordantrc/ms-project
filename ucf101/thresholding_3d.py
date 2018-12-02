@@ -111,8 +111,9 @@ def threshold_activations(activations, out, latch, thresholding_method):
 			threshold = bin_edges[min_val]
 			returned_values = activations > threshold
 	
-	out.append(returned_values)
-	latch.count_down()
+	#out.append(returned_values)
+	#latch.count_down()
+	return returned_valued
 
 def compress_activations(activations, out, compression_method, compression_latch, thresholding_method):
 	#separate the activations into spatial subdivisions
@@ -140,27 +141,29 @@ def compress_activations(activations, out, compression_method, compression_latch
 	for i in range(len(activation_divisions)):
 		thresholded_activations.append([])
 
-	activation_latch = CountDownLatch(len(activation_divisions))
-	list_of_threads = []
+	# activation_latch = CountDownLatch(len(activation_divisions))
+	# list_of_threads = []
 	for i in range(len(activation_divisions)):
 		#print("start")
 		if(len(activation_divisions[i]) > 0):
-			t = threading.Thread(target = threshold_activations, args = (activation_divisions[i], thresholded_activations[i], activation_latch, thresholding_method, ))
-			list_of_threads.append(t)
-			t.start()
-		else:
+			#t = threading.Thread(target = threshold_activations, args = (activation_divisions[i], thresholded_activations[i], activation_latch, thresholding_method, ))
+			threshold_activations(activation_divisions[i], thresholded_activations[i], None, thresholding_method)
+			#list_of_threads.append(t)
+			#t.start()
+		# else:
 			#print("err: ", i, activation_divisions[i])
-			activation_latch.count_down()
+			#activation_latch.count_down()
 
 		
 	# wait for all threads to finish
-	activation_latch.await()
+	# activation_latch.await()
 	#print("finished")
 	#for i in activation_divisions:
 	#	print(i)
-	out.append( np.array(thresholded_activations).squeeze() )
+	# out.append( np.array(thresholded_activations).squeeze() )
 	#print("out_shape:", np.array(thresholded_activations).squeeze().shape)
-	compression_latch.count_down()
+	# compression_latch.count_down()
+	return np.array(thresholded_activations).squeeze()
 
 def thresholding(activation_map, compression_method={"type":"max", "value":-1}, thresholding_method="basic"):
 	'''
@@ -190,22 +193,24 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 		thresholded_activations.append([])
 	
 	#setup multithread processes to perform the threading operation
-	latch = CountDownLatch(num_events)
+	# latch = CountDownLatch(num_events)
 
-	list_of_threads = []
+	# list_of_threads = []
 	for i in range(num_events):
 		# isolate the activations for filter 'i' and perform the thresholding for 
 		# this feature in its own thread
 		#activations = np.reshape(activation_map[...,i], (activation_map.shape[0], -1)) 
-		activations = activation_map[...,i]
+		# activations = activation_map[...,i]
+		activations = activation_map[i]
 
-		t = threading.Thread(target = compress_activations, args = (activations, thresholded_activations[i], compression_method, latch, thresholding_method, ))
+		# t = threading.Thread(target = compress_activations, args = (activations, thresholded_activations[i], compression_method, latch, thresholding_method, ))
+		compress_activations(activations, thresholded_activations[i], compression_method, None, thresholding_method)
 
-		list_of_threads.append(t)
-		t.start()
+		#list_of_threads.append(t)
+		# t.start()
 		
 	# wait for all threads to finish
-	latch.await()
+	# latch.await()
 	#print("compression_finished:", np.array(thresholded_activations).squeeze().shape)
 
 	# pad and resize array for use in the ITR network
