@@ -224,6 +224,7 @@ def run_test():
       layers.append(layer)
   print("layers type = %s, length = %s" % (type(layers), len(layers)))
   print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
+  print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
   logits = tf.concat(logits, 0)
   layers = tf.concat(layers, 0)
   norm_score = tf.nn.softmax(logits)
