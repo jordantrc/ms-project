@@ -80,12 +80,17 @@ def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_
     -sess: the tensorflow Session
     -c3d_model: the c3d network model
   '''
-  assert (len(layers) / 5) == len(sample_names), "layers list and sample_names list have different lengths"
+  num_layers = 5
+  assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths"
   print("sample_names = %s" % (sample_names))
 
-  thresholded_data = thresholding(layers, compression_method, thresholding_approach)
-
-  #print(thresholded_data)
+  for i, s in sample_names:
+    s_index = i * num_layers
+    sample_layers = layers[s_index:s_index + num_layers - 1]
+    assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
+    for l in sample_layers:
+      thresholded_data = thresholding(l, compression_method, thresholding_approach)
+      print("thresholded_data = %s" % thresholded_data)
 
   #ex = make_sequence_example(thresholded_data, info_values["label"][0], info_values["example_id"][0], c3d_depth, compression_method["value"])
   #print("write to: ", video_name)
