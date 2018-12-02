@@ -9,6 +9,7 @@ import tensorflow as tf
 import c3d_model
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-9999'
+IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
 TRAIN_LIST = 'train-test-splits/trainlist01.txt'
 TEST_LIST = 'train-test-splits/testlist01.txt'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad'
@@ -251,6 +252,7 @@ def run_test():
     start_time = time.time()
     test_images, test_labels, next_start_pos, _, valid_len = \
             c3d_model.read_clip_and_label(
+                    IMAGE_DIRECTORY,
                     TEST_LIST,
                     FLAGS.batch_size * gpu_num,
                     start_pos=next_start_pos
