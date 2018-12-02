@@ -265,7 +265,7 @@ def run_test():
   write_file.close()
   print("done")
 
-def main(_):
+def main():
   run_test()
 
 if __name__ == '__main__':
