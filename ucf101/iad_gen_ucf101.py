@@ -63,7 +63,7 @@ def make_sequence_example(
 	return ex
 
 
-def convert_to_IAD_input(layers):
+def convert_to_IAD_input(layers, sample_names):
   '''
   Provides the training input for the ITR network by generating an IAD from the
   activation map of the C3D network. Outputs two dictionaries. The first contains
@@ -250,7 +250,7 @@ def run_test():
     # Fill a feed dictionary with the actual set of images and labels
     # for this particular training step.
     start_time = time.time()
-    test_images, test_labels, next_start_pos, _, valid_len = \
+    test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
             c3d_model.read_clip_and_label(
                     IMAGE_DIRECTORY,
                     TEST_LIST,
@@ -271,7 +271,7 @@ def run_test():
               predict_score[i][top1_predicted_label]))
 
     # generate IAD output
-    convert_to_IAD_input(layers_out)
+    convert_to_IAD_input(layers_out, sample_names)
 
   write_file.close()
   print("done")
