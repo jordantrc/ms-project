@@ -200,7 +200,7 @@ def run_test():
             'wc5b': _variable_with_weight_decay('wc5b', [3, 3, 3, 512, 512], 0.04, 0.00),
             'wd1': _variable_with_weight_decay('wd1', [8192, 4096], 0.04, 0.001),
             'wd2': _variable_with_weight_decay('wd2', [4096, 4096], 0.04, 0.002),
-            'out': _variable_with_weight_decay('wout', [4096, c3d_model.NUM_CLASSES], 0.04, 0.005)
+            'out': _variable_with_weight_decay('wout', [4096, NUM_CLASSES], 0.04, 0.005)
             }
     biases = {
             'bc1': _variable_with_weight_decay('bc1', [64], 0.04, 0.0),
@@ -213,7 +213,7 @@ def run_test():
             'bc5b': _variable_with_weight_decay('bc5b', [512], 0.04, 0.0),
             'bd1': _variable_with_weight_decay('bd1', [4096], 0.04, 0.0),
             'bd2': _variable_with_weight_decay('bd2', [4096], 0.04, 0.0),
-            'out': _variable_with_weight_decay('bout', [c3d_model.NUM_CLASSES], 0.04, 0.0),
+            'out': _variable_with_weight_decay('bout', [NUM_CLASSES], 0.04, 0.0),
             }
   logits = []
   layers = []
