@@ -86,7 +86,7 @@ def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_
 
   for i, s in enumerate(sample_names):
     s_index = i * num_layers
-    sample_layers = layers[s_index:s_index + num_layers - 1]
+    sample_layers = layers[s_index:s_index + num_layers]
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
     for l in sample_layers:
       thresholded_data = thresholding(l, compression_method, thresholding_approach)
