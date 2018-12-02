@@ -94,7 +94,7 @@ def max_pool(name, l_input, k):
   return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME', name=name)
 
 
-def inference_c3d(_X, _dropout, batch_size, _weights, _biases, layer):
+def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
 
   # Convolution Layer
   conv1 = conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
@@ -219,7 +219,7 @@ def run_test():
   layers = []
   for gpu_index in range(0, gpu_num):
     with tf.device('/gpu:%d' % gpu_index):
-      logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases, MAP_LAYER)
+      logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
       logits.append(logit)
       layers.append(layer)
   logits = tf.concat(logits, 0)
