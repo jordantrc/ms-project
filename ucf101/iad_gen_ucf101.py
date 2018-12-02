@@ -5,7 +5,7 @@
 
 import tensorflow as tf
 
-MODEL = ''
+MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-9999'
 TRAIN_LIST = 'train-test-splits/trainlist01.txt'
 TEST_LIST = 'train-test-splits/testlist01.txt'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad'
