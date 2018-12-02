@@ -179,6 +179,7 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 
 	num_events = activation_map.shape[-1]
 	initial_length = activation_map.shape[0]
+	print("num_events = %s, initial_length = %s" % (num_events, initial_length))
 
 	#only perform thresholding on the un-padded region of the input
 	activation_map = np.array(activation_map)
