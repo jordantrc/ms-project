@@ -3,6 +3,7 @@
 # contains the code for generating IAD images from the
 # trained model.
 
+import time
 import tensorflow as tf
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-9999'
@@ -222,9 +223,9 @@ def run_test():
       logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
       logits.append(logit)
       layers.append(layer)
-  print("layers type = %s, length = %s" % (type(layers), len(layers)))
-  print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
-  print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
+  #print("layers type = %s, length = %s" % (type(layers), len(layers)))
+  #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
+  #print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
   # layers is a list of length gpu_num
   # layers[0] is a list of length 5
   # layers[0][0] is a tensor with shape (1, 16, 112, 112, 64)
