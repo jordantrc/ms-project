@@ -229,14 +229,7 @@ def run_test():
   # layers[0] is a list of length 5
   # layers[0][0] is a tensor with shape (1, 16, 112, 112, 64)
 
-  # flatten the layers array
-  flattened_layers = []
-  for l in layers:
-    for m in l:
-      flattened_layers.append([[m]])
-
   logits = tf.concat(logits, 0)
-  layers = tf.concat(flattened_layers, 0)
   norm_score = tf.nn.softmax(logits)
   saver = tf.train.Saver()
   sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
