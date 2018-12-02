@@ -141,9 +141,9 @@ def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
   # Output: class prediction
   out = tf.matmul(dense2, _weights['out']) + _biases['out']
 
-  layers = [conv1, conv2, conv3, conv4, conv5]
+  conv_layers = [conv1, conv2, conv3, conv4, conv5]
 
-  return out, layers
+  return out, conv_layers
 
 
 def placeholder_inputs(batch_size):
