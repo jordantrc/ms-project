@@ -19,7 +19,7 @@ NUM_FRAMES_PER_CLIP = 16
 # tensorflow flags
 flags = tf.app.flags
 gpu_num = 2
-flags.DEFINE_integer('batch_size', 10 , 'Batch size.')
+flags.DEFINE_integer('batch_size', 1, 'Batch size.')
 FLAGS = flags.FLAGS
 
 "-----------------------------------------------------------------------------------------------------------------------"
