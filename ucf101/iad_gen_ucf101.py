@@ -9,6 +9,7 @@ import numpy as np
 import tensorflow as tf
 
 import c3d_model
+from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-9999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
@@ -21,6 +22,8 @@ CROP_SIZE = 112
 CHANNELS = 3
 # Number of frames per video clip
 NUM_FRAMES_PER_CLIP = 16
+COMPRESSION = {"type":"peaks", "value":10, "num_channels":10}
+THRESHOLDING = "norm"
 
 # tensorflow flags
 flags = tf.app.flags
@@ -65,7 +68,7 @@ def make_sequence_example(
 	return ex
 
 
-def convert_to_IAD_input(layers, sample_names):
+def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_approach):
   '''
   Provides the training input for the ITR network by generating an IAD from the
   activation map of the C3D network. Outputs two dictionaries. The first contains
@@ -77,9 +80,11 @@ def convert_to_IAD_input(layers, sample_names):
     -sess: the tensorflow Session
     -c3d_model: the c3d network model
   '''
-  print("convert_to_IAD_input: layers.shape = %s" % str(layers.shape))
+  assert len(layers) / 5 == len(sample_names), "layers list and sample_names list have different lengths (%s, %s)" %
+                                               (len(layers) / 5, len(sample_names))
+  print("sample_names = %s" % (sample_names))
 
-  #thresholded_data = thresholding(c3d_activation_map[0], info_values["data_ratio"], compression_method, thresholding_approach)
+  thresholded_data = thresholding(layers, compression_method, thresholding_approach)
 
   #print(thresholded_data)
 
@@ -227,13 +232,12 @@ def run_test():
     with tf.device('/gpu:%d' % gpu_index):
       logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
       logits.append(logit)
-      layers.append(layer)
+      layers.extend(layer)
   #print("layers type = %s, length = %s" % (type(layers), len(layers)))
   #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
   #print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
-  # layers is a list of length gpu_num
-  # layers[0] is a list of length 5
-  # layers[0][0] is a tensor with shape (1, 16, 112, 112, 64)
+  # layers is a list of length 10 (5 * gpu_num)
+  # layers[0] is a tensor with shape (1, 16, 112, 112, 64)
 
   logits = tf.concat(logits, 0)
   norm_score = tf.nn.softmax(logits)
@@ -273,7 +277,7 @@ def run_test():
               predict_score[i][top1_predicted_label]))
 
     # generate IAD output
-    convert_to_IAD_input(layers_out, sample_names)
+    convert_to_IAD_input(layers_out, sample_names, COMPRESSION, THRESHOLDING)
 
   write_file.close()
   print("done")
