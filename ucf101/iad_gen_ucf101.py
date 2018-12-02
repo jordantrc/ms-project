@@ -89,7 +89,8 @@ def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_
     sample_layers = layers[s_index:s_index + num_layers]
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
     for l in sample_layers:
-      thresholded_data = thresholding(l, compression_method, thresholding_approach)
+      layer_data = tf.squeeze(l, [0])
+      thresholded_data = thresholding(layer_data, compression_method, thresholding_approach)
       print("thresholded_data = %s" % thresholded_data)
 
   #ex = make_sequence_example(thresholded_data, info_values["label"][0], info_values["example_id"][0], c3d_depth, compression_method["value"])
