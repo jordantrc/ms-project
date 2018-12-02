@@ -246,7 +246,7 @@ def run_test():
                     FLAGS.batch_size * gpu_num,
                     start_pos=next_start_pos
                     )
-    predict_score, layers_out = sess.run([norm_score, layers]
+    predict_score, layers_out = sess.run([norm_score, layers],
             feed_dict={images_placeholder: test_images}
             )
     for i in range(0, valid_len):
