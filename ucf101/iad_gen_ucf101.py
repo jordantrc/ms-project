@@ -233,7 +233,7 @@ def run_test():
   flattened_layers = []
   for l in layers:
     for m in l:
-      flattened_layers.append([m])
+      flattened_layers.append([[m]])
 
   logits = tf.concat(logits, 0)
   layers = tf.concat(flattened_layers, 0)
