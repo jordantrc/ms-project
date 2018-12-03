@@ -22,7 +22,7 @@ CROP_SIZE = 112
 CHANNELS = 3
 # Number of frames per video clip
 NUM_FRAMES_PER_CLIP = 16
-COMPRESSION = {"type":"peaks", "value":10, "num_channels":10}
+COMPRESSION = {"type": "max", "value": 1, "num_channels": 1}
 THRESHOLDING = "norm"
 
 # tensorflow flags
