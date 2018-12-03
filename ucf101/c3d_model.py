@@ -469,7 +469,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
     dirname = line[0]
     sample_name = os.path.basename(dirname)
     dirname = os.path.join(directory, dirname)
-    tmp_label = int(line[1]) - 1
+    tmp_label = int(line[1])
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
     tmp_data, _ = get_frames_data(dirname, num_frames_per_clip)
