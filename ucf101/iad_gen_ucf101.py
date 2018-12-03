@@ -7,6 +7,7 @@ import time
 import PIL.Image as Image
 import numpy as np
 import os
+import random
 import tensorflow as tf
 
 import c3d_model
