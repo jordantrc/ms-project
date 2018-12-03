@@ -106,7 +106,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         writer.write(ex.SerializeToString())
 
         # generate the image
-        print("single layer shape = %s" % str(thresholded_data[layer_to_test].shape))
+        print("single layer shape = %s" % (type(thresholded_data[layer_to_test]), str(thresholded_data[layer_to_test].shape)))
         img = Image.fromarray(thresholded_data[layer_to_test])
         img.save(img_name)
 
