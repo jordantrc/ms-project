@@ -209,34 +209,34 @@ def generate_iad(list_file, sess, predict_write_file=None):
         write_file = open(predict_write_file, "w", 0)
 
     for step in xrange(steps):
-    # Fill a feed dictionary with the actual set of images and labels
-    # for this particular training step.
-    start_time = time.time()
-    test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
-            c3d_model.read_clip_and_label(
-                    IMAGE_DIRECTORY,
-                    list_file,
-                    FLAGS.batch_size * gpu_num,
-                    start_pos=next_start_pos
-                    )
-    predict_score, layers_out = sess.run([norm_score, layers],
-            feed_dict={images_placeholder: test_images}
-            )
-    for i in range(0, valid_len):
-      true_label = test_labels[i],
-      top1_predicted_label = np.argmax(predict_score[i])
-      # Write results: true label, class prob for true label, predicted label, class prob for predicted label
-      write_file.write('{}, {}, {}, {}\n'.format(
-              true_label[0],
-              predict_score[i][true_label],
-              top1_predicted_label,
-              predict_score[i][top1_predicted_label]))
+        # Fill a feed dictionary with the actual set of images and labels
+        # for this particular training step.
+        start_time = time.time()
+        test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
+                c3d_model.read_clip_and_label(
+                        IMAGE_DIRECTORY,
+                        list_file,
+                        FLAGS.batch_size * gpu_num,
+                        start_pos=next_start_pos
+                        )
+        predict_score, layers_out = sess.run([norm_score, layers],
+                feed_dict={images_placeholder: test_images}
+                )
+        for i in range(0, valid_len):
+          true_label = test_labels[i],
+          top1_predicted_label = np.argmax(predict_score[i])
+          # Write results: true label, class prob for true label, predicted label, class prob for predicted label
+          write_file.write('{}, {}, {}, {}\n'.format(
+                  true_label[0],
+                  predict_score[i][true_label],
+                  top1_predicted_label,
+                  predict_score[i][top1_predicted_label]))
 
-    #for i, l in enumerate(layers_out):
-    #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
+        #for i, l in enumerate(layers_out):
+        #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
-    # generate IAD output
-    convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+        # generate IAD output
+        convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
 
     write_file.close()
     print("done")
