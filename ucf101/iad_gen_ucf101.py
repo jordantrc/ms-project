@@ -292,10 +292,10 @@ def run_test():
     logits = []
     layers = []
     for gpu_index in range(0, gpu_num):
-    with tf.device('/gpu:%d' % gpu_index):
-        logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
-        logits.append(logit)
-        layers.extend(layer)
+        with tf.device('/gpu:%d' % gpu_index):
+            logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
+            logits.append(logit)
+            layers.extend(layer)
     #print("layers type = %s, length = %s" % (type(layers), len(layers)))
     #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
     #print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
