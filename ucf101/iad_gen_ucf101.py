@@ -263,39 +263,39 @@ def run_test():
     # Get the sets of images and labels for training, validation, and
     images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size * gpu_num)
     with tf.variable_scope('var_name') as var_scope:
-    weights = {
-            'wc1': _variable_with_weight_decay('wc1', [3, 3, 3, 3, 64], 0.04, 0.00),
-            'wc2': _variable_with_weight_decay('wc2', [3, 3, 3, 64, 128], 0.04, 0.00),
-            'wc3a': _variable_with_weight_decay('wc3a', [3, 3, 3, 128, 256], 0.04, 0.00),
-            'wc3b': _variable_with_weight_decay('wc3b', [3, 3, 3, 256, 256], 0.04, 0.00),
-            'wc4a': _variable_with_weight_decay('wc4a', [3, 3, 3, 256, 512], 0.04, 0.00),
-            'wc4b': _variable_with_weight_decay('wc4b', [3, 3, 3, 512, 512], 0.04, 0.00),
-            'wc5a': _variable_with_weight_decay('wc5a', [3, 3, 3, 512, 512], 0.04, 0.00),
-            'wc5b': _variable_with_weight_decay('wc5b', [3, 3, 3, 512, 512], 0.04, 0.00),
-            'wd1': _variable_with_weight_decay('wd1', [8192, 4096], 0.04, 0.001),
-            'wd2': _variable_with_weight_decay('wd2', [4096, 4096], 0.04, 0.002),
-            'out': _variable_with_weight_decay('wout', [4096, NUM_CLASSES], 0.04, 0.005)
-            }
-    biases = {
-            'bc1': _variable_with_weight_decay('bc1', [64], 0.04, 0.0),
-            'bc2': _variable_with_weight_decay('bc2', [128], 0.04, 0.0),
-            'bc3a': _variable_with_weight_decay('bc3a', [256], 0.04, 0.0),
-            'bc3b': _variable_with_weight_decay('bc3b', [256], 0.04, 0.0),
-            'bc4a': _variable_with_weight_decay('bc4a', [512], 0.04, 0.0),
-            'bc4b': _variable_with_weight_decay('bc4b', [512], 0.04, 0.0),
-            'bc5a': _variable_with_weight_decay('bc5a', [512], 0.04, 0.0),
-            'bc5b': _variable_with_weight_decay('bc5b', [512], 0.04, 0.0),
-            'bd1': _variable_with_weight_decay('bd1', [4096], 0.04, 0.0),
-            'bd2': _variable_with_weight_decay('bd2', [4096], 0.04, 0.0),
-            'out': _variable_with_weight_decay('bout', [NUM_CLASSES], 0.04, 0.0),
-            }
+        weights = {
+                'wc1': _variable_with_weight_decay('wc1', [3, 3, 3, 3, 64], 0.04, 0.00),
+                'wc2': _variable_with_weight_decay('wc2', [3, 3, 3, 64, 128], 0.04, 0.00),
+                'wc3a': _variable_with_weight_decay('wc3a', [3, 3, 3, 128, 256], 0.04, 0.00),
+                'wc3b': _variable_with_weight_decay('wc3b', [3, 3, 3, 256, 256], 0.04, 0.00),
+                'wc4a': _variable_with_weight_decay('wc4a', [3, 3, 3, 256, 512], 0.04, 0.00),
+                'wc4b': _variable_with_weight_decay('wc4b', [3, 3, 3, 512, 512], 0.04, 0.00),
+                'wc5a': _variable_with_weight_decay('wc5a', [3, 3, 3, 512, 512], 0.04, 0.00),
+                'wc5b': _variable_with_weight_decay('wc5b', [3, 3, 3, 512, 512], 0.04, 0.00),
+                'wd1': _variable_with_weight_decay('wd1', [8192, 4096], 0.04, 0.001),
+                'wd2': _variable_with_weight_decay('wd2', [4096, 4096], 0.04, 0.002),
+                'out': _variable_with_weight_decay('wout', [4096, NUM_CLASSES], 0.04, 0.005)
+                }
+        biases = {
+                'bc1': _variable_with_weight_decay('bc1', [64], 0.04, 0.0),
+                'bc2': _variable_with_weight_decay('bc2', [128], 0.04, 0.0),
+                'bc3a': _variable_with_weight_decay('bc3a', [256], 0.04, 0.0),
+                'bc3b': _variable_with_weight_decay('bc3b', [256], 0.04, 0.0),
+                'bc4a': _variable_with_weight_decay('bc4a', [512], 0.04, 0.0),
+                'bc4b': _variable_with_weight_decay('bc4b', [512], 0.04, 0.0),
+                'bc5a': _variable_with_weight_decay('bc5a', [512], 0.04, 0.0),
+                'bc5b': _variable_with_weight_decay('bc5b', [512], 0.04, 0.0),
+                'bd1': _variable_with_weight_decay('bd1', [4096], 0.04, 0.0),
+                'bd2': _variable_with_weight_decay('bd2', [4096], 0.04, 0.0),
+                'out': _variable_with_weight_decay('bout', [NUM_CLASSES], 0.04, 0.0),
+                }
     logits = []
     layers = []
     for gpu_index in range(0, gpu_num):
     with tf.device('/gpu:%d' % gpu_index):
-      logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
-      logits.append(logit)
-      layers.extend(layer)
+        logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
+        logits.append(logit)
+        layers.extend(layer)
     #print("layers type = %s, length = %s" % (type(layers), len(layers)))
     #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
     #print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
