@@ -34,69 +34,69 @@ FLAGS = flags.FLAGS
 "-----------------------------------------------------------------------------------------------------------------------"
 
 def make_sequence_example(img_raw, label, example_id, num_channels):
-  """creates the tfrecord example"""
-  print("ENTER make_sequence_example:")
-  print(img_raw.shape)
-  print(label, example_id)
+    """creates the tfrecord example"""
+    print("ENTER make_sequence_example:")
+    print(img_raw.shape)
+    print(label, example_id)
 
-	# The object we return
-	ex = tf.train.SequenceExample()
+    # The object we return
+    ex = tf.train.SequenceExample()
 
-	# ---- descriptive data ----
+    # ---- descriptive data ----
 
-	ex.context.feature["length"].int64_list.value.append(img_raw.shape[1])
-	ex.context.feature["example_id"].bytes_list.value.append(example_id)
+    ex.context.feature["length"].int64_list.value.append(img_raw.shape[1])
+    ex.context.feature["example_id"].bytes_list.value.append(example_id)
 
-	# ---- label data ----
+    # ---- label data ----
 
-	ex.context.feature["total_lab"].int64_list.value.append(first_action)
-	ex.context.feature["c3d_depth"].int64_list.value.append(c3d_depth)
-	ex.context.feature["num_channels"].int64_list.value.append(num_channels)
-	
-	# ---- data sequences ----
+    ex.context.feature["total_lab"].int64_list.value.append(first_action)
+    ex.context.feature["c3d_depth"].int64_list.value.append(c3d_depth)
+    ex.context.feature["num_channels"].int64_list.value.append(num_channels)
+    
+    # ---- data sequences ----
 
-	def load_array(example, name, data, dtype):
-		fl_data = example.feature_lists.feature_list[name].feature.add().bytes_list.value
-		print("newShape:", np.asarray(data).astype(dtype).shape)
-		fl_data.append(np.asarray(data).astype(dtype).tostring())
+    def load_array(example, name, data, dtype):
+        fl_data = example.feature_lists.feature_list[name].feature.add().bytes_list.value
+        print("newShape:", np.asarray(data).astype(dtype).shape)
+        fl_data.append(np.asarray(data).astype(dtype).tostring())
 
-	load_array(ex, "img_raw", img_raw, np.float32)
+    load_array(ex, "img_raw", img_raw, np.float32)
 
-	return ex
+    return ex
 
 
 def convert_to_IAD_input(layers, sample_names, labels, compression_method, thresholding_approach):
-  '''
-  Provides the training input for the ITR network by generating an IAD from the
-  activation map of the C3D network. Outputs two dictionaries. The first contains
-  the placeholders that will be used when evaluating the full ITR model. The second 
-  contains information about the observation being read (ie. true labels, number of
-  prompts, file name, etc). 
+    '''
+    Provides the training input for the ITR network by generating an IAD from the
+    activation map of the C3D network. Outputs two dictionaries. The first contains
+    the placeholders that will be used when evaluating the full ITR model. The second 
+    contains information about the observation being read (ie. true labels, number of
+    prompts, file name, etc). 
     -placeholders: the list of placeholders used by the network
     -tf_records: the TFRecord data source to read from
     -sess: the tensorflow Session
     -c3d_model: the c3d network model
-  '''
-  num_layers = 5
-  assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths"
-  # print("sample_names = %s" % (sample_names))
+    '''
+    num_layers = 5
+    assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths"
+    # print("sample_names = %s" % (sample_names))
 
-  for i, s in enumerate(sample_names):
-    s_index = i * num_layers
-    sample_layers = layers[s_index:s_index + num_layers]
+    for i, s in enumerate(sample_names):
+        s_index = i * num_layers
+        sample_layers = layers[s_index:s_index + num_layers]
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
 
     thresholded_data = []
     for l in sample_layers:
-      layer_data = np.squeeze(l, axis=0)
-      thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
-      # print("thresholded_data shape = %s" % str(thresholded_data.shape))
+        layer_data = np.squeeze(l, axis=0)
+        thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
+        # print("thresholded_data shape = %s" % str(thresholded_data.shape))
 
     # generate the tfrecord
     ex = make_sequence_example(thresholded_data, labels[i], s, compression_method["value"])
-  #print("write to: ", video_name)
-  #writer = tf.python_io.TFRecordWriter(video_name)
-  #writer.write(ex.SerializeToString())
+    #print("write to: ", video_name)
+    #writer = tf.python_io.TFRecordWriter(video_name)
+    #writer.write(ex.SerializeToString())
 
 
 def conv3d(name, l_input, w, b):
