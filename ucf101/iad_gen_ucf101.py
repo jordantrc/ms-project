@@ -91,7 +91,7 @@ def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_
     for l in sample_layers:
       layer_data = np.squeeze(l, axis=0)
       thresholded_data = thresholding(layer_data, compression_method, thresholding_approach)
-      print("thresholded_data = %s" % thresholded_data)
+      print("thresholded_data shape = %s" % str(thresholded_data.shape))
 
   #ex = make_sequence_example(thresholded_data, info_values["label"][0], info_values["example_id"][0], c3d_depth, compression_method["value"])
   #print("write to: ", video_name)
