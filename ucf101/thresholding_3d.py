@@ -219,8 +219,8 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 
 	#NEED TO ORGANIZE 3D-IAD
 
-	threshold_activations = np.array(thresholded_activations)
-	print("thresholded_activations type = %s" % type(thresholded_activations))
+	thresholded_activations = np.array(thresholded_activations)
+	print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
 	thresholded_activations = thresholded_activations.squeeze() #.astype(np.int64)
 	print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
 	#print("thresholded_activations[0]:", thresholded_activations[0][:5])
