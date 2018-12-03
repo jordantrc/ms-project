@@ -205,7 +205,8 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 		activations = activation_map[...,i]
 
 		# t = threading.Thread(target = compress_activations, args = (activations, thresholded_activations[i], compression_method, latch, thresholding_method, ))
-		compress_activations(activations, thresholded_activations[i], compression_method, None, thresholding_method)
+		thresholded_activations[i] = compress_activations(activations, thresholded_activations[i], compression_method, None, thresholding_method)
+		print("thresholded_activations[%s] shape = %s" % (i, str(thresholded_activations[i].shape)))
 
 		#list_of_threads.append(t)
 		# t.start()
