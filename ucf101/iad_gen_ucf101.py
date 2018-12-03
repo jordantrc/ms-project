@@ -33,11 +33,7 @@ FLAGS = flags.FLAGS
 
 "-----------------------------------------------------------------------------------------------------------------------"
 
-def make_sequence_example(
-	img_raw, 
-	label,
-	example_id,
-	num_channels):
+def make_sequence_example(img_raw, label, example_id, num_channels):
   
   print("ENTER make_sequence_example:")
   print(img_raw.shape)
