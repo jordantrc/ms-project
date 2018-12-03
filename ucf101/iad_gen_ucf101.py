@@ -35,12 +35,13 @@ FLAGS = flags.FLAGS
 
 def make_sequence_example(
 	img_raw, 
-	first_action,
+	label,
 	example_id,
-	c3d_depth,
 	num_channels):
-
-	print(first_action, example_id)
+  
+  print("ENTER make_sequence_example")
+  print(img_raw.shape)
+	print(label, example_id)
 
 	# The object we return
 	ex = tf.train.SequenceExample()
@@ -68,7 +69,7 @@ def make_sequence_example(
 	return ex
 
 
-def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_approach):
+def convert_to_IAD_input(layers, sample_names, labels, compression_method, thresholding_approach):
   '''
   Provides the training input for the ITR network by generating an IAD from the
   activation map of the C3D network. Outputs two dictionaries. The first contains
@@ -82,18 +83,21 @@ def convert_to_IAD_input(layers, sample_names, compression_method, thresholding_
   '''
   num_layers = 5
   assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths"
-  print("sample_names = %s" % (sample_names))
+  # print("sample_names = %s" % (sample_names))
 
   for i, s in enumerate(sample_names):
     s_index = i * num_layers
     sample_layers = layers[s_index:s_index + num_layers]
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
+
+    thresholded_data = []
     for l in sample_layers:
       layer_data = np.squeeze(l, axis=0)
-      thresholded_data = thresholding(layer_data, compression_method, thresholding_approach)
-      print("thresholded_data shape = %s" % str(thresholded_data.shape))
+      thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
+      # print("thresholded_data shape = %s" % str(thresholded_data.shape))
 
-  #ex = make_sequence_example(thresholded_data, info_values["label"][0], info_values["example_id"][0], c3d_depth, compression_method["value"])
+    # generate the tfrecord
+    ex = make_sequence_example(thresholded_data, labels[i], s, compression_method["value"])
   #print("write to: ", video_name)
   #writer = tf.python_io.TFRecordWriter(video_name)
   #writer.write(ex.SerializeToString())
@@ -285,7 +289,7 @@ def run_test():
       print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
     # generate IAD output
-    convert_to_IAD_input(layers_out, sample_names, COMPRESSION, THRESHOLDING)
+    convert_to_IAD_input(layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
 
   write_file.close()
   print("done")

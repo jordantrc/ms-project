@@ -182,11 +182,11 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 
 	num_events = activation_map.shape[-1]
 	initial_length = activation_map.shape[0]
-	print("num_events = %s, initial_length = %s" % (num_events, initial_length))
+	# print("num_events = %s, initial_length = %s" % (num_events, initial_length))
 
 	#only perform thresholding on the un-padded region of the input
 	activation_map = np.array(activation_map)
-	print("activation_map shape = %s" % str(activation_map.shape))
+	# print("activation_map shape = %s" % str(activation_map.shape))
 
 	#set up a list to contain the identified start and stop times
 	thresholded_activations = []
@@ -213,7 +213,7 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 
 	# wait for all threads to finish
 	latch.await()
-	print("compression_finished:", np.array(thresholded_activations).squeeze().shape)
+	# print("compression_finished:", np.array(thresholded_activations).squeeze().shape)
 
 	# pad and resize array for use in the ITR network
 	#thresholded_activations *= 255
@@ -221,7 +221,7 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 	#NEED TO ORGANIZE 3D-IAD
 
 	thresholded_activations = np.array(thresholded_activations)
-	print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
+	# print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
 	#thresholded_activations = thresholded_activations.squeeze() #.astype(np.int64)
 	#print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
 	#print("thresholded_activations[0]:", thresholded_activations[0][:5])
@@ -231,5 +231,5 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 									((0,0), (0,initial_length-thresholded_activations.shape[1]), (0,0)), 
 									'constant', 
 									constant_values=(0,0))
-	print("thresholded_activations: ", thresholded_activations.shape)
+	# print("thresholded_activations: ", thresholded_activations.shape)
 	return thresholded_activations 
