@@ -110,7 +110,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
             rescaled = (255.0 / pixels.max() * (pixels - pixels.min())).astype(np.uint8)
             img = Image.fromarray(rescaled)
             img = img.convert("L")
-            img = img.resize((img.width * 10, img.height))
+            # img = img.resize((img.width * 10, img.height))
             img.save(img_name, quality=95)
 
 
