@@ -85,9 +85,6 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     for i, s in enumerate(sample_names):
         video_name = os.path.join(directory, s + ".tfrecord")
 
-        # save a random layer as an image
-        img_name = os.path.join(directory, s + "_" + str(layer_to_test) + ".jpg")
-
         s_index = i * num_layers
         sample_layers = layers[s_index:s_index + num_layers]
         assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
