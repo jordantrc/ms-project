@@ -113,7 +113,7 @@ def threshold_activations(activations, out, latch, thresholding_method):
 	
 	#out.append(returned_values)
 	#latch.count_down()
-	return returned_valued
+	return returned_values
 
 def compress_activations(activations, out, compression_method, compression_latch, thresholding_method):
 	#separate the activations into spatial subdivisions
@@ -186,7 +186,7 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 
 	#only perform thresholding on the un-padded region of the input
 	activation_map = np.array(activation_map)
-	print("activation_map = %s" % activation_map)
+	print("activation_map shape = %s" % str(activation_map.shape))
 
 	#set up a list to contain the identified start and stop times
 	thresholded_activations = []
