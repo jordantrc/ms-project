@@ -79,7 +79,8 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     -c3d_model: the c3d network model
     '''
     num_layers = 5
-    assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths (%s/%s)" % (len(layers), len(sample_names))
+    assert len(layers) % num_layers == 0
+    # assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths (%s/%s)" % (len(layers), len(sample_names))
     # print("sample_names = %s" % (sample_names))
 
     for i, s in enumerate(sample_names):
@@ -97,7 +98,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
 
         # generate the tfrecord
         ex = make_sequence_example(thresholded_data, labels[i], s, compression_method["value"])
-        print("write to: ", video_name)
+        print("write tfrecord to: ", video_name)
         writer = tf.python_io.TFRecordWriter(video_name)
         writer.write(ex.SerializeToString())
 
