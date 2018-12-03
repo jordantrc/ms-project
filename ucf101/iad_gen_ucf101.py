@@ -4,7 +4,7 @@
 # trained model.
 
 import time
-
+import PIL.Image as Image
 import numpy as np
 import tensorflow as tf
 
@@ -43,29 +43,28 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
     ex = tf.train.SequenceExample()
 
     # ---- descriptive data ----
-
-    ex.context.feature["length"].int64_list.value.append(img_raw.shape[1])
     ex.context.feature["example_id"].bytes_list.value.append(example_id)
-
-    # ---- label data ----
-
-    ex.context.feature["total_lab"].int64_list.value.append(first_action)
+    ex.context.feature["label"].int64_list.value.append(label)
     ex.context.feature["c3d_depth"].int64_list.value.append(c3d_depth)
     ex.context.feature["num_channels"].int64_list.value.append(num_channels)
-    
-    # ---- data sequences ----
 
-    def load_array(example, name, data, dtype):
-        fl_data = example.feature_lists.feature_list[name].feature.add().bytes_list.value
-        print("newShape:", np.asarray(data).astype(dtype).shape)
-        fl_data.append(np.asarray(data).astype(dtype).tostring())
+    for i, img in enumerate(img_raw):
+        layer = i + 1
+        ex.context.feature["length/{:02d}".format(layer)].int64_list.value.append(img.shape[1])
+        
+        # ---- data sequences ----
 
-    load_array(ex, "img_raw", img_raw, np.float32)
+        def load_array(example, name, data, dtype):
+            fl_data = example.feature_lists.feature_list[name].feature.add().bytes_list.value
+            print("newShape:", np.asarray(data).astype(dtype).shape)
+            fl_data.append(np.asarray(data).astype(dtype).tostring())
+
+        load_array(ex, "img/{:02d}".format(layer), img, np.float32)
 
     return ex
 
 
-def convert_to_IAD_input(layers, sample_names, labels, compression_method, thresholding_approach):
+def convert_to_IAD_input(directory, layers, sample_names, labels, compression_method, thresholding_approach):
     '''
     Provides the training input for the ITR network by generating an IAD from the
     activation map of the C3D network. Outputs two dictionaries. The first contains
@@ -82,21 +81,31 @@ def convert_to_IAD_input(layers, sample_names, labels, compression_method, thres
     # print("sample_names = %s" % (sample_names))
 
     for i, s in enumerate(sample_names):
+        video_name = os.path.join(directory, s + ".tfrecord")
+
+        # save a random layer as an image
+        layer_to_test = random.randint(0, num_layers)
+        img_name = os.path.join(directory, s + "_" + str(layer_to_test) + ".jpg")
+
         s_index = i * num_layers
         sample_layers = layers[s_index:s_index + num_layers]
-    assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
+        assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
 
-    thresholded_data = []
-    for l in sample_layers:
-        layer_data = np.squeeze(l, axis=0)
-        thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
-        # print("thresholded_data shape = %s" % str(thresholded_data.shape))
+        thresholded_data = []
+        for l in sample_layers:
+            layer_data = np.squeeze(l, axis=0)
+            thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
+            # print("thresholded_data shape = %s" % str(thresholded_data.shape))
 
-    # generate the tfrecord
-    ex = make_sequence_example(thresholded_data, labels[i], s, compression_method["value"])
-    #print("write to: ", video_name)
-    #writer = tf.python_io.TFRecordWriter(video_name)
-    #writer.write(ex.SerializeToString())
+        # generate the tfrecord
+        ex = make_sequence_example(thresholded_data, labels[i], s, compression_method["value"])
+        print("write to: ", video_name)
+        writer = tf.python_io.TFRecordWriter(video_name)
+        writer.write(ex.SerializeToString())
+
+        # generate the image
+        img = Image.fromarray(thresholded_data[layer_to_test])
+        img.save(img_name)
 
 
 def conv3d(name, l_input, w, b):
@@ -285,7 +294,7 @@ def run_test():
       print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
     # generate IAD output
-    convert_to_IAD_input(layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+    convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
 
   write_file.close()
   print("done")
