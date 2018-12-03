@@ -86,7 +86,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         video_name = os.path.join(directory, s + ".tfrecord")
 
         # save a random layer as an image
-        layer_to_test = random.randint(0, num_layers)
+        layer_to_test = random.randint(0, num_layers - 1)
         img_name = os.path.join(directory, s + "_" + str(layer_to_test) + ".jpg")
 
         s_index = i * num_layers
