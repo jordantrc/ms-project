@@ -38,7 +38,7 @@ FLAGS = flags.FLAGS
 def make_sequence_example(img_raw, label, example_id, num_channels):
     """creates the tfrecord example"""
     print("ENTER make_sequence_example:")
-    print(len(img_raw))
+    # print(len(img_raw))
     print(label, example_id)
 
     # The object we return
@@ -106,6 +106,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         writer.write(ex.SerializeToString())
 
         # generate the image
+        print("single layer shape = %s" % str(thresholded_data[layer_to_test].shape))
         img = Image.fromarray(thresholded_data[layer_to_test])
         img.save(img_name)
 
