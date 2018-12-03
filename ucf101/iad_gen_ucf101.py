@@ -79,7 +79,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     -c3d_model: the c3d network model
     '''
     num_layers = 5
-    assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths"
+    assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths (%s/%s)" % (len(layers), len(sample_names))
     # print("sample_names = %s" % (sample_names))
 
     for i, s in enumerate(sample_names):
@@ -112,7 +112,8 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         rescaled = (255.0 / pixels.max() * (pixels - pixels.min())).astype(np.uint8)
         img = Image.fromarray(rescaled)
         img = img.convert("L")
-        img.save(img_name)
+        img = img.resize((img.width * 10, img.heigt))
+        img.save(img_name, quality=95)
 
 
 def conv3d(name, l_input, w, b):
