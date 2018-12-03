@@ -34,10 +34,10 @@ FLAGS = flags.FLAGS
 "-----------------------------------------------------------------------------------------------------------------------"
 
 def make_sequence_example(img_raw, label, example_id, num_channels):
-  
+  """creates the tfrecord example"""
   print("ENTER make_sequence_example:")
   print(img_raw.shape)
-	print(label, example_id)
+  print(label, example_id)
 
 	# The object we return
 	ex = tf.train.SequenceExample()
