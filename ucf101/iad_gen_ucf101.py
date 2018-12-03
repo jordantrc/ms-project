@@ -47,7 +47,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
     # ---- descriptive data ----
     ex.context.feature["example_id"].bytes_list.value.append(example_id)
     ex.context.feature["label"].int64_list.value.append(label)
-    ex.context.feature["c3d_depth"].int64_list.value.append(c3d_depth)
+    # ex.context.feature["c3d_depth"].int64_list.value.append(c3d_depth)
     ex.context.feature["num_channels"].int64_list.value.append(num_channels)
 
     for i, img in enumerate(img_raw):
