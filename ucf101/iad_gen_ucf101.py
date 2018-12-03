@@ -200,6 +200,48 @@ def placeholder_inputs(batch_size):
   return images_placeholder, labels_placeholder
 
 
+def generate_iad(list_file, sess, predict_write_file=None):
+    num_videos = len(list(open(list_file, 'r')))
+    steps = num_videos
+    next_start_pos = 0
+
+    if predict_write_file is not None:
+        write_file = open(predict_write_file, "w", 0)
+
+    for step in xrange(steps):
+    # Fill a feed dictionary with the actual set of images and labels
+    # for this particular training step.
+    start_time = time.time()
+    test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
+            c3d_model.read_clip_and_label(
+                    IMAGE_DIRECTORY,
+                    list_file,
+                    FLAGS.batch_size * gpu_num,
+                    start_pos=next_start_pos
+                    )
+    predict_score, layers_out = sess.run([norm_score, layers],
+            feed_dict={images_placeholder: test_images}
+            )
+    for i in range(0, valid_len):
+      true_label = test_labels[i],
+      top1_predicted_label = np.argmax(predict_score[i])
+      # Write results: true label, class prob for true label, predicted label, class prob for predicted label
+      write_file.write('{}, {}, {}, {}\n'.format(
+              true_label[0],
+              predict_score[i][true_label],
+              top1_predicted_label,
+              predict_score[i][top1_predicted_label]))
+
+    #for i, l in enumerate(layers_out):
+    #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
+
+    # generate IAD output
+    convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+
+    write_file.close()
+    print("done")
+
+
 def _variable_on_cpu(name, shape, initializer):
   #with tf.device('/cpu:%d' % cpu_id):
   with tf.device('/cpu:0'):
@@ -268,43 +310,10 @@ def run_test():
   sess.run(init)
   # Create a saver for writing training checkpoints.
   saver.restore(sess, MODEL)
+  
   # And then after everything is built, start the training loop.
-  bufsize = 0
-  write_file = open("predict_ret.txt", "w+", bufsize)
-  next_start_pos = 0
-  test_steps = int((num_test_videos - 1) / (FLAGS.batch_size * gpu_num) + 1)
-  for step in xrange(test_steps):
-    # Fill a feed dictionary with the actual set of images and labels
-    # for this particular training step.
-    start_time = time.time()
-    test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
-            c3d_model.read_clip_and_label(
-                    IMAGE_DIRECTORY,
-                    TEST_LIST,
-                    FLAGS.batch_size * gpu_num,
-                    start_pos=next_start_pos
-                    )
-    predict_score, layers_out = sess.run([norm_score, layers],
-            feed_dict={images_placeholder: test_images}
-            )
-    for i in range(0, valid_len):
-      true_label = test_labels[i],
-      top1_predicted_label = np.argmax(predict_score[i])
-      # Write results: true label, class prob for true label, predicted label, class prob for predicted label
-      write_file.write('{}, {}, {}, {}\n'.format(
-              true_label[0],
-              predict_score[i][true_label],
-              top1_predicted_label,
-              predict_score[i][top1_predicted_label]))
-
-    #for i, l in enumerate(layers_out):
-    #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
-
-    # generate IAD output
-    convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
-
-  write_file.close()
-  print("done")
+  generate_iad(TEST_FILE, sess, predict_write_file='predict_ret.txt')
+  generate_iad(TRAIN_FILE, sess)
 
 def main():
   run_test()
