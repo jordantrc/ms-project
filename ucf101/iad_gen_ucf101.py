@@ -107,6 +107,9 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
 
         # generate the image
         print("write test to: ", img_name)
+        max_value = np.max(thresholded_data[layer_to_test])
+        min_value = np.max(thresholded_data[layer_to_test])
+        print("min = %s, max = %s", (min_value, max_value))
         print("single layer type = %s, shape = %s" % (type(thresholded_data[layer_to_test]), str(thresholded_data[layer_to_test].shape)))
         img = Image.fromarray(np.squeeze(thresholded_data[layer_to_test], axis=2))
         img = img.convert("L")
