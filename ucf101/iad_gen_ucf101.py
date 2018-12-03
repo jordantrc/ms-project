@@ -290,8 +290,8 @@ def run_test():
               top1_predicted_label,
               predict_score[i][top1_predicted_label]))
 
-    for i, l in enumerate(layers_out):
-      print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
+    #for i, l in enumerate(layers_out):
+    #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
     # generate IAD output
     convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
