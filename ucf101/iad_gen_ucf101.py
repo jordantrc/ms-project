@@ -256,13 +256,13 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 
 def run_test():
-  num_train_videos = len(list(open(TRAIN_LIST, 'r')))
-  num_test_videos = len(list(open(TEST_LIST,'r')))
-  print("Number of train videos = {}, test videos = {}".format(num_train_videos, num_test_videos))
+    num_train_videos = len(list(open(TRAIN_LIST, 'r')))
+    num_test_videos = len(list(open(TEST_LIST,'r')))
+    print("Number of train videos = {}, test videos = {}".format(num_train_videos, num_test_videos))
 
-  # Get the sets of images and labels for training, validation, and
-  images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size * gpu_num)
-  with tf.variable_scope('var_name') as var_scope:
+    # Get the sets of images and labels for training, validation, and
+    images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size * gpu_num)
+    with tf.variable_scope('var_name') as var_scope:
     weights = {
             'wc1': _variable_with_weight_decay('wc1', [3, 3, 3, 3, 64], 0.04, 0.00),
             'wc2': _variable_with_weight_decay('wc2', [3, 3, 3, 64, 128], 0.04, 0.00),
@@ -289,31 +289,78 @@ def run_test():
             'bd2': _variable_with_weight_decay('bd2', [4096], 0.04, 0.0),
             'out': _variable_with_weight_decay('bout', [NUM_CLASSES], 0.04, 0.0),
             }
-  logits = []
-  layers = []
-  for gpu_index in range(0, gpu_num):
+    logits = []
+    layers = []
+    for gpu_index in range(0, gpu_num):
     with tf.device('/gpu:%d' % gpu_index):
       logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
       logits.append(logit)
       layers.extend(layer)
-  #print("layers type = %s, length = %s" % (type(layers), len(layers)))
-  #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
-  #print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
-  # layers is a list of length 10 (5 * gpu_num)
-  # layers[0] is a tensor with shape (1, 16, 112, 112, 64)
+    #print("layers type = %s, length = %s" % (type(layers), len(layers)))
+    #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
+    #print("layers[0][0] type = %s, shape = %s" % (type(layers[0][0]), layers[0][0].shape))
+    # layers is a list of length 10 (5 * gpu_num)
+    # layers[0] is a tensor with shape (1, 16, 112, 112, 64)
 
-  logits = tf.concat(logits, 0)
-  norm_score = tf.nn.softmax(logits)
-  saver = tf.train.Saver()
-  sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-  init = tf.global_variables_initializer()
-  sess.run(init)
-  # Create a saver for writing training checkpoints.
-  saver.restore(sess, MODEL)
-  
-  # And then after everything is built, start the training loop.
-  generate_iad(TEST_LIST, sess, predict_write_file='predict_ret.txt')
-  generate_iad(TRAIN_LIST, sess)
+    logits = tf.concat(logits, 0)
+    norm_score = tf.nn.softmax(logits)
+    saver = tf.train.Saver()
+    sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+    init = tf.global_variables_initializer()
+    sess.run(init)
+    # Create a saver for writing training checkpoints.
+    saver.restore(sess, MODEL)
+
+    # And then after everything is built, start the training loop.
+    for list_file in [TEST_LIST, TRAIN_LIST]:
+        # only write predictions if it's a test list
+        if "train" in list_file:
+            predict_write_file = None
+        else:
+            predict_write_file = "predict_ret.txt"
+        num_videos = len(list(open(list_file, 'r')))
+        steps = num_videos
+        next_start_pos = 0
+
+        if predict_write_file is not None:
+            write_file = open(predict_write_file, "w", 0)
+
+        for step in xrange(steps):
+            # Fill a feed dictionary with the actual set of images and labels
+            # for this particular training step.
+            start_time = time.time()
+            test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
+                    c3d_model.read_clip_and_label(
+                            IMAGE_DIRECTORY,
+                            list_file,
+                            FLAGS.batch_size * gpu_num,
+                            start_pos=next_start_pos
+                            )
+            predict_score, layers_out = sess.run([norm_score, layers],
+                    feed_dict={images_placeholder: test_images}
+                    )
+
+            if predict_write_file is not None:
+                for i in range(0, valid_len):
+                  true_label = test_labels[i],
+                  top1_predicted_label = np.argmax(predict_score[i])
+                  # Write results: true label, class prob for true label, predicted label, class prob for predicted label
+                  write_file.write('{}, {}, {}, {}\n'.format(
+                          true_label[0],
+                          predict_score[i][true_label],
+                          top1_predicted_label,
+                          predict_score[i][top1_predicted_label]))
+
+            #for i, l in enumerate(layers_out):
+            #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
+
+            # generate IAD output
+            convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+
+        if predict_write_file is not None:
+            write_file.close()
+        print("done generating IADs for %s" % list_file)
+
 
 def main():
   run_test()
