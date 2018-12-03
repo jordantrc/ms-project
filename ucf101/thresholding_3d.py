@@ -222,8 +222,8 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 
 	thresholded_activations = np.array(thresholded_activations)
 	print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
-	thresholded_activations = thresholded_activations.squeeze() #.astype(np.int64)
-	print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
+	#thresholded_activations = thresholded_activations.squeeze() #.astype(np.int64)
+	#print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
 	#print("thresholded_activations[0]:", thresholded_activations[0][:5])
 	thresholded_activations = np.transpose(thresholded_activations, (0,2,1))
 
