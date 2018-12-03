@@ -39,7 +39,7 @@ def make_sequence_example(
 	example_id,
 	num_channels):
   
-  print("ENTER make_sequence_example")
+  print("ENTER make_sequence_example:")
   print(img_raw.shape)
 	print(label, example_id)
 
