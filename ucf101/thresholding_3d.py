@@ -202,7 +202,7 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 		# this feature in its own thread
 		#activations = np.reshape(activation_map[...,i], (activation_map.shape[0], -1)) 
 		# activations = activation_map[...,i]
-		activations = activation_map[i]
+		activations = activation_map[...,i]
 
 		# t = threading.Thread(target = compress_activations, args = (activations, thresholded_activations[i], compression_method, latch, thresholding_method, ))
 		compress_activations(activations, thresholded_activations[i], compression_method, None, thresholding_method)
