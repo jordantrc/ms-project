@@ -312,8 +312,8 @@ def run_test():
   saver.restore(sess, MODEL)
   
   # And then after everything is built, start the training loop.
-  generate_iad(TEST_FILE, sess, predict_write_file='predict_ret.txt')
-  generate_iad(TRAIN_FILE, sess)
+  generate_iad(TEST_LIST, sess, predict_write_file='predict_ret.txt')
+  generate_iad(TRAIN_LIST, sess)
 
 def main():
   run_test()
