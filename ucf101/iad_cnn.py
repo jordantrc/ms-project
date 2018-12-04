@@ -88,7 +88,7 @@ def _parse_function(example):
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     print("img shape = %s" % img.get_shape())
-    img = tf.reshape(img, img_geom)
+    img = tf.reshape(img, img_geom, "parse_reshape")
     print("img shape = %s" % img.get_shape())
 
     # pad the image to make it square and then resize
