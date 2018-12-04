@@ -95,6 +95,7 @@ def _parse_function(example):
     img = tf.pad(img, padding, 'CONSTANT')
     print("img shape = %s" % img.get_shape())
     img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
+    print("img shape = %s" % img.get_shape())
 
     label = tf.cast(parsed_features['label'], tf.int64)
     label = tf.one_hot(label, depth=NUM_CLASSES)
