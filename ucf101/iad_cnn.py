@@ -180,8 +180,9 @@ def main():
     dataset_iterator = dataset.make_initializable_iterator()
     x, y_true = dataset_iterator.get_next()
 
-    # 
+    # reshape x to 4d tensor
     print("x shape = %s" % x.get_shape())
+    x = tf.expand_dims(x, 0)
 
     y_true_class = tf.argmax(y_true, axis=1)
 
