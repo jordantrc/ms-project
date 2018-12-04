@@ -48,6 +48,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
 
     for i, img in enumerate(img_raw):
         layer = i + 1
+        print("img shape = %s" % str(img.shape))
         img = img[i].tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img)
 
