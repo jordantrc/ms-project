@@ -40,7 +40,7 @@ def list_to_filenames(list_file):
         lines = text.split('\n')
 
     if '' in lines:
-        lines = lines.remove('')
+        lines.remove('')
 
     for l in lines:
         sample, label = l.split()
