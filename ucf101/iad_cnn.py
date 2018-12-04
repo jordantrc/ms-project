@@ -147,6 +147,7 @@ def cnn_inference(x, weights, biases, dropout):
 
     # flatten pool4
     pool2_flat = tf.reshape(pool2, [-1, pool2_shape[1] * pool2_shape[2] * pool2_shape[3]])
+    print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.nn.leaky_relu(tf.matmul(pool2_flat, w_fc1) + b_fc1)
 
     # dropout
