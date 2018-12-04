@@ -56,11 +56,11 @@ def list_to_filenames(list_file):
 
 def _weight_variable(name, shape):
     initial = tf.truncated_normal(shape, stddev=WEIGHT_STDDEV)
-    return tf.Variable(name, initial)
+    return tf.get_variable(name, initial)
 
 def _bias_variable(name, shape):
     initial = tf.constant(BIAS, shape=shape)
-    return tf.Variable(name, initial)
+    return tf.get_variable(name, initial)
 
 def _conv2d(x, W, b):
     conv = tf.nn.conv2d(x, W, strides[1, 1, 1, 1], padding='VALID') + b
