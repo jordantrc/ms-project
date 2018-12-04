@@ -60,7 +60,7 @@ def _weight_variable(name, shape):
 
 def _bias_variable(name, shape):
     initial = tf.constant(BIAS, name=name, shape=shape)
-    return tf.get_variable(initial)
+    return tf.Variable(initial)
 
 def _conv2d(x, W, b):
     conv = tf.nn.conv2d(x, W, strides[1, 1, 1, 1], padding='VALID') + b
