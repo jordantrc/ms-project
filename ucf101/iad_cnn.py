@@ -113,8 +113,8 @@ def get_variables(model_name, num_channels=1):
             'W_3': _weight_variable('W_3', [3, 3, 32, 32])
             }
         biases = {
-            'b_0': _bias_variable('b_0', [16]),
-            'b_1': _bias_variable('b_1', [16]),
+            'b_0': _bias_variable('b_0', [32]),
+            'b_1': _bias_variable('b_1', [64]),
             'b_2': _bias_variable('b_2', [32]),
             'b_3': _bias_variable('b_3', [32])
             }
