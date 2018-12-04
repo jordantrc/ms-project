@@ -77,7 +77,7 @@ def _parse_function(example):
     features['length/{:02d}'.format(LAYER)] = tf.FixedLenFeature((), tf.int64)
     features['img/{:02d}'.format(LAYER)] = tf.FixedLenFeature((), tf.string)
 
-    parsed_features = tf.parse_single_example(example)
+    parsed_features = tf.parse_single_example(example, features)
 
     # decode the image
     img = tf.decode_raw(features['img/{:02d}'.format(LAYER)], tf.float32)
