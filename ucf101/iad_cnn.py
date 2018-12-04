@@ -64,7 +64,7 @@ def _bias_variable(name, shape):
     return tf.Variable(initial)
 
 def _conv2d(x, W, b):
-    conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='VALID') + b
+    conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME') + b
     return tf.nn.leaky_relu(conv, alpha=LEAKY_RELU_ALPHA)
 
 def _max_pool_kxk(x, k=2):
