@@ -18,6 +18,8 @@ BIAS = 0.1
 LEAKY_RELU_ALPHA = 0.01
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
+IMAGE_HEIGHT = 64
+IMAGE_WIDTH = 64
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -28,6 +30,7 @@ LEARNING_RATE = 1e-3
 # layer 5 - 512 features x 2 time slices
 LAYER = 5
 LAYER_GEOMETRY = (512, 2, 1)
+LAYER_PAD = [[0, 0], [255, 255], [0, 0]]
 
 #-------------General helper functions----------------#
 
@@ -84,8 +87,15 @@ def _parse_function(example):
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     img = tf.reshape(img, LAYER_GEOMETRY)
+
+    # pad the image to make it square and then resize
+    #padding = tf.constant(LAYER_PAD)
+    #img = tf.pad(img, padding, 'CONSTANT')
+    img = tf.image.resize_image_with_pad(img, IMAGE_HEIGHT, IMAGE_WIDTH)
     print("img shape = %s" % img.get_shape())
+
     label = tf.cast(parsed_features['label'], tf.int64)
+    label = tf.one_hot(label, depth=NUM_CLASSES)
 
     return img, label
 
