@@ -121,7 +121,7 @@ def get_variables(model_name, num_channels=1):
     return weights, biases
 
 
-def cnn_inference(x, weights, biases, dropout):
+def cnn_inference(x, batch_size, weights, biases, dropout):
 
     # first layer
     conv1 = _conv2d(x, weights['W_0'], biases['b_0'])
@@ -142,13 +142,11 @@ def cnn_inference(x, weights, biases, dropout):
     print("pool2 shape = %s" % pool2_shape)
 
     # fully connected layer
-    #w_fc1 = _weight_variable('W_fc1', [pool2_shape[1] * pool2_shape[2] * pool2_shape[3], 1024])
-    w_fc1 = _weight_variable('W_fc1', [16 * 16 * 64, 1024])
+    w_fc1 = _weight_variable('W_fc1', [pool2_shape[1] * pool2_shape[2] * pool2_shape[3], 1024])
     b_fc1 = _bias_variable('b_fc1', [1024])
 
     # flatten pool4
-    # pool2_flat = tf.reshape(pool2, [-1, pool2_shape[1] * pool2_shape[2] * pool2_shape[3]])
-    pool2_flat = tf.reshape(pool2, [-1, 16 * 16 * 64])
+    pool2_flat = tf.reshape(pool2, [batch_size, pool2_shape[1] * pool2_shape[2] * pool2_shape[3]])
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.nn.leaky_relu(tf.matmul(pool2_flat, w_fc1) + b_fc1)
 
@@ -204,7 +202,7 @@ def main():
     y_true_class = tf.argmax(y_true, axis=1)
 
     # get neural network response
-    logits = cnn_inference(x, weights, biases, dropout)
+    logits = cnn_inference(x, BATCH_SIZE, weights, biases, dropout)
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
 
