@@ -27,7 +27,7 @@ LEARNING_RATE = 1e-3
 # layer 3 - 512 features x 4 time slices
 # layer 4 - 512 features x 2 time slices
 LAYER = 4
-LAYER_GEOMETRY = (512, 2)
+LAYER_GEOMETRY = (512, 2, 1)
 
 #-------------General helper functions----------------#
 
@@ -183,7 +183,7 @@ def main():
 
     # reshape x to 4d tensor
     print("x shape prior to re-shape = %s" % x.get_shape())
-    x = tf.expand_dims(x, 1)
+    x = tf.expand_dims(x, 0)
     print("x shape = %s" % x.get_shape())
 
     y_true_class = tf.argmax(y_true, axis=1)
