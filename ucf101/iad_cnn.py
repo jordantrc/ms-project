@@ -121,7 +121,7 @@ def get_variables(model_name, num_channels=1):
     return weights, biases
 
 
-def cnn_inference(x, batch_size, weights, biases, dropout):
+def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # first layer
     conv1 = _conv2d(x, weights['W_0'], biases['b_0'])
@@ -204,7 +204,7 @@ def main():
     y_true_class = tf.argmax(y_true, axis=1)
 
     # get neural network response
-    logits = cnn_inference(x, BATCH_SIZE, weights, biases, dropout)
+    logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
 
