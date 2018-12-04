@@ -50,5 +50,6 @@ for example in tf.python_io.tf_record_iterator(file_name):
             img = tf.image.resize_bilinear(img, (64, 64))
             print("img shape = %s" % img.get_shape())
             img = tf.squeeze(img, 0)
+            img = img.eval()
             cv2.imwrite("img%d.jpg" % (i), img)
 
