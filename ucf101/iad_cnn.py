@@ -142,7 +142,6 @@ def main():
     filenames.extend(filenames[0:pad_filenames])
 
     # create the TensorFlow sessions
-    saver = tf.train.Saver()
     config = tf.ConfigProto(allow_soft_placement=True)
     sess = tf.Session(config=config)
 
@@ -181,6 +180,7 @@ def main():
 
     # initializer
     init_op = tf.global_variables_initializer()
+    saver = tf.train.Saver()
     sess.run(init_op)
 
     # load model
