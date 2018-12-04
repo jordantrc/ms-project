@@ -180,6 +180,7 @@ def main():
     # ensure filenames list is evenly divisable by batch size
     pad_filenames = len(filenames) % BATCH_SIZE
     filenames.extend(filenames[0:pad_filenames])
+    print("filenames = %s..." % filenames[0:5])
 
     # create the TensorFlow sessions
     config = tf.ConfigProto(allow_soft_placement=True)
