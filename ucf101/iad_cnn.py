@@ -89,10 +89,10 @@ def _parse_function(example):
     img = tf.reshape(img, LAYER_GEOMETRY)
 
     # pad the image to make it square and then resize
-    #padding = tf.constant(LAYER_PAD)
-    #img = tf.pad(img, padding, 'CONSTANT')
-    img = tf.image.resize_image_with_pad(img, IMAGE_HEIGHT, IMAGE_WIDTH)
+    padding = tf.constant(LAYER_PAD)
+    img = tf.pad(img, padding, 'CONSTANT')
     print("img shape = %s" % img.get_shape())
+    img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
 
     label = tf.cast(parsed_features['label'], tf.int64)
     label = tf.one_hot(label, depth=NUM_CLASSES)
