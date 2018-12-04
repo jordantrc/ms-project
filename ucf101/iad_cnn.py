@@ -204,6 +204,7 @@ def main():
 
     y_true_class = tf.argmax(y_true, axis=1)
     print("x shape = %s" % x.get_shape().as_list())
+    print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
     logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
