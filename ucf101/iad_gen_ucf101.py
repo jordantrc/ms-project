@@ -48,7 +48,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
 
     for i, img in enumerate(img_raw):
         layer = i + 1
-        img_raw = img_raw.tostring()
+        img_raw = img_raw[i].tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img_raw)
 
     example = tf.train.Example(features=tf.train.Features(feature=features))
