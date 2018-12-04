@@ -41,6 +41,14 @@ def _bytes_feature(value):
 
 def make_sequence_example(img_raw, label, example_id, num_channels):
     """creates the tfrecord example"""
+    valid_dimensions = [
+                        (64, 16, 1),
+                        (128, 16, 1),
+                        (256, 8, 1),
+                        (512, 4, 1),
+                        (512, 2, 1)
+                        ]
+
     features = dict()
     features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
     features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
@@ -49,6 +57,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
     for i, img in enumerate(img_raw):
         layer = i + 1
         print("img shape = %s" % str(img.shape))
+        assert img.shape == valid_dimensions[i], "invalid dimensions for img"
         img = img[i].tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img)
 
