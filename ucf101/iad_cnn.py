@@ -142,11 +142,12 @@ def cnn_inference(x, batch_size, weights, biases, dropout):
     print("pool2 shape = %s" % pool2_shape)
 
     # fully connected layer
-    w_fc1 = _weight_variable('W_fc1', [pool2_shape[1] * pool2_shape[2] * pool2_shape[3], 1024])
+    pool2_flat_size = pool2_shape[1] * pool2_shape[2] * pool2_shape[3]
+    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, 1024])
     b_fc1 = _bias_variable('b_fc1', [1024])
 
     # flatten pool4
-    pool2_flat = tf.reshape(pool2, [batch_size, pool2_shape[1] * pool2_shape[2] * pool2_shape[3]])
+    pool2_flat = tf.reshape(pool2, [batch_size, pool2_flat_size])
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.nn.leaky_relu(tf.matmul(pool2_flat, w_fc1) + b_fc1)
 
