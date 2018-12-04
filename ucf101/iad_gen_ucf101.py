@@ -58,7 +58,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
         layer = i + 1
         print("img shape = %s" % str(img.shape))
         assert img.shape == valid_dimensions[i], "invalid dimensions for img"
-        img = img[i].tostring()
+        img = img.tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img)
 
     example = tf.train.Example(features=tf.train.Features(feature=features))
