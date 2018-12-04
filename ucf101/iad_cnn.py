@@ -107,8 +107,8 @@ def _parse_function(example):
 def get_variables(model_name, num_channels=1):
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-            'W_0': _weight_variable('W_0', [3, 3, num_channels, 16]),
-            'W_1': _weight_variable('W_1', [3, 3, 16, 16]),
+            'W_0': _weight_variable('W_0', [5, 5, 1, 32]),
+            'W_1': _weight_variable('W_1', [5, 5, 32, 64]),
             'W_2': _weight_variable('W_2', [3, 3, 16, 32]),
             'W_3': _weight_variable('W_3', [3, 3, 32, 32])
             }
@@ -132,22 +132,22 @@ def cnn_inference(x, weights, biases, dropout):
     pool2 = _max_pool_kxk(conv2, 2)
 
     # third layer
-    conv3 = _conv2d(pool2, weights['W_2'], biases['b_2'])
-    pool3 = _max_pool_kxk(conv3, 2)
+    #conv3 = _conv2d(pool2, weights['W_2'], biases['b_2'])
+    #pool3 = _max_pool_kxk(conv3, 2)
 
     # fourth layer
-    conv4 = _conv2d(pool3, weights['W_3'], biases['b_3'])
-    pool4 = _max_pool_kxk(conv4, 2)
-    pool4_shape = pool4.get_shape().as_list()
-    print("pool4 shape = %s" % pool4_shape)
+    #conv4 = _conv2d(pool3, weights['W_3'], biases['b_3'])
+    #pool4 = _max_pool_kxk(conv4, 2)
+    pool2_shape = pool4.get_shape().as_list()
+    print("pool2 shape = %s" % pool2_shape)
 
     # fully connected layer
-    w_fc1 = _weight_variable('W_fc1', [pool4_shape[1] * pool4_shape[2] * pool4_shape[3], 1024])
+    w_fc1 = _weight_variable('W_fc1', [pool2_shape[1] * pool2_shape[2] * pool2_shape[3], 1024])
     b_fc1 = _bias_variable('b_fc1', [1024])
 
     # flatten pool4
-    pool4_flat = tf.reshape(pool4, [-1, pool4_shape[1] * pool4_shape[2] * pool4_shape[3]])
-    fc1 = tf.nn.leaky_relu(tf.matmul(pool4_flat, w_fc1) + b_fc1)
+    pool2_flat = tf.reshape(pool2, [-1, pool2_shape[1] * pool2_shape[2] * pool2_shape[3]])
+    fc1 = tf.nn.leaky_relu(tf.matmul(pool2_flat, w_fc1) + b_fc1)
 
     # dropout
     fc1 = tf.nn.dropout(fc1, dropout)
