@@ -215,7 +215,7 @@ def main():
     while True:
         try:
             feed_dict = {'dropout': DROPOUT}
-            train_result = sess.run([train_op, accuracy], feed_dict=feed_dict)
+            train_result = sess.run([train_op, accuracy], feed_dict={dropout: DROPOUT})
             print("step %s, accuracy = %s" % accuracy)
         except tf.errors.OutOfRangeError:
             print("data exhausted")
