@@ -18,6 +18,12 @@ LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
              '4': [[0, 0], [0, 0], [254, 254], [0, 0]],
              '5': [[0, 0], [0, 0], [255, 255], [0, 0]]
              }
+LAYER_GEOMETRY = {'1': (64, 16, 1),
+                  '2': (128, 16, 1),
+                  '3': (256, 8, 1),
+                  '4': (512, 4, 1),
+                  '5': (512, 2, 1)
+                  }
 
 for example in tf.python_io.tf_record_iterator(file_name):
     features = dict()
@@ -32,6 +38,7 @@ for example in tf.python_io.tf_record_iterator(file_name):
     with sess.as_default():
         # decode the image data
         for i in range(1, 5):
+            img_geom = tuple([1]) + LAYER_GEOMETRY[str(i)]
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
             img = tf.reshape(img, img_geom, "parse_reshape")
