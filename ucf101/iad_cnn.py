@@ -126,8 +126,8 @@ def cnn_inference(x, weights, biases, dropout):
     print("pool4 shape = %s" % pool4_shape)
 
     # fully connected layer
-    w_fc1 = _weight_variable(pool4_shape[1] * pool4_shape[2] * pool4_shape[3], 1024)
-    b_fc1 = _bias_variable([1024])
+    w_fc1 = _weight_variable('W_fc1', [pool4_shape[1] * pool4_shape[2] * pool4_shape[3], 1024])
+    b_fc1 = _bias_variable('b_fc1', [1024])
 
     # flatten pool4
     pool4_flat = tf.reshape(pool4, [-1, pool4_shape[1] * pool4_shape[2] * pool4_shape[3]])
@@ -137,8 +137,8 @@ def cnn_inference(x, weights, biases, dropout):
     fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout
-    w_fc2 = _weight_variable(1024, NUM_CLASSES)
-    b_fc2 = _bias_variable([NUM_CLASSES])
+    w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
+    b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
 
