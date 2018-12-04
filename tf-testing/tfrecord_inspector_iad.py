@@ -12,11 +12,11 @@ assert os.path.isfile(file_name)
 
 sess = tf.Session()
 
-LAYER_PAD = {1: [[0, 0], [0, 0], [24, 24], [0, 0]]
-             2: [[0, 0], [0, 0], [56, 56], [0, 0]],
-             3: [[0, 0], [0, 0], [124, 124], [0, 0]],
-             4: [[0, 0], [0, 0], [254, 254], [0, 0]],
-             5: [[0, 0], [0, 0], [255, 255], [0, 0]]
+LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]]
+             '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
+             '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
+             '4': [[0, 0], [0, 0], [254, 254], [0, 0]],
+             '5': [[0, 0], [0, 0], [255, 255], [0, 0]]
              }
 
 for example in tf.python_io.tf_record_iterator(file_name):
@@ -37,7 +37,7 @@ for example in tf.python_io.tf_record_iterator(file_name):
             img = tf.reshape(img, img_geom, "parse_reshape")
 
             # pad the image to make it square and then resize
-            padding = tf.constant(LAYER_PAD[i])
+            padding = tf.constant(LAYER_PAD[str(i)])
             img = tf.pad(img, padding, 'CONSTANT')
             print("img shape = %s" % img.get_shape())
             img = tf.image.resize_bilinear(img, (64, 64))
