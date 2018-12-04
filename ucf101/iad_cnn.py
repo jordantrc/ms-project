@@ -181,11 +181,6 @@ def main():
     dataset_iterator = dataset.make_initializable_iterator()
     x, y_true = dataset_iterator.get_next()
 
-    # reshape x to 4d tensor
-    print("x shape prior to re-shape = %s" % x.get_shape())
-    x = tf.expand_dims(x, 0)
-    print("x shape = %s" % x.get_shape())
-
     y_true_class = tf.argmax(y_true, axis=1)
 
     # get neural network response
