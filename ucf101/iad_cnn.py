@@ -21,12 +21,12 @@ LEARNING_RATE = 1e-3
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
-# layer 0 - 64 features x 16 time slices
-# layer 1 - 128 features x 16 time slices
-# layer 2 - 256 features x 8 time slices
-# layer 3 - 512 features x 4 time slices
-# layer 4 - 512 features x 2 time slices
-LAYER = 4
+# layer 1 - 64 features x 16 time slices
+# layer 2 - 128 features x 16 time slices
+# layer 3 - 256 features x 8 time slices
+# layer 4 - 512 features x 4 time slices
+# layer 5 - 512 features x 2 time slices
+LAYER = 5
 LAYER_GEOMETRY = (512, 2, 1)
 
 #-------------General helper functions----------------#
@@ -75,8 +75,8 @@ def _parse_function(example):
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
 
-    for i in range(0, 5):
-        features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+    for i in range(1, 6):
+        # features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
         features['img/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.string)
 
     parsed_features = tf.parse_single_example(example, features)
