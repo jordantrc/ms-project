@@ -182,8 +182,9 @@ def main():
     x, y_true = dataset_iterator.get_next()
 
     # reshape x to 4d tensor
+    print("x shape prior to re-shape = %s" % x.get_shape())
+    x = tf.expand_dims(x, 1)
     print("x shape = %s" % x.get_shape())
-    x = tf.expand_dims(x, 0)
 
     y_true_class = tf.argmax(y_true, axis=1)
 
