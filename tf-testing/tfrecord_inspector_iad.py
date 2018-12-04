@@ -42,7 +42,7 @@ for example in tf.python_io.tf_record_iterator(file_name):
             print("img_geom = %s" % str(img_geom))
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
-            img.eval()
+            print(img.eval())
             img = tf.reshape(img, img_geom, "parse_reshape")
 
             # pad the image to make it square and then resize
