@@ -35,35 +35,52 @@ FLAGS = flags.FLAGS
 
 "-----------------------------------------------------------------------------------------------------------------------"
 
+def _bytes_feature(value):
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+
 def make_sequence_example(img_raw, label, example_id, num_channels):
     """creates the tfrecord example"""
-    print("ENTER make_sequence_example:")
-    # print(len(img_raw))
-    print(label, example_id)
-
-    # The object we return
-    ex = tf.train.SequenceExample()
-
-    # ---- descriptive data ----
-    ex.context.feature["example_id"].bytes_list.value.append(example_id)
-    ex.context.feature["label"].int64_list.value.append(label)
-    # ex.context.feature["c3d_depth"].int64_list.value.append(c3d_depth)
-    ex.context.feature["num_channels"].int64_list.value.append(num_channels)
+    features = dict()
+    features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
+    features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
+    features['num_channels'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[num_channels]))
 
     for i, img in enumerate(img_raw):
         layer = i + 1
-        ex.context.feature["length/{:02d}".format(layer)].int64_list.value.append(img.shape[1])
+        img_raw = img_raw.tostring()
+        features['img/{:02d}'.format(layer)] = _bytes_feature(img_raw)
+
+    example = tf.train.Example(features=tf.train.Features(feature=features))
+
+
+    #print("ENTER make_sequence_example:")
+    # print(len(img_raw))
+    #print(label, example_id)
+
+    # The object we return
+    #ex = tf.train.SequenceExample()
+
+    # ---- descriptive data ----
+    #ex.context.feature["example_id"].bytes_list.value.append(example_id)
+    #ex.context.feature["label"].int64_list.value.append(label)
+    # ex.context.feature["c3d_depth"].int64_list.value.append(c3d_depth)
+    #ex.context.feature["num_channels"].int64_list.value.append(num_channels)
+
+    #for i, img in enumerate(img_raw):
+    #    layer = i + 1
+    #    ex.context.feature["length/{:02d}".format(layer)].int64_list.value.append(img.shape[1])
         
         # ---- data sequences ----
 
-        def load_array(example, name, data, dtype):
-            fl_data = example.feature_lists.feature_list[name].feature.add().bytes_list.value
-            print("newShape:", np.asarray(data).astype(dtype).shape)
-            fl_data.append(np.asarray(data).astype(dtype).tostring())
+    #    def load_array(example, name, data, dtype):
+    #        fl_data = example.feature_lists.feature_list[name].feature.add().bytes_list.value
+    #        print("newShape:", np.asarray(data).astype(dtype).shape)
+    #        fl_data.append(np.asarray(data).astype(dtype).tostring())
 
-        load_array(ex, "img/{:02d}".format(layer), img, np.float32)
+    #    load_array(ex, "img/{:02d}".format(layer), img, np.float32)
 
-    return ex
+    return example
 
 
 def convert_to_IAD_input(directory, layers, sample_names, labels, compression_method, thresholding_approach):
