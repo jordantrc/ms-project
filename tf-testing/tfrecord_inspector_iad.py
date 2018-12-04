@@ -39,7 +39,7 @@ for example in tf.python_io.tf_record_iterator(file_name):
         # decode the image data
         for i in range(1, 5):
             img_geom = tuple([1]) + LAYER_GEOMETRY[str(i)]
-            print("img_geom = %s" % img_geom)
+            print("img_geom = %s" % str(img_geom))
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
             img = tf.reshape(img, img_geom, "parse_reshape")
