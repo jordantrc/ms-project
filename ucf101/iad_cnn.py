@@ -74,8 +74,10 @@ def _max_pool_kxk(x, k=2):
 def _parse_function(example):
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
-    features['length/{:02d}'.format(LAYER)] = tf.FixedLenFeature((), tf.int64)
-    features['img/{:02d}'.format(LAYER)] = tf.FixedLenFeature((), tf.string)
+
+    for i in range(0, 5):
+        features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+        features['img/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.string)
 
     parsed_features = tf.parse_single_example(example, features)
 
@@ -123,7 +125,7 @@ def cnn_inference(x, weights, biases, dropout):
     conv4 = _conv2d(pool3, weights['W_3'], biases['b_3'])
     pool4 = _max_pool_kxk(conv4, 2)
     pool4_shape = pool4.get_shape().as_list()
-    print("pool4 shape = %s" % pool4_shape)
+    # print("pool4 shape = %s" % pool4_shape)
 
     # fully connected layer
     w_fc1 = _weight_variable('W_fc1', [pool4_shape[1] * pool4_shape[2] * pool4_shape[3], 1024])
