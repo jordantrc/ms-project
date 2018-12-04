@@ -3,6 +3,7 @@
 # Convolutional Neural Network for IAD data for the UCF101 dataset
 #
 import os
+import random
 import tensorflow as tf
 
 BATCH_SIZE = 10
@@ -35,7 +36,7 @@ def list_to_filenames(list_file):
     iad_directory = '/home/jordanc/datasets/UCF-101/iad'
 
     with open(list_file, 'r') as list_fd:
-        text = list_rd.read()
+        text = list_fd.read()
         lines = text.split('\n')
 
     for l in lines:
@@ -130,6 +131,12 @@ def main():
 
     # get the list of filenames
     filenames = list_to_filenames(FILE_LIST)
+    if training:
+        random.shuffle(filenames)
+
+    # ensure filenames list is evenly divisable by batch size
+    pad_filenames = len(filenames) % BATCH_SIZE
+    filenames.extend(filenames[0:pad_filenames])
 
     # create the TensorFlow sessions
     saver = tf.train.Saver()
