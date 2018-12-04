@@ -79,11 +79,12 @@ def _parse_function(example):
 
     parsed_features = tf.parse_single_example(example, features)
 
-    # decode the image
-    img = tf.decode_raw(features['img/{:02d}'.format(LAYER)], tf.float32)
+    # decode the image, get label
+    img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     img = tf.reshape(img, LAYER_GEOMETRY)
+    label = tf.cast(parsed_features['label'], tf.int64)
 
-    return image, label
+    return img, label
 
 
 def get_variables(model_name, num_channels=1):
