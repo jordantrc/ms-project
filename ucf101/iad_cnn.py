@@ -87,6 +87,7 @@ def _parse_function(example):
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
+    print("img = %s" % img.eval())
     img = tf.reshape(img, img_geom)
     print("img shape = %s" % img.get_shape())
 
