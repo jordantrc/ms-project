@@ -39,6 +39,7 @@ for example in tf.python_io.tf_record_iterator(file_name):
         # decode the image data
         for i in range(1, 5):
             img_geom = tuple([1]) + LAYER_GEOMETRY[str(i)]
+            print("img_geom = %s" % img_geom)
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
             img = tf.reshape(img, img_geom, "parse_reshape")
@@ -46,9 +47,7 @@ for example in tf.python_io.tf_record_iterator(file_name):
             # pad the image to make it square and then resize
             padding = tf.constant(LAYER_PAD[str(i)])
             img = tf.pad(img, padding, 'CONSTANT')
-            print("img shape = %s" % img.get_shape())
             img = tf.image.resize_bilinear(img, (64, 64))
-            print("img shape = %s" % img.get_shape())
             img = tf.squeeze(img, 0)
             img = img.eval()
             cv2.imwrite("img%d.jpg" % (i), img)
