@@ -27,6 +27,7 @@ LEARNING_RATE = 1e-3
 # layer 3 - 512 features x 4 time slices
 # layer 4 - 512 features x 2 time slices
 LAYER = 4
+LAYER_GEOMETRY = (512, 2)
 
 #-------------General helper functions----------------#
 
@@ -68,6 +69,21 @@ def _conv2d(x, W, b):
 
 def _max_pool_kxk(x, k=2):
     return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
+
+
+def _parse_function(example):
+    features = dict()
+    features['label'] = tf.FixedLenFeature((), tf.int64)
+    features['length/{:02d}'.format(LAYER)] = tf.FixedLenFeature((), tf.int64)
+    features['img/{:02d}'.format(LAYER)] = tf.FixedLenFeature((), tf.string)
+
+    parsed_features = tf.parse_single_example(example)
+
+    # decode the image
+    img = tf.decode_raw(features['img/{:02d}'.format(LAYER)], tf.float32)
+    img = tf.reshape(img, LAYER_GEOMETRY)
+
+    return image, label
 
 
 def get_variables(model_name, num_channels=1):
