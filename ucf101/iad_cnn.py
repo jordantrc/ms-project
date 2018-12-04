@@ -55,12 +55,12 @@ def list_to_filenames(list_file):
 #-------------CNN Functions---------------------------#
 
 def _weight_variable(name, shape):
-    initial = tf.truncated_normal(shape, stddev=WEIGHT_STDDEV)
-    return tf.get_variable(name, initial)
+    initial = tf.truncated_normal_initializer(stddev=WEIGHT_STDDEV)
+    return tf.get_variable(name, shape, initializer=initial)
 
 def _bias_variable(name, shape):
-    initial = tf.constant(BIAS, shape=shape)
-    return tf.get_variable(name, initial)
+    initial = tf.constant(BIAS, name=name, shape=shape)
+    return tf.get_variable(initial)
 
 def _conv2d(x, W, b):
     conv = tf.nn.conv2d(x, W, strides[1, 1, 1, 1], padding='VALID') + b
