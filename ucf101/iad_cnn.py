@@ -39,6 +39,9 @@ def list_to_filenames(list_file):
         text = list_fd.read()
         lines = text.split('\n')
 
+    if '' in lines:
+        lines = lines.remove('')
+
     for l in lines:
         sample, label = l.split()
         sample_basename = os.path.basename(sample)
