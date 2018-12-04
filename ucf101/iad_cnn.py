@@ -123,6 +123,7 @@ def cnn_inference(x, weights, biases, dropout):
     conv4 = _conv2d(pool3, weights['W_3'], biases['b_3'])
     pool4 = _max_pool_kxk(conv4, 2)
     pool4_shape = pool4.get_shape().as_list()
+    print("pool4 shape = %s" % pool4_shape)
 
     # fully connected layer
     w_fc1 = _weight_variable(pool4_shape[1] * pool4_shape[2] * pool4_shape[3], 1024)
