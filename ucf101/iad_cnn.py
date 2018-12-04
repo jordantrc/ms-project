@@ -207,6 +207,7 @@ def main():
 
     # get neural network response
     logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
+    print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
 
