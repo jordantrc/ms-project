@@ -30,7 +30,7 @@ IMAGE_WIDTH = 64
 # layer 5 - 512 features x 2 time slices
 LAYER = 5
 LAYER_GEOMETRY = (512, 2, 1)
-LAYER_PAD = [[0, 0], [255, 255], [0, 0]]
+LAYER_PAD = [[0, 0], [0, 0], [255, 255], [0, 0]]
 
 #-------------General helper functions----------------#
 
@@ -75,6 +75,7 @@ def _max_pool_kxk(x, k=2):
 
 
 def _parse_function(example):
+    img_geom = tuple([1]) + LAYER_GEOMETRY
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
 
@@ -86,7 +87,7 @@ def _parse_function(example):
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
-    img = tf.reshape(img, LAYER_GEOMETRY)
+    img = tf.reshape(img, img_geom)
 
     # pad the image to make it square and then resize
     padding = tf.constant(LAYER_PAD)
