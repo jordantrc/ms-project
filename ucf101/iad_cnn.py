@@ -85,7 +85,7 @@ def _max_pool_kxk(x, k=2):
 
 
 def _parse_function(example):
-    img_geom = tuple([1]) + LAYER_GEOMETRY[LAYER]
+    img_geom = tuple([1]) + LAYER_GEOMETRY[str(LAYER)]
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
 
@@ -100,7 +100,7 @@ def _parse_function(example):
     img = tf.reshape(img, img_geom, "parse_reshape")
 
     # pad the image to make it square and then resize
-    padding = tf.constant(LAYER_PAD[LAYER])
+    padding = tf.constant(LAYER_PAD[str(LAYER)])
     img = tf.pad(img, padding, 'CONSTANT')
     print("img shape = %s" % img.get_shape())
     img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
