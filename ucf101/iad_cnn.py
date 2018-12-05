@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
-LOAD_MODEL = 'iad_models/iad_model_layer_1_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+#LOAD_MODEL = 'iad_models/iad_model_layer_1_step_final.ckpt'
+LOAD_MODEL = None
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
@@ -30,12 +30,18 @@ IMAGE_WIDTH = 64
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-LAYER = 1
+LAYER = 5
+#LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
+#             '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
+#             '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
+#             '4': [[0, 0], [0, 0], [254, 254], [0, 0]],
+#             '5': [[0, 0], [0, 0], [255, 255], [0, 0]]
+#             }
 LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
-             '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
-             '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
-             '4': [[0, 0], [0, 0], [254, 254], [0, 0]],
-             '5': [[0, 0], [0, 0], [255, 255], [0, 0]]
+             '2': [[0, 0], [0, 0], [24, 24], [0, 0]],
+             '3': [[0, 0], [0, 0], [28, 28], [0, 0]],
+             '4': [[0, 0], [0, 0], [30, 30], [0, 0]],
+             '5': [[0, 0], [0, 0], [31, 31], [0, 0]]
              }
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
@@ -108,9 +114,9 @@ def _parse_function(example):
     # pad the image to make it square and then resize
     padding = tf.constant(LAYER_PAD[str(LAYER)])
     img = tf.pad(img, padding, 'CONSTANT')
-    print("img shape = %s" % img.get_shape())
-    img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
-    print("img shape = %s" % img.get_shape())
+    #print("img shape = %s" % img.get_shape())
+    #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
+    #print("img shape = %s" % img.get_shape())
     img = tf.squeeze(img, 0)
 
     label = tf.cast(parsed_features['label'], tf.int64)
