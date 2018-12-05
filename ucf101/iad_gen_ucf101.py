@@ -112,6 +112,8 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
 
     for i, s in enumerate(sample_names):
         video_name = os.path.join(directory, s + ".tfrecord")
+        if os.path.isfile(video_name):
+          continue
 
         s_index = i * num_layers
         sample_layers = layers[s_index:s_index + num_layers]
