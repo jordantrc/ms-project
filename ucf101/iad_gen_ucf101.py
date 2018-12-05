@@ -347,12 +347,10 @@ def run_test():
             predict_write_file = None
         else:
             predict_write_file = "predict_ret.txt"
+            write_file = open(predict_write_file, "w", 0)
         num_videos = len(list(open(list_file, 'r')))
         steps = num_videos
         next_start_pos = 0
-
-        if predict_write_file is not None:
-            write_file = open(predict_write_file, "w", 0)
 
         for step in xrange(steps):
             # Fill a feed dictionary with the actual set of images and labels
