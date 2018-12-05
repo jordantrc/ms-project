@@ -18,7 +18,7 @@ WEIGHT_STDDEV = 0.04
 BIAS = 0.04
 LEAKY_RELU_ALPHA = 0.01
 DROPOUT = 0.5
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-2
 IMAGE_HEIGHT = 64
 IMAGE_WIDTH = 64
 
@@ -83,8 +83,7 @@ def _bias_variable(name, shape):
 
 def _conv2d(x, W, b):
     conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME') + b
-    # return tf.nn.leaky_relu(conv, alpha=LEAKY_RELU_ALPHA)
-    return tf.nn.relu(conv)
+    return tf.nn.leaky_relu(conv, alpha=LEAKY_RELU_ALPHA)
 
 def _max_pool_kxk(x, k=2):
     return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
@@ -166,8 +165,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     pool2_flat = tf.layers.flatten(pool2)
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.matmul(pool2_flat, w_fc1) + b_fc1
-    # fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
-    fc1 = tf.nn.relu(fc1)
+    fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
 
     # dropout
     fc1 = tf.nn.dropout(fc1, dropout)
