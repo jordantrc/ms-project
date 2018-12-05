@@ -8,6 +8,7 @@ import tensorflow as tf
 
 BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/trainlist01.txt'
+MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = None
 EPOCHS = 20
 NUM_CLASSES = 101
@@ -66,6 +67,10 @@ def list_to_filenames(list_file):
     return filenames
 
 
+def save_model(sess, saver, step):
+    save_path = os.path.join(MODEL_SAVE_DIR, "iad_model_step_%s.ckpt" % step)
+    saver.save(sess, save_path)
+
 #-------------CNN Functions---------------------------#
 
 def _weight_variable(name, shape):
@@ -78,7 +83,8 @@ def _bias_variable(name, shape):
 
 def _conv2d(x, W, b):
     conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME') + b
-    return tf.nn.leaky_relu(conv, alpha=LEAKY_RELU_ALPHA)
+    # return tf.nn.leaky_relu(conv, alpha=LEAKY_RELU_ALPHA)
+    return tf.nn.relu(conv)
 
 def _max_pool_kxk(x, k=2):
     return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
@@ -160,7 +166,8 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     pool2_flat = tf.layers.flatten(pool2)
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.matmul(pool2_flat, w_fc1) + b_fc1
-    fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
+    # fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
+    fc1 = tf.nn.relu(fc1)
 
     # dropout
     fc1 = tf.nn.dropout(fc1, dropout)
@@ -251,6 +258,8 @@ def main():
             train_result = sess.run([train_op, accuracy, x, logits], feed_dict={dropout: DROPOUT})
             if step % 100 == 0:
                 print("step %s, accuracy = %s" % (step, train_result[1]))
+                # save the current model
+                save_model(sess, saver, step)
             # print("x = %s, logits = %s" % (train_result[2], train_result[3]))
             step += 1
         except tf.errors.OutOfRangeError:
