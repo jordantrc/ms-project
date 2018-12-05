@@ -187,6 +187,7 @@ def main():
         training = False
 
     # get the list of filenames
+    print("loading file list from %s" % FILE_LIST)
     filenames = list_to_filenames(FILE_LIST)
     if training:
         random.shuffle(filenames)
@@ -270,8 +271,8 @@ def main():
         # loop until out of data
         while True:
             try:
-                accuracy = sess.run([accuracy, x, logits], feed_dict={dropout: 1.0})
-                cumulative_accuracy += accuracy
+                test_result = sess.run([accuracy, x, logits], feed_dict={dropout: 1.0})
+                cumulative_accuracy += test_result[0]
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
                           (step, train_result[1], cumulative_accuracy / step / BATCH_SIZE))
