@@ -6,7 +6,7 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 #LOAD_MODEL = 'iad_models/iad_model_layer_3_step_final.ckpt'
