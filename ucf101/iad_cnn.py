@@ -250,8 +250,7 @@ def main():
         # loop until out of data
         while True:
             try:
-                feed_dict = {'dropout': DROPOUT}
-                train_result = sess.run([train_op, accuracy, x, logits], feed_dict=feed_dict)
+                train_result = sess.run([train_op, accuracy, x, logits], feed_dict={'dropout': DROPOUT})
                 if step % 100 == 0:
                     print("step %s, accuracy = %s" % (step, train_result[1]))
                     # save the current model
@@ -271,8 +270,7 @@ def main():
         # loop until out of data
         while True:
             try:
-                feed_dict = {'dropout': 1.0}
-                accuracy = sess.run([accuracy, x, logits], feed_dict=feed_dict)
+                accuracy = sess.run([accuracy, x, logits], feed_dict={'dropout': 1.0})
                 cumulative_accuracy += accuracy
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
