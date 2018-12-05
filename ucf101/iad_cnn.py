@@ -9,7 +9,7 @@ import tensorflow as tf
 BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/trainlist01.txt'
 LOAD_MODEL = None
-EPOCHS = 5
+EPOCHS = 10
 NUM_CLASSES = 101
 
 # neural network variables
