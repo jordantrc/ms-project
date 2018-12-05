@@ -9,7 +9,7 @@ import tensorflow as tf
 BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
-LOAD_MODEL = None
+LOAD_MODEL = 'iad_models/iad_model_step_19999.ckpt'
 EPOCHS = 20
 NUM_CLASSES = 101
 
@@ -241,28 +241,46 @@ def main():
     saver = tf.train.Saver()
     sess.run(init_op)
 
-    # load model
-    if LOAD_MODEL is not None:
-        saver.restore(sess, LOAD_MODEL)
-
     # start the training/testing steps
-    step = 0
-    sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
+    if training:
+        step = 0
+        sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
 
-    # loop until out of data
-    while True:
-        try:
-            feed_dict = {'dropout': DROPOUT}
-            train_result = sess.run([train_op, accuracy, x, logits], feed_dict={dropout: DROPOUT})
-            if step % 100 == 0:
-                print("step %s, accuracy = %s" % (step, train_result[1]))
-                # save the current model
-                save_model(sess, saver, step)
-            # print("x = %s, logits = %s" % (train_result[2], train_result[3]))
-            step += 1
-        except tf.errors.OutOfRangeError:
-            print("data exhausted")
-            break
+        # loop until out of data
+        while True:
+            try:
+                feed_dict = {'dropout': DROPOUT}
+                train_result = sess.run([train_op, accuracy, x, logits], feed_dict=feed_dict)
+                if step % 100 == 0:
+                    print("step %s, accuracy = %s" % (step, train_result[1]))
+                    # save the current model
+                    save_model(sess, saver, step)
+                # print("x = %s, logits = %s" % (train_result[2], train_result[3]))
+                step += 1
+            except tf.errors.OutOfRangeError:
+                print("data exhausted, saving final model")
+                save_model(sess, saver, 'final')
+                break
+    else:
+        step = 0
+        saver.restore(sess, LOAD_MODEL)
+        sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
+
+        cumulative_accuracy = 0.0
+        # loop until out of data
+        while True:
+            try:
+                feed_dict = {'dropout': 1.0}
+                accuracy = sess.run([accuracy, x, logits], feed_dict=feed_dict)
+                cumulative_accuracy += accuracy
+                if step % 100 == 0:
+                    print("step %s, accuracy = %s, cumulative accuracy = %s" %
+                          (step, train_result[1], cumulative_accuracy / step / BATCH_SIZE))
+                step += 1
+            except tf.errors.OutOfRangeError:
+                print("data exhausted, test results:")
+                print("steps = %s, cumulative accuracy = %s" % (step, cumulative_accuracy / step / BATCH_SIZE))
+                break
 
 
 if __name__ == "__main__":
