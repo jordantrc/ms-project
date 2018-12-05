@@ -6,19 +6,19 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
-#MODEL_SAVE_DIR = 'iad_models/'
-LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
+MODEL_SAVE_DIR = 'iad_models/'
+#LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
+LOAD_MODEL = None
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
 WEIGHT_STDDEV = 0.04
 BIAS = 0.04
 LEAKY_RELU_ALPHA = 0.01
-DROPOUT = 0.6
+DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 IMAGE_HEIGHT = 64
 IMAGE_WIDTH = 64
@@ -30,7 +30,7 @@ IMAGE_WIDTH = 64
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-LAYER = 5
+LAYER = 4
 LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
              '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
              '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
@@ -281,7 +281,7 @@ def main():
                 step += 1
             except tf.errors.OutOfRangeError:
                 print("data exhausted, test results:")
-                print("steps = %s, cumulative accuracy = %s" % (step, cumulative_accuracy / step / BATCH_SIZE))
+                print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
                 break
 
 
