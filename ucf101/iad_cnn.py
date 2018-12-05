@@ -6,7 +6,7 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/trainlist01.txt'
 LOAD_MODEL = None
 EPOCHS = 5
