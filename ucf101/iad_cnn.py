@@ -275,7 +275,7 @@ def main():
                 cumulative_accuracy += test_result[0]
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
-                          (step, train_result[1], cumulative_accuracy / step / BATCH_SIZE))
+                          (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
                 step += 1
             except tf.errors.OutOfRangeError:
                 print("data exhausted, test results:")
