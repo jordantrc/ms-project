@@ -9,7 +9,7 @@ import tensorflow as tf
 BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/trainlist01.txt'
 LOAD_MODEL = None
-EPOCHS = 15
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
@@ -28,7 +28,7 @@ IMAGE_WIDTH = 64
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-LAYER = 4
+LAYER = 3
 LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
              '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
              '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
