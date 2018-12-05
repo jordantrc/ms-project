@@ -429,15 +429,27 @@ def get_frames_data(filename, num_frames_per_clip=16):
   ret_arr = []
   s_index = 0
   for parent, dirnames, filenames in os.walk(filename):
-    if(len(filenames)<num_frames_per_clip):
-      return [], s_index
     filenames = sorted(filenames)
-    s_index = random.randint(0, len(filenames) - num_frames_per_clip)
-    for i in range(s_index, s_index + num_frames_per_clip):
-      image_name = str(filename) + '/' + str(filenames[i])
-      img = Image.open(image_name)
-      img_data = np.array(img)
-      ret_arr.append(img_data)
+    if(len(filenames) < num_frames_per_clip):
+      # oversample
+      i = 0
+      while len(ret_arr) < num_frames_per_clip:
+        image_name = str(filename) + '/' + str(filenames[i])
+        img = Image.open(image_name)
+        img_data = np.array(img)
+        ret_arr.append(img_data)
+        i += 1
+        if i == len(filenames):
+          i = 0
+    else:
+      s_index = random.randint(0, len(filenames) - num_frames_per_clip)
+      for i in range(s_index, s_index + num_frames_per_clip):
+        image_name = str(filename) + '/' + str(filenames[i])
+        img = Image.open(image_name)
+        img_data = np.array(img)
+        ret_arr.append(img_data)
+
+    assert len(ret_arr) == num_frames_per_clip
   return ret_arr, s_index
 
 def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):

@@ -113,6 +113,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     for i, s in enumerate(sample_names):
         video_name = os.path.join(directory, s + ".tfrecord")
         if os.path.isfile(video_name):
+          print("tfrecord already exists, skipping...")
           continue
 
         s_index = i * num_layers
@@ -342,6 +343,7 @@ def run_test():
 
     # And then after everything is built, start the training loop.
     for list_file in [TEST_LIST, TRAIN_LIST]:
+        print("Generting IADs for %s" % list_file)
         # only write predictions if it's a test list
         if "train" in list_file:
             predict_write_file = None
