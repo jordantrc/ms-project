@@ -245,6 +245,7 @@ def main():
 
     # start the training/testing steps
     if training:
+        print("begin training")
         step = 0
         sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
 
@@ -263,6 +264,7 @@ def main():
                 save_model(sess, saver, 'final')
                 break
     else:
+        print("begin testing")
         step = 0
         saver.restore(sess, LOAD_MODEL)
         sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
