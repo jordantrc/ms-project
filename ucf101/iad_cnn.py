@@ -9,12 +9,12 @@ import tensorflow as tf
 BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/trainlist01.txt'
 LOAD_MODEL = None
-EPOCHS = 10
+EPOCHS = 15
 NUM_CLASSES = 101
 
 # neural network variables
-WEIGHT_STDDEV = 0.1
-BIAS = 0.1
+WEIGHT_STDDEV = 0.04
+BIAS = 0.04
 LEAKY_RELU_ALPHA = 0.01
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
@@ -29,8 +29,18 @@ IMAGE_WIDTH = 64
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 LAYER = 5
-LAYER_GEOMETRY = (512, 2, 1)
-LAYER_PAD = [[0, 0], [0, 0], [255, 255], [0, 0]]
+LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
+             '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
+             '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
+             '4': [[0, 0], [0, 0], [254, 254], [0, 0]],
+             '5': [[0, 0], [0, 0], [255, 255], [0, 0]]
+             }
+LAYER_GEOMETRY = {'1': (64, 16, 1),
+                  '2': (128, 16, 1),
+                  '3': (256, 8, 1),
+                  '4': (512, 4, 1),
+                  '5': (512, 2, 1)
+                  }
 
 #-------------General helper functions----------------#
 
@@ -75,7 +85,7 @@ def _max_pool_kxk(x, k=2):
 
 
 def _parse_function(example):
-    img_geom = tuple([1]) + LAYER_GEOMETRY
+    img_geom = tuple([1]) + LAYER_GEOMETRY[LAYER]
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
 
@@ -90,7 +100,7 @@ def _parse_function(example):
     img = tf.reshape(img, img_geom, "parse_reshape")
 
     # pad the image to make it square and then resize
-    padding = tf.constant(LAYER_PAD)
+    padding = tf.constant(LAYER_PAD[LAYER])
     img = tf.pad(img, padding, 'CONSTANT')
     print("img shape = %s" % img.get_shape())
     img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
