@@ -171,7 +171,7 @@ def cnn_mctnet(x, batch_size, weights, biases, dropout):
     w_fc1 = _weight_variable('W_fc1', [flatten_size, NUM_CLASSES])
     b_fc1 = _bias_variable('b_fc1', [NUM_CLASSES])
 
-    logits = tf.add(tf.matmul(pool4_flat, w_fc2), b_fc2)
+    logits = tf.add(tf.matmul(pool4_flat, w_fc1), b_fc1)
 
     return logits
 
