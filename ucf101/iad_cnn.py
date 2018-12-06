@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 40
 NUM_CLASSES = 101
 
 # neural network variables
@@ -29,7 +29,7 @@ LEARNING_RATE = 1e-3
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 FIRST_CNN_WIDTH = 32
-LAYER = 5
+LAYER = 4
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
@@ -202,8 +202,8 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # fully connected layer
     pool2_flat_size = pool2_shape[1] * pool2_shape[2] * pool2_shape[3]
-    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, 512])
-    b_fc1 = _bias_variable('b_fc1', [512])
+    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, 1024])
+    b_fc1 = _bias_variable('b_fc1', [1024])
 
     # flatten pool2
     #pool2_flat = tf.reshape(pool2, [-1, pool2_flat_size])
@@ -216,7 +216,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout
-    w_fc2 = _weight_variable('W_fc2', [512, NUM_CLASSES])
+    w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
     b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
