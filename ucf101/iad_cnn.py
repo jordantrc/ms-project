@@ -184,11 +184,11 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # first layer
     conv1 = _conv2d(x, weights['W_0'], biases['b_0'], activation_function='leaky_relu')
-    #pool1 = _max_pool_kxk(conv1, 2)
+    pool1 = _max_pool_kxk(conv1, 2)
 
     # second layer
     conv2 = _conv2d(conv1, weights['W_1'], biases['b_1'], activation_function='leaky_relu')
-    #pool2 = _max_pool_kxk(conv2, 2)
+    pool2 = _max_pool_kxk(conv2, 2)
 
     # third layer
     #conv3 = _conv2d(pool2, weights['W_2'], biases['b_2'])
@@ -197,7 +197,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     # fourth layer
     #conv4 = _conv2d(pool3, weights['W_3'], biases['b_3'])
     #pool4 = _max_pool_kxk(conv4, 2)
-    pool2_shape = conv2.get_shape().as_list()
+    pool2_shape = pool2.get_shape().as_list()
     print("pool2 shape = %s" % pool2_shape)
 
     # fully connected layer
