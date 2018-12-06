@@ -101,17 +101,12 @@ def _parse_function(example):
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     img = tf.reshape(img, img_geom, "parse_reshape")
-    if LOAD_MODEL is None:
-        # flip with 50% chance
-        flip = random.random()
-        if flip < 0.5:
-            img = tf.reverse(img, [2])
 
     # determine padding
     layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2]) / 2
 
     # pad the image to make it square and then resize
-    pad_shape = [[0, 0], [0, 0], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
+    pad_shape = [[0, 0], [1, 1], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
     padding = tf.constant(pad_shape)
     img = tf.pad(img, padding, 'CONSTANT')
     print("img shape = %s" % img.get_shape())
