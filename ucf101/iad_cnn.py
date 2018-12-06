@@ -202,8 +202,8 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # fully connected layer
     pool2_flat_size = pool2_shape[1] * pool2_shape[2] * pool2_shape[3]
-    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, pool2_flat_size])
-    b_fc1 = _bias_variable('b_fc1', [pool2_flat_size])
+    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, 4096])
+    b_fc1 = _bias_variable('b_fc1', [4096])
 
     # flatten pool2
     #pool2_flat = tf.reshape(pool2, [-1, pool2_flat_size])
@@ -216,7 +216,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout
-    w_fc2 = _weight_variable('W_fc2', [pool2_flat_size, NUM_CLASSES])
+    w_fc2 = _weight_variable('W_fc2', [4096, NUM_CLASSES])
     b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
