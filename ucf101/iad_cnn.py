@@ -6,7 +6,7 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 10
+BATCH_SIZE = 1
 FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
@@ -108,7 +108,7 @@ def _parse_function(example):
     # pad the image to make it square and then resize
     pad_shape = [[0, 0], [0, 0], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
     padding = tf.constant(pad_shape)
-    img = tf.pad(img, padding, 'CONSTANT', constant_value=-1.0)
+    img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
     print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
