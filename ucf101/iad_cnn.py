@@ -7,11 +7,11 @@ import random
 import tensorflow as tf
 
 BATCH_SIZE = 10
-FILE_LIST = 'train-test-splits/testlist01.txt'
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
 LOAD_MODEL = None
-EPOCHS =20
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
