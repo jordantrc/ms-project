@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
-LOAD_MODEL = 'iad_models/iad_model_layer_2_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+#LOAD_MODEL = 'iad_models/iad_model_layer_2_step_final.ckpt'
+LOAD_MODEL = None
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
@@ -29,7 +29,7 @@ LEARNING_RATE = 1e-3
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 FIRST_CNN_WIDTH = 32
-LAYER = 2
+LAYER = 1
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
