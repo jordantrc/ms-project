@@ -6,19 +6,19 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
-LOAD_MODEL = 'iad_models/iad_model_layer_1_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+#LOAD_MODEL = 'iad_models/iad_model_layer_1_step_final.ckpt'
+LOAD_MODEL = None
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
 WEIGHT_STDDEV = 0.04
 BIAS = 0.04
 LEAKY_RELU_ALPHA = 0.01
-DROPOUT = 0.5
+DROPOUT = 0.6
 LEARNING_RATE = 1e-3
 
 # the layer from which to load the activation map
@@ -29,7 +29,7 @@ LEARNING_RATE = 1e-3
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 FIRST_CNN_WIDTH = 32
-LAYER = 1
+LAYER = 5
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
@@ -75,9 +75,13 @@ def _bias_variable(name, shape):
     initial = tf.constant(BIAS, name=name, shape=shape)
     return tf.Variable(initial)
 
-def _conv2d(x, W, b):
+def _conv2d(x, W, b, activation_function='leaky_relu'):
     conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME') + b
-    return tf.nn.leaky_relu(conv, alpha=LEAKY_RELU_ALPHA)
+    if activation_function == 'relu':
+        result = tf.nn.relu(conv)
+    elif activation_function == 'leaky_relu':
+        result = tf.nn.leaky_relu(conv, alpha=LEAKY_RELU_ALPHA)
+    return result
 
 def _max_pool_kxk(x, k=2):
     return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
@@ -179,11 +183,11 @@ def cnn_mctnet(x, batch_size, weights, biases, dropout):
 def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # first layer
-    conv1 = _conv2d(x, weights['W_0'], biases['b_0'])
+    conv1 = _conv2d(x, weights['W_0'], biases['b_0'], activation_function='relu')
     pool1 = _max_pool_kxk(conv1, 2)
 
     # second layer
-    conv2 = _conv2d(pool1, weights['W_1'], biases['b_1'])
+    conv2 = _conv2d(pool1, weights['W_1'], biases['b_1'], activation_function='relu')
     pool2 = _max_pool_kxk(conv2, 2)
 
     # third layer
@@ -206,7 +210,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     pool2_flat = tf.layers.flatten(pool2)
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.matmul(pool2_flat, w_fc1) + b_fc1
-    fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
+    fc1 = tf.nn.relu(fc1)
 
     # dropout
     fc1 = tf.nn.dropout(fc1, dropout)
