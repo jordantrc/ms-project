@@ -318,7 +318,7 @@ def main():
         # loop until out of data
         while True:
             try:
-                test_result = sess.run([accuracy, x, logits], feed_dict={dropout: 1.0})
+                test_result = sess.run([accuracy, x, logits], feed_dict={dropout: DROPOUT})
                 cumulative_accuracy += test_result[0]
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
