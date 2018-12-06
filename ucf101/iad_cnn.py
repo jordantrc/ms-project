@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
-LOAD_MODEL = 'iad_models/iad_model_layer_1_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+#LOAD_MODEL = 'iad_models/iad_model_layer_1_step_final.ckpt'
+LOAD_MODEL = None
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
@@ -28,19 +28,8 @@ LEARNING_RATE = 1e-3
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-LAYER = 1
-#LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
-#             '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
-#             '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
-#             '4': [[0, 0], [0, 0], [254, 254], [0, 0]],
-#             '5': [[0, 0], [0, 0], [255, 255], [0, 0]]
-#             }
-LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
-             '2': [[0, 0], [0, 0], [24, 24], [0, 0]],
-             '3': [[0, 0], [0, 0], [28, 28], [0, 0]],
-             '4': [[0, 0], [0, 0], [30, 30], [0, 0]],
-             '5': [[0, 0], [0, 0], [31, 31], [0, 0]]
-             }
+FIRST_CNN_WIDTH = 16
+LAYER = 5
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
@@ -109,8 +98,12 @@ def _parse_function(example):
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     img = tf.reshape(img, img_geom, "parse_reshape")
 
+    # determine padding
+    layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2]) / 2
+
     # pad the image to make it square and then resize
-    padding = tf.constant(LAYER_PAD[str(LAYER)])
+    pad_shape = [[0, 0], [0, 0], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
+    padding = tf.constant(pad_shape)
     img = tf.pad(img, padding, 'CONSTANT')
     #print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
@@ -123,21 +116,64 @@ def _parse_function(example):
     return img, label
 
 
-def get_variables(model_name, num_channels=1):
+def get_variables_lenet(model_name, num_channels=1):
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-            'W_0': _weight_variable('W_0', [5, 5, 1, 32]),
-            'W_1': _weight_variable('W_1', [5, 5, 32, 64]),
-            'W_2': _weight_variable('W_2', [3, 3, 16, 32]),
-            'W_3': _weight_variable('W_3', [3, 3, 32, 32])
+            'W_0': _weight_variable('W_0', [5, 5, num_channels, 32]),
+            'W_1': _weight_variable('W_1', [5, 5, 32, 64])
             }
         biases = {
             'b_0': _bias_variable('b_0', [32]),
-            'b_1': _bias_variable('b_1', [64]),
-            'b_2': _bias_variable('b_2', [32]),
-            'b_3': _bias_variable('b_3', [32])
+            'b_1': _bias_variable('b_1', [64])
             }
     return weights, biases
+
+
+def get_variables_mctnet(model_name, num_channels=1):
+    with tf.variable_scope(model_name) as var_scope:
+        weights = {
+                'W_0': weight_variable('W_0', [3, 3, num_channels, 16]),
+                'W_1': weight_variable('W_1', [3, 3, 16, 16]),
+                'W_2': weight_variable('W_2', [3, 3, 16, 32]),
+                'W_3': weight_variable('W_3', [3, 3, 32, 32])
+                }
+        biases = {
+                'b_0': bias_variable('b_0', [16]),
+                'b_1': bias_variable('b_1', [16]),
+                'b_2': bias_variable('b_2', [32]),
+                'b_3': bias_variable('b_3', [32])
+                }
+    return weights, biases
+
+
+def cnn_mctnet(x, batch_size, weights, biases, dropout):
+     # first layer
+    conv1 = _conv2d(x, weights['W_0'], biases['b_0'])
+    pool1 = _max_pool_kxk(conv1, 2)
+
+    # second layer
+    conv2 = _conv2d(pool1, weights['W_1'], biases['b_1'])
+    pool2 = _max_pool_kxk(conv2, 2)
+
+    # third layer
+    conv3 = _conv2d(pool2, weights['W_2'], biases['b_2'])
+    pool3 = _max_pool_kxk(conv3, 2)
+
+    # fourth layer
+    conv4 = _conv2d(pool3, weights['W_3'], biases['b_3'])
+    pool4 = _max_pool_kxk(conv4, 2)
+
+    # one fully connected layer
+    pool4_shape = pool4.get_shape().as_list()
+    flatten_size = pool4_shape[1] * pool4_shape[2] * pool4_shape[3]
+    pool4_flat = tf.reshape(pool4, (-1, flatten_size))
+
+    w_fc1 = _weight_variable('W_fc1', [flatten_size, NUM_CLASSES])
+    b_fc1 = _bias_variable('b_fc1', [NUM_CLASSES])
+
+    logits = tf.add(tf.matmul(pool4_flat, w_fc2), b_fc2)
+
+    return logits
 
 
 def cnn_lenet(x, batch_size, weights, biases, dropout):
@@ -206,7 +242,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables('ucf101_iad')
+    weights, biases = get_variables_mctnet('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -228,7 +264,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
+    logits = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
