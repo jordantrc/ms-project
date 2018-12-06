@@ -28,7 +28,7 @@ LEARNING_RATE = 1e-3
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-FIRST_CNN_WIDTH = 32
+FIRST_CNN_WIDTH = 16
 LAYER = 5
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
@@ -123,12 +123,12 @@ def _parse_function(example):
 def get_variables_lenet(model_name, num_channels=1):
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-            'W_0': _weight_variable('W_0', [5, 5, num_channels, 32]),
-            'W_1': _weight_variable('W_1', [5, 5, 32, 64])
+            'W_0': _weight_variable('W_0', [3, 3, num_channels, 16]),
+            'W_1': _weight_variable('W_1', [3, 3, 16, 32])
             }
         biases = {
-            'b_0': _bias_variable('b_0', [32]),
-            'b_1': _bias_variable('b_1', [64])
+            'b_0': _bias_variable('b_0', [16]),
+            'b_1': _bias_variable('b_1', [32])
             }
     return weights, biases
 
@@ -202,8 +202,8 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # fully connected layer
     pool2_flat_size = pool2_shape[1] * pool2_shape[2] * pool2_shape[3]
-    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, 1024])
-    b_fc1 = _bias_variable('b_fc1', [1024])
+    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, pool2_flat_size])
+    b_fc1 = _bias_variable('b_fc1', [pool2_flat_size])
 
     # flatten pool2
     #pool2_flat = tf.reshape(pool2, [-1, pool2_flat_size])
@@ -216,7 +216,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout
-    w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
+    w_fc2 = _weight_variable('W_fc2', [pool2_flat_size, NUM_CLASSES])
     b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
@@ -318,7 +318,7 @@ def main():
         # loop until out of data
         while True:
             try:
-                test_result = sess.run([accuracy, x, logits], feed_dict={dropout: DROPOUT})
+                test_result = sess.run([accuracy, x, logits], feed_dict={dropout: 1.0})
                 cumulative_accuracy += test_result[0]
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
