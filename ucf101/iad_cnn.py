@@ -216,7 +216,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout
-    w_fc2 = _weight_variable('W_fc2', [2048, NUM_CLASSES])
+    w_fc2 = _weight_variable('W_fc2', [512, NUM_CLASSES])
     b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
