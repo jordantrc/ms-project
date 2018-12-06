@@ -149,29 +149,29 @@ def get_variables_mctnet(model_name, num_channels=1):
 def cnn_mctnet(x, batch_size, weights, biases, dropout):
      # first layer
     conv1 = _conv2d(x, weights['W_0'], biases['b_0'])
-    pool1 = _max_pool_kxk(conv1, 2)
+    #pool1 = _max_pool_kxk(conv1, 2)
 
     # second layer
-    conv2 = _conv2d(pool1, weights['W_1'], biases['b_1'])
-    pool2 = _max_pool_kxk(conv2, 2)
+    conv2 = _conv2d(conv1, weights['W_1'], biases['b_1'])
+    #pool2 = _max_pool_kxk(conv2, 2)
 
     # third layer
-    conv3 = _conv2d(pool2, weights['W_2'], biases['b_2'])
-    pool3 = _max_pool_kxk(conv3, 2)
+    conv3 = _conv2d(conv2, weights['W_2'], biases['b_2'])
+    #pool3 = _max_pool_kxk(conv3, 2)
 
     # fourth layer
-    conv4 = _conv2d(pool3, weights['W_3'], biases['b_3'])
-    pool4 = _max_pool_kxk(conv4, 2)
+    conv4 = _conv2d(conv3, weights['W_3'], biases['b_3'])
+    #pool4 = _max_pool_kxk(conv4, 2)
 
     # one fully connected layer
-    pool4_shape = pool4.get_shape().as_list()
-    flatten_size = pool4_shape[1] * pool4_shape[2] * pool4_shape[3]
-    pool4_flat = tf.reshape(pool4, (-1, flatten_size))
+    conv4_shape = conv4.get_shape().as_list()
+    flatten_size = conv4_shape[1] * conv4_shape[2] * conv4_shape[3]
+    conv4_flat = tf.reshape(conv4, (-1, flatten_size))
 
     w_fc1 = _weight_variable('W_fc1', [flatten_size, NUM_CLASSES])
     b_fc1 = _bias_variable('b_fc1', [NUM_CLASSES])
 
-    logits = tf.add(tf.matmul(pool4_flat, w_fc1), b_fc1)
+    logits = tf.add(tf.matmul(conv4_flat, w_fc1), b_fc1)
 
     return logits
 
