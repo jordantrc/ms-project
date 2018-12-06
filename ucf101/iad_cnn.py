@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 FILE_LIST = 'train-test-splits/testlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
@@ -101,6 +101,11 @@ def _parse_function(example):
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     img = tf.reshape(img, img_geom, "parse_reshape")
+    if LOAD_MODEL is None:
+        # flip with 50% chance
+        flip = random.random()
+        if flip < 0.5:
+            img = tf.reverse(img, [2])
 
     # determine padding
     layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2]) / 2
