@@ -105,7 +105,7 @@ def _parse_function(example):
     pad_shape = [[0, 0], [0, 0], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
     padding = tf.constant(pad_shape)
     img = tf.pad(img, padding, 'CONSTANT')
-    #print("img shape = %s" % img.get_shape())
+    print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
     img = tf.squeeze(img, 0)
