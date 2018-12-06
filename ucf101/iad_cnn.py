@@ -183,11 +183,11 @@ def cnn_mctnet(x, batch_size, weights, biases, dropout):
 def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # first layer
-    conv1 = _conv2d(x, weights['W_0'], biases['b_0'], activation_function='relu')
+    conv1 = _conv2d(x, weights['W_0'], biases['b_0'], activation_function='leaky_relu')
     pool1 = _max_pool_kxk(conv1, 2)
 
     # second layer
-    conv2 = _conv2d(pool1, weights['W_1'], biases['b_1'], activation_function='relu')
+    conv2 = _conv2d(pool1, weights['W_1'], biases['b_1'], activation_function='leaky_relu')
     pool2 = _max_pool_kxk(conv2, 2)
 
     # third layer
@@ -210,7 +210,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     pool2_flat = tf.layers.flatten(pool2)
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.matmul(pool2_flat, w_fc1) + b_fc1
-    fc1 = tf.nn.relu(fc1)
+    fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
 
     # dropout
     fc1 = tf.nn.dropout(fc1, dropout)
