@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 40
 NUM_CLASSES = 101
 
 # neural network variables
@@ -106,7 +106,7 @@ def _parse_function(example):
     layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2]) / 2
 
     # pad the image to make it square and then resize
-    pad_shape = [[0, 0], [1, 1], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
+    pad_shape = [[0, 0], [0, 0], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
     padding = tf.constant(pad_shape)
     img = tf.pad(img, padding, 'CONSTANT')
     print("img shape = %s" % img.get_shape())
@@ -185,6 +185,9 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     # first layer
     conv1 = _conv2d(x, weights['W_0'], biases['b_0'], activation_function='leaky_relu')
     pool1 = _max_pool_kxk(conv1, 2)
+
+    # dropout
+    pool1 = tf.nn.dropout(pool1, dropout)
 
     # second layer
     conv2 = _conv2d(pool1, weights['W_1'], biases['b_1'], activation_function='leaky_relu')
