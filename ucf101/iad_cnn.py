@@ -11,7 +11,7 @@ FILE_LIST = 'train-test-splits/testlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
 #LOAD_MODEL = None
-EPOCHS = 1s
+EPOCHS = 1
 NUM_CLASSES = 101
 
 # neural network variables
