@@ -207,7 +207,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # flatten pool2
     #pool2_flat = tf.reshape(pool2, [-1, pool2_flat_size])
-    pool2_flat = tf.layers.flatten(pool2)
+    pool2_flat = tf.layers.flatten(conv2)
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
     fc1 = tf.matmul(pool2_flat, w_fc1) + b_fc1
     fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
