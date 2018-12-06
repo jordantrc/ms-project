@@ -132,16 +132,16 @@ def get_variables_lenet(model_name, num_channels=1):
 def get_variables_mctnet(model_name, num_channels=1):
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'W_0': weight_variable('W_0', [3, 3, num_channels, 16]),
-                'W_1': weight_variable('W_1', [3, 3, 16, 16]),
-                'W_2': weight_variable('W_2', [3, 3, 16, 32]),
-                'W_3': weight_variable('W_3', [3, 3, 32, 32])
+                'W_0': _weight_variable('W_0', [3, 3, num_channels, 16]),
+                'W_1': _weight_variable('W_1', [3, 3, 16, 16]),
+                'W_2': _weight_variable('W_2', [3, 3, 16, 32]),
+                'W_3': _weight_variable('W_3', [3, 3, 32, 32])
                 }
         biases = {
-                'b_0': bias_variable('b_0', [16]),
-                'b_1': bias_variable('b_1', [16]),
-                'b_2': bias_variable('b_2', [32]),
-                'b_3': bias_variable('b_3', [32])
+                'b_0': _bias_variable('b_0', [16]),
+                'b_1': _bias_variable('b_1', [16]),
+                'b_2': _bias_variable('b_2', [32]),
+                'b_3': _bias_variable('b_3', [32])
                 }
     return weights, biases
 
