@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 20
 NUM_CLASSES = 101
 
 # neural network variables
@@ -167,6 +167,8 @@ def cnn_mctnet(x, batch_size, weights, biases, dropout):
     conv4 = _conv2d(conv3, weights['W_3'], biases['b_3'])
     #pool4 = _max_pool_kxk(conv4, 2)
 
+    conv4 = tf.nn.dropout(conv4_dropout)
+
     # one fully connected layer
     conv4_shape = conv4.get_shape().as_list()
     flatten_size = conv4_shape[1] * conv4_shape[2] * conv4_shape[3]
@@ -268,7 +270,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
+    logits = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
