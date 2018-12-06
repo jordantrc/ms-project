@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 10
-FILE_LIST = 'train-test-splits/trainlist01.txt'
+BATCH_SIZE = 1
+FILE_LIST = 'train-test-splits/testlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
-#LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-LOAD_MODEL = None
-EPOCHS = 20
+LOAD_MODEL = 'iad_models/iad_model_layer_3_step_final.ckpt'
+#LOAD_MODEL = None
+EPOCHS = 1
 NUM_CLASSES = 101
 
 # neural network variables
@@ -293,10 +293,11 @@ def main():
         while True:
             try:
                 train_result = sess.run([train_op, accuracy, x, logits], feed_dict={dropout: DROPOUT})
-                if step % 100 == 0:
+                if step != 0 and step % 100 == 0:
                     print("step %s, accuracy = %s" % (step, train_result[1]))
-                    # save the current model
-                    save_model(sess, saver, step)
+                    # save the current model every 1000 steps
+                    if step % 1000 == 0:
+                        save_model(sess, saver, step)
                 # print("x = %s, logits = %s" % (train_result[2], train_result[3]))
                 step += 1
             except tf.errors.OutOfRangeError:
