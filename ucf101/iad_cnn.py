@@ -167,7 +167,7 @@ def cnn_mctnet(x, batch_size, weights, biases, dropout):
     conv4 = _conv2d(conv3, weights['W_3'], biases['b_3'])
     #pool4 = _max_pool_kxk(conv4, 2)
 
-    conv4 = tf.nn.dropout(conv4_dropout)
+    conv4 = tf.nn.dropout(conv4, dropout)
 
     # one fully connected layer
     conv4_shape = conv4.get_shape().as_list()
