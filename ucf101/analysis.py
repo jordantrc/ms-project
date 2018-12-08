@@ -1,6 +1,9 @@
 # analysis.py
 
 from sklearn import metrics
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 def confusion_matrix(predictions, labels, classes):
