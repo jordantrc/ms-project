@@ -340,7 +340,7 @@ def main():
             print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
         # create confusion matrix
-        labels = [str(x) for x in range(0, 101)]
+        labels = [x for x in range(0, 101)]
         cm = analysis.confusion_matrix(predictions, true_classes, labels)
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, labels, "layer4.pdf")
