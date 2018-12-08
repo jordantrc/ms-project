@@ -331,7 +331,7 @@ def main():
             except tf.errors.OutOfRangeError:
                 print("data exhausted, test results:")
                 print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
-                for i, p in predictions:
+                for i, p in enumerate(predictions):
                     print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
                 break
 
