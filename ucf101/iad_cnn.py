@@ -6,6 +6,8 @@ import os
 import random
 import tensorflow as tf
 
+import analysis
+
 BATCH_SIZE = 1
 FILE_LIST = 'train-test-splits/testlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
@@ -329,11 +331,19 @@ def main():
                           (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
                 step += 1
             except tf.errors.OutOfRangeError:
-                print("data exhausted, test results:")
-                print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
-                for i, p in enumerate(predictions):
-                    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
                 break
+
+        # wrap up, provide test results
+        print("data exhausted, test results:")
+        print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
+        for i, p in enumerate(predictions):
+            print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
+
+        # create confusion matrix
+        labels = [str(x) for x in range(0, 101)]
+        cm = confusion_matrix(predictions, true_classes, labels)
+        print("confusion matrix = %s" % cm)
+        plot_confusion_matrix(cm, labels, "layer4.pdf")
 
 
 if __name__ == "__main__":
