@@ -1,6 +1,7 @@
 # analysis.py
 
 import numpy as np
+import itertools
 from sklearn import metrics
 import matplotlib
 matplotlib.use('Agg')
