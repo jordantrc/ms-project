@@ -50,13 +50,13 @@ def plot_confusion_matrix(cm, classes, filename,
     else:
         print('Confusion matrix, without normalization')
 
-    print(cm)
+    #print(cm)
 
-    thresh = cm.max() * 0.73
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, "{0:.4f}".format(cm[i, j]),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+    #thresh = cm.max() * 0.73
+    #for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+    #    plt.text(j, i, "{0:.4f}".format(cm[i, j]),
+    #             horizontalalignment="center",
+    #             color="white" if cm[i, j] > thresh else "black")
     plt.tight_layout()
     plt.ylabel('True class')
     plt.xlabel('Predicted class')
