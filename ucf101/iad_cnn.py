@@ -6,12 +6,12 @@ import os
 import random
 import tensorflow as tf
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 10
 NUM_CLASSES = 101
 
 # neural network variables
@@ -103,10 +103,10 @@ def _parse_function(example):
     img = tf.reshape(img, img_geom, "parse_reshape")
 
     # determine padding
-    layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2]) / 2
+    layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2])
 
-    # pad the image to make it square and then resize
-    pad_shape = [[0, 0], [0, 0], [layer_dim3_pad, layer_dim3_pad], [0, 0]]
+    # pad the image
+    pad_shape = [[0, 0], [0, 0], [0, layer_dim3_pad], [0, 0]]
     padding = tf.constant(pad_shape)
     img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
     print("img shape = %s" % img.get_shape())
@@ -315,11 +315,15 @@ def main():
         sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
 
         cumulative_accuracy = 0.0
+        predictions = []
+        true_classes = []
         # loop until out of data
         while True:
             try:
-                test_result = sess.run([accuracy, x, logits], feed_dict={dropout: 1.0})
+                test_result = sess.run([accuracy, x, logits, y_pred_class, y_true_class], feed_dict={dropout: 1.0})
                 cumulative_accuracy += test_result[0]
+                predictions.append(y_pred_class)
+                true_classes.append(y_true_class)
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
                           (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
@@ -327,6 +331,8 @@ def main():
             except tf.errors.OutOfRangeError:
                 print("data exhausted, test results:")
                 print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
+                for i, p in predictions:
+                    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
                 break
 
 
