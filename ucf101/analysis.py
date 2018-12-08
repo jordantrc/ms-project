@@ -13,16 +13,7 @@ def confusion_matrix(predictions, labels, classes):
     """
     # print("pred = %s, type = %s, labels = %s, type = %s, classes = %s, type = %s" % (predictions, type(predictions), labels, type(labels), classes, type(classes)))
 
-    y_true = []
-    y_pred = []
-
-    for p in predictions:
-        y_true.append(classes[p])
-
-    for l in labels:
-        y_pred.append(classes[l])
-
-    cm = metrics.confusion_matrix(y_true, y_pred, classes)
+    cm = metrics.confusion_matrix(labels, predictions, classes)
 
     return cm
 
