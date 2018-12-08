@@ -341,9 +341,9 @@ def main():
 
         # create confusion matrix
         labels = [str(x) for x in range(0, 101)]
-        cm = confusion_matrix(predictions, true_classes, labels)
+        cm = analysis.confusion_matrix(predictions, true_classes, labels)
         print("confusion matrix = %s" % cm)
-        plot_confusion_matrix(cm, labels, "layer4.pdf")
+        analysis.plot_confusion_matrix(cm, labels, "layer4.pdf")
 
 
 if __name__ == "__main__":
