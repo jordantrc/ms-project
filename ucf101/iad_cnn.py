@@ -322,8 +322,8 @@ def main():
             try:
                 test_result = sess.run([accuracy, x, logits, y_pred_class, y_true_class], feed_dict={dropout: 1.0})
                 cumulative_accuracy += test_result[0]
-                predictions.append(y_pred_class)
-                true_classes.append(y_true_class)
+                predictions.append(test_result[3])
+                true_classes.append(test_result[4])
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
                           (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
