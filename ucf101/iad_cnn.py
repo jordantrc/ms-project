@@ -66,7 +66,7 @@ def list_to_filenames(list_file):
             class_counts[class_name] += 1
             class_files[class_name].append(iad_file_path)
         else:
-            class_counts[class_names] = 1
+            class_counts[class_name] = 1
             class_files[class_name] = [iad_file_path]
 
     # balance classes if we're training
