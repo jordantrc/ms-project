@@ -72,15 +72,14 @@ def list_to_filenames(list_file):
     # balance classes if we're training
     if LOAD_MODEL is None:
         max_class_count = -1
-        max_class = ''
-        for k, v in class_counts:
-            if v > max_class_count:
+        for k in class_counts.keys():
+            if class_counts[k] > max_class_count:
                 max_class_count = v
 
         # add files to filenames, add as many as possible and then
         # sample the remainder less than max_class_count
-        for k, v in class_counts:
-            oversample = max_class_count - v
+        for k in class_counts.keys():
+            oversample = max_class_count - class_counts[k]
             filenames.extend(class_files[k])
             filenames.extend(random.sample(class_files[k], oversample))
 
