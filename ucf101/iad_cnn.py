@@ -8,7 +8,7 @@ import tensorflow as tf
 
 import analysis
 
-BATCH_SIZE = 10
+BATCH_SIZE = 1
 FILE_LIST = 'train-test-splits/testlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
