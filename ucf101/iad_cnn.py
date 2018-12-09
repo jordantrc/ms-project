@@ -263,6 +263,7 @@ def main():
     # get the list of filenames
     print("loading file list from %s" % FILE_LIST)
     filenames = list_to_filenames(FILE_LIST)
+    print("%s files" % len(filenames))
     if training:
         random.shuffle(filenames)
 
