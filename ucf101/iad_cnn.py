@@ -8,13 +8,14 @@ import tensorflow as tf
 
 import analysis
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 10
 NUM_CLASSES = 101
+CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges']
 
 # neural network variables
 WEIGHT_STDDEV = 0.1
@@ -78,13 +79,22 @@ def list_to_filenames(list_file):
 
         # add files to filenames, add as many as possible and then
         # sample the remainder less than max_class_count
-        for k in class_counts.keys():
+        if CLASSES_TO_INCLUDE == 'all':
+            keys = class_counts.keys()
+        else:
+            keys = [x for x in class_counts.keys() if x in CLASSES_TO_INCLUDE]
+
+        for k in keys:
             oversample = max_class_count - class_counts[k]
             filenames.extend(class_files[k])
             filenames.extend(random.sample(class_files[k], oversample))
 
     else:
-        keys = class_files.keys()
+        if CLASSES_TO_INCLUDE == 'all':
+            keys = class_counts.keys()
+        else:
+            keys = [x for x in class_counts.keys() if x in CLASSES_TO_INCLUDE]
+
         for k in sorted(keys):
             filenames.extend(class_files[k])
 
@@ -365,8 +375,8 @@ def main():
         # wrap up, provide test results
         print("data exhausted, test results:")
         print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
-        for i, p in enumerate(predictions):
-            print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
+        #for i, p in enumerate(predictions):
+        #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
         # create confusion matrix
         labels = [x for x in range(0, 101)]
