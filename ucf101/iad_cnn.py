@@ -8,14 +8,14 @@ import tensorflow as tf
 
 import analysis
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/trainlist01.txt'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 10
 NUM_CLASSES = 101
-CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges']
+CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade']
 
 # neural network variables
 WEIGHT_STDDEV = 0.1
@@ -379,7 +379,10 @@ def main():
         #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
         # create confusion matrix
-        labels = [x for x in range(0, 101)]
+        if CLASSES_TO_INCLUDE == 'all':
+            labels = [x for x in range(0, NUM_CLASSES)]
+        else:
+            labels = [x for x in range(0, len(CLASSES_TO_INCLUDE))]
         cm = analysis.confusion_matrix(predictions, true_classes, labels)
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, labels, "layer4.pdf")
