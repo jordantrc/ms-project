@@ -44,6 +44,8 @@ LAYER_GEOMETRY = {'1': (64, 16, 1),
 def list_to_filenames(list_file):
     '''converts a list file to a list of filenames'''
     filenames = []
+    class_counts = {}
+    class_files = {}
     iad_directory = '/home/jordanc/datasets/UCF-101/iad'
 
     with open(list_file, 'r') as list_fd:
@@ -58,7 +60,34 @@ def list_to_filenames(list_file):
         sample_basename = os.path.basename(sample)
         iad_file = sample_basename + ".tfrecord"
         iad_file_path = os.path.join(iad_directory, iad_file)
-        filenames.append(iad_file_path)
+
+        class_name = sample_basename.split('_')[1]
+        if class_name in class_counts:
+            class_counts[class_name] += 1
+            class_files[class_name].append(iad_file_path)
+        else:
+            class_counts[class_names] = 1
+            class_files[class_name] = [iad_file_path]
+
+    # balance classes if we're training
+    if LOAD_MODEL is None:
+        max_class_count = -1
+        max_class = ''
+        for k, v in class_counts:
+            if v > max_class_count:
+                max_class_count = v
+
+        # add files to filenames, add as many as possible and then
+        # sample the remainder less than max_class_count
+        for k, v in class_counts:
+            oversample = max_class_count - v
+            filenames.extend(class_files[k])
+            filenames.extend(random.sample(class_files[k], oversample))
+
+    else:
+        keys = class_files.keys()
+        for k in sorted(keys):
+            filenames.extend(class_files[k])
 
     return filenames
 
