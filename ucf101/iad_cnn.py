@@ -74,7 +74,7 @@ def list_to_filenames(list_file):
         max_class_count = -1
         for k in class_counts.keys():
             if class_counts[k] > max_class_count:
-                max_class_count = v
+                max_class_count = class_counts[k]
 
         # add files to filenames, add as many as possible and then
         # sample the remainder less than max_class_count
