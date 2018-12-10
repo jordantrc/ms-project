@@ -29,6 +29,27 @@ def confusion_matrix(predictions, labels, classes):
     return cm
 
 
+def per_class_table(predictions, labels, classes):
+	'''generates statistics on a per-class basis'''
+	class_table = {}
+	for i, l in enumerate(labels):
+		if l not in class_table:
+			class_table[l] = {'true': 0, 'false': 0}
+		
+		if l == predictions[i]:
+			class_table[l]['true'] += 1
+		else:
+			class_table[l]['false'] += 1
+
+	print("class, true, false, accuracy")
+	for k in sorted(class_table.keys()):
+		print("%s, %s, %s, %s" % 
+					(k, 
+					 class_table[k]['true'],
+					 class_table[k]['false'],
+					 float(class_table['true'] / (class_table['true'] + class_table['false']))))
+
+
 def plot_confusion_matrix(cm, classes, filename,
                           normalize=True,
                           title='Confusion matrix',

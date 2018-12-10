@@ -389,6 +389,8 @@ def main():
         cm = analysis.confusion_matrix(predictions, true_classes, labels)
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, labels, "layer4.pdf")
+        print("per-class accuracy:")
+        analysis.per_class_table(predictions, true_classes, labels)
 
 
 if __name__ == "__main__":
