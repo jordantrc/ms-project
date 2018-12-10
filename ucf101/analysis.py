@@ -31,12 +31,20 @@ def confusion_matrix(predictions, labels, classes):
 
 def per_class_table(predictions, labels, classes):
 	'''generates statistics on a per-class basis'''
+	y_true = []
+	y_pred = []
+
+	for p in predictions:
+		y_pred.append(p[0])
+	for l in labels:
+		y_true.append(p[0])
+
 	class_table = {}
-	for i, l in enumerate(labels):
+	for i, l in enumerate(y_true):
 		if l not in class_table:
 			class_table[l] = {'true': 0, 'false': 0}
 		
-		if l == predictions[i]:
+		if l == y_pred[i]:
 			class_table[l]['true'] += 1
 		else:
 			class_table[l]['false'] += 1
