@@ -55,7 +55,7 @@ def per_class_table(predictions, labels, classes):
 		num_true = float(class_table[k]['true'])
 		num_false = float(class_table[k]['false'])
 		total = num_true + num_false
-		print("%s, %s, %s, %s" % 
+		print("%s, %s, %s, %.02f" % 
 					(k, 
 					 class_table[k]['true'],
 					 class_table[k]['false'],
