@@ -37,7 +37,7 @@ def per_class_table(predictions, labels, classes):
 	for p in predictions:
 		y_pred.append(p[0])
 	for l in labels:
-		y_true.append(p[0])
+		y_true.append(l[0])
 
 	class_table = {}
 	for i, l in enumerate(y_true):
