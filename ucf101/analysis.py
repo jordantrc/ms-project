@@ -55,7 +55,7 @@ def per_class_table(predictions, labels, classes):
 					(k, 
 					 class_table[k]['true'],
 					 class_table[k]['false'],
-					 float(class_table['true'] / (class_table['true'] + class_table['false']))))
+					 float(class_table[k]['true'] / (class_table[k]['true'] + class_table[k]['false']))))
 
 
 def plot_confusion_matrix(cm, classes, filename,
