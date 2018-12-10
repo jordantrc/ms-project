@@ -41,7 +41,7 @@ def per_class_table(predictions, labels, classes):
 
 	class_table = {}
 	for i, l in enumerate(y_true):
-		print("l = %s" % l)
+		#print("l = %s" % l)
 		if l not in class_table:
 			class_table[l] = {'true': 0, 'false': 0}
 		
@@ -52,11 +52,15 @@ def per_class_table(predictions, labels, classes):
 
 	print("class, true, false, accuracy")
 	for k in sorted(class_table.keys()):
+		num_true = class_table[k]['true']
+		num_false = class_table[k]['false']
+		total = num_true + num_false
 		print("%s, %s, %s, %s" % 
 					(k, 
 					 class_table[k]['true'],
 					 class_table[k]['false'],
-					 float(class_table[k]['true'] / (class_table[k]['true'] + class_table[k]['false']))))
+					 float(num_true / total))
+					 )
 
 
 def plot_confusion_matrix(cm, classes, filename,
