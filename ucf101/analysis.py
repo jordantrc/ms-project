@@ -41,6 +41,7 @@ def per_class_table(predictions, labels, classes):
 
 	class_table = {}
 	for i, l in enumerate(y_true):
+		print("l = %s" % l)
 		if l not in class_table:
 			class_table[l] = {'true': 0, 'false': 0}
 		
