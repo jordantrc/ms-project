@@ -42,13 +42,14 @@ def per_class_table(predictions, labels, classes):
 	class_table = {}
 	for i, l in enumerate(y_true):
 		#print("l = %s" % l)
-		if l not in class_table:
-			class_table[l] = {'true': 0, 'false': 0}
+		class_name = classes[l]
+		if class_name not in class_table:
+			class_table[class_name] = {'true': 0, 'false': 0}
 		
 		if l == y_pred[i]:
-			class_table[l]['true'] += 1
+			class_table[class_name]['true'] += 1
 		else:
-			class_table[l]['false'] += 1
+			class_table[class_name]['false'] += 1
 
 	print("class, true, false, accuracy")
 	for k in sorted(class_table.keys()):

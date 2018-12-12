@@ -7,6 +7,7 @@ import random
 import tensorflow as tf
 
 import analysis
+from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 BATCH_SIZE = 1
 FILE_LIST = 'train-test-splits/testlist01.txt'
@@ -274,6 +275,9 @@ def main():
     else:
         training = False
 
+    # get the list of classes
+    class_list = get_class_list(CLASS_INDEX_FILE)
+
     # get the list of filenames
     print("loading file list from %s" % FILE_LIST)
     filenames = list_to_filenames(FILE_LIST)
@@ -382,16 +386,11 @@ def main():
         #for i, p in enumerate(predictions):
         #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
-        # create confusion matrix
-        if CLASSES_TO_INCLUDE == 'all':
-            labels = [x for x in range(0, NUM_CLASSES)]
-        else:
-            labels = [x for x in range(0, len(CLASSES_TO_INCLUDE))]
-        cm = analysis.confusion_matrix(predictions, true_classes, labels)
+        cm = analysis.confusion_matrix(predictions, true_classes, class_list)
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, labels, "layer4.pdf")
         print("per-class accuracy:")
-        analysis.per_class_table(predictions, true_classes, labels)
+        analysis.per_class_table(predictions, true_classes, class_list)
 
 
 if __name__ == "__main__":
