@@ -111,10 +111,21 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     # print("sample_names = %s" % (sample_names))
 
     for i, s in enumerate(sample_names):
-        video_name = os.path.join(directory, s + ".tfrecord")
-        if os.path.isfile(video_name):
-          print("tfrecord already exists, skipping...")
-          continue
+        # get a list of files matching this name from the directory
+        file_list = os.listdir(directory)
+        matching_samples = []
+        pattern = s + "*.tfrecord"
+        for f in file_list:
+          if fnmatch.fnmatch(f, s):
+            matching_samples.append(f)
+        
+        # if there are already samples, just pick the next index
+        if len(matching_samples) > 0:
+          last_index = sorted(matching_samples)[-1].split('_')[4].split('.')[0]
+        else:
+          last_index = -1
+
+        video_name = os.path.join(directory, "%s_%02d.tfrecord" % (s, last_index + 1))
 
         s_index = i * num_layers
         sample_layers = layers[s_index:s_index + num_layers]
@@ -347,16 +358,24 @@ def run_test():
         # only write predictions if it's a test list
         if "train" in list_file:
             predict_write_file = None
+            oversample = True
         else:
+            oversample = False
             predict_write_file = "predict_ret.txt"
             write_file = open(predict_write_file, "w", 0)
+        
+        # determine if oversampling should be used
         num_videos = len(list(open(list_file, 'r')))
-        steps = num_videos
+        if oversample:
+          steps = num_videos * 10
+        else:
+          steps = num_videos
         next_start_pos = 0
 
         for step in xrange(steps):
             # Fill a feed dictionary with the actual set of images and labels
             # for this particular training step.
+            next_start_pos = next_start_pos % num_videos
             start_time = time.time()
             test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
                     c3d_model.read_clip_and_label(

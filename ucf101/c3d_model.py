@@ -442,7 +442,7 @@ def get_frames_data(filename, num_frames_per_clip=16):
         if i == len(filenames):
           i = 0
     else:
-      s_index = random.randint(0, len(filenames) - num_frames_per_clip)
+      s_index = random.randrange(0, len(filenames) - num_frames_per_clip, int(num_frames_per_clip / 2))
       for i in range(s_index, s_index + num_frames_per_clip):
         image_name = str(filename) + '/' + str(filenames[i])
         img = Image.open(image_name)
