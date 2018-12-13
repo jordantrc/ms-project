@@ -125,8 +125,8 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
           last_index = sorted(matching_samples)[-1].split('_')[4].split('.')[0]
         else:
           last_index = -1
-
-        video_name = os.path.join(directory, "%s_%02d.tfrecord" % (s, last_index + 1))
+        new_index = last_index + 1
+        video_name = os.path.join(directory, "%s_%02d.tfrecord" % (s, new_index))
 
         s_index = i * num_layers
         sample_layers = layers[s_index:s_index + num_layers]
