@@ -122,7 +122,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         
         # if there are already samples, just pick the next index
         if len(matching_samples) > 0:
-          last_index = sorted(matching_samples)[-1].split('_')[4].split('.')[0]
+          last_index = int(sorted(matching_samples)[-1].split('_')[4].split('.')[0])
         else:
           last_index = -1
         new_index = last_index + 1
