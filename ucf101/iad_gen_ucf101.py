@@ -3,6 +3,7 @@
 # contains the code for generating IAD images from the
 # trained model.
 
+import fnmatch
 import time
 import PIL.Image as Image
 import numpy as np
