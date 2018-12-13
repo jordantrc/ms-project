@@ -15,8 +15,8 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-9999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/trainlist01.txt'
-TEST_LIST = 'train-test-splits/testlist01.txt'
+TRAIN_LIST = 'train-test-splits/train.list'
+TEST_LIST = 'train-test-splits/test.list'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad'
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
