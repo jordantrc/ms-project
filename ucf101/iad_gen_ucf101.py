@@ -367,47 +367,49 @@ def run_test():
         
         # determine if oversampling should be used
         num_videos = len(list(open(list_file, 'r')))
+        steps = num_videos
         if oversample:
-          steps = num_videos * 10
+          epochs = 10
         else:
-          steps = num_videos
-        next_start_pos = 0
+          epochs = 1
 
-        for step in xrange(steps):
-            # Fill a feed dictionary with the actual set of images and labels
-            # for this particular training step.
-            next_start_pos = next_start_pos % num_videos
-            start_time = time.time()
-            test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
-                    c3d_model.read_clip_and_label(
-                            IMAGE_DIRECTORY,
-                            list_file,
-                            FLAGS.batch_size * gpu_num,
-                            start_pos=next_start_pos
-                            )
-            predict_score, layers_out = sess.run([norm_score, layers],
-                    feed_dict={images_placeholder: test_images}
-                    )
+        for i in range(epochs):
+          next_start_pos = 0
 
-            if predict_write_file is not None:
-                for i in range(0, valid_len):
-                  true_label = test_labels[i],
-                  top1_predicted_label = np.argmax(predict_score[i])
-                  # Write results: true label, class prob for true label, predicted label, class prob for predicted label
-                  write_file.write('{}, {}, {}, {}\n'.format(
-                          true_label[0],
-                          predict_score[i][true_label],
-                          top1_predicted_label,
-                          predict_score[i][top1_predicted_label]))
+          for step in xrange(steps):
+              # Fill a feed dictionary with the actual set of images and labels
+              # for this particular training step.
+              start_time = time.time()
+              test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
+                      c3d_model.read_clip_and_label(
+                              IMAGE_DIRECTORY,
+                              list_file,
+                              FLAGS.batch_size * gpu_num,
+                              start_pos=next_start_pos
+                              )
+              predict_score, layers_out = sess.run([norm_score, layers],
+                      feed_dict={images_placeholder: test_images}
+                      )
 
-            #for i, l in enumerate(layers_out):
-            #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
+              if predict_write_file is not None:
+                  for i in range(0, valid_len):
+                    true_label = test_labels[i],
+                    top1_predicted_label = np.argmax(predict_score[i])
+                    # Write results: true label, class prob for true label, predicted label, class prob for predicted label
+                    write_file.write('{}, {}, {}, {}\n'.format(
+                            true_label[0],
+                            predict_score[i][true_label],
+                            top1_predicted_label,
+                            predict_score[i][top1_predicted_label]))
 
-            # generate IAD output
-            convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+              #for i, l in enumerate(layers_out):
+              #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
-        if predict_write_file is not None:
-            write_file.close()
+              # generate IAD output
+              convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+
+          if predict_write_file is not None:
+              write_file.close()
         print("done generating IADs for %s" % list_file)
 
 
