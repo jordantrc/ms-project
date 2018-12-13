@@ -435,7 +435,7 @@ def get_frames_data(filename, num_frames_per_clip=16):
     if(len(filenames) < num_frames_per_clip):
       # oversample
       i = 0
-      while len(ret_arr) < num_frames_per_clip:
+      while len(ret_arr) != num_frames_per_clip:
         image_name = str(filename) + '/' + str(filenames[i])
         img = Image.open(image_name)
         img_data = np.array(img)
@@ -443,7 +443,7 @@ def get_frames_data(filename, num_frames_per_clip=16):
         i += 1
         if i == len(filenames):
           i = 0
-        return ret_arr, s_index
+      return ret_arr, s_index
 
     elif len(filenames) == num_frames_per_clip:
       s_index = 0
