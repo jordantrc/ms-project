@@ -13,6 +13,7 @@ import numpy as np
 import time
 import os
 import cv2
+import sys
 
 from PIL import Image
 from itertools import cycle
@@ -519,7 +520,11 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
       data.append(img_datas)
       label.append(int(tmp_label))
 
-  np_arr_data = np.array(data).astype(np.float32)
+  try:
+    np_arr_data = np.array(data).astype(np.float32)
+  except ValueError:
+    print("data = %s, type = %s" % (data, type(data)))
+    sys.exit(1)
   np_arr_label = np.array(label).astype(np.int64)
 
   return np_arr_data, np_arr_label, next_batch_start, read_dirnames, valid_len, sample_names
