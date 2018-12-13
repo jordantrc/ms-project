@@ -57,7 +57,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
 
     for i, img in enumerate(img_raw):
         layer = i + 1
-        print("img shape = %s" % str(img.shape))
+        #print("img shape = %s" % str(img.shape))
         assert img.shape == valid_dimensions[i], "invalid dimensions for img"
         img = img.tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img)
@@ -117,7 +117,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         matching_samples = []
         pattern = s + "*.tfrecord"
         for f in file_list:
-          if fnmatch.fnmatch(f, s):
+          if fnmatch.fnmatch(f, pattern):
             matching_samples.append(f)
         
         # if there are already samples, just pick the next index
