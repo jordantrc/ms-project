@@ -146,7 +146,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
 
         # generate the image
         for i, d in enumerate(thresholded_data):
-            img_name = os.path.join(directory, s + "_" + str(i) + ".jpg")
+            img_name = os.path.join(directory, s + "_" + str(new_index) + "_" + str(i) + ".jpg")
             print("write test image to: %s" % img_name)
             #print("single layer type = %s, shape = %s" % (type(d), str(thresholded_data[layer_to_test].shape)))
             pixels = np.squeeze(d, axis=2)
