@@ -523,7 +523,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
   try:
     np_arr_data = np.array(data).astype(np.float32)
   except ValueError:
-    print("data = %s, type = %s" % (data, type(data)))
+    print("data = %s, type = %s, len = %s" % (data[0], type(data), len(data)))
     sys.exit(1)
   np_arr_label = np.array(label).astype(np.int64)
 
