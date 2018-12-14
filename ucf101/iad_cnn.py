@@ -64,6 +64,7 @@ def list_to_filenames(list_file):
 
     iad_dir_list = os.listdir(iad_directory)
     iad_dir_list = [x for x in iad_dir_list if 'tfrecord' in x]
+    print("iad_dir_list sample = %s" % (iad_dir_list[0:5]))
 
     for l in lines:
         found_files = 0
