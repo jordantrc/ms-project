@@ -69,6 +69,7 @@ def list_to_filenames(list_file):
         sample, label = l.split()
         sample_basename = os.path.basename(sample)
         iad_file_filter = sample_basename + "*.tfrecord"
+        print("getting files for %s" % sample_basename)
         for f in filenames:
           if fnmatch.fnmatch(f, iad_file_filter):
             iad_file_path = os.path.join(iad_directory, f)
@@ -82,6 +83,7 @@ def list_to_filenames(list_file):
                 class_files[class_name] = [iad_file_path]
 
     # balance classes if we're training
+    print("balancing files across classes")
     if LOAD_MODEL is None:
         max_class_count = -1
         for k in class_counts.keys():
