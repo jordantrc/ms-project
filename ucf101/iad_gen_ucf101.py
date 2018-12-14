@@ -111,9 +111,11 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     # assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths (%s/%s)" % (len(layers), len(sample_names))
     # print("sample_names = %s" % (sample_names))
 
+    file_list = os.listdir(directory)
+    file_list = [x for x in file_list if 'tfrecord' in x]
+
     for i, s in enumerate(sample_names):
         # get a list of files matching this name from the directory
-        file_list = os.listdir(directory)
         matching_samples = []
         pattern = s + "*.tfrecord"
         for f in file_list:
