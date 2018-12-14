@@ -360,7 +360,7 @@ def run_test():
     for list_file in [TEST_LIST, TRAIN_LIST]:
         print("Generting IADs for %s" % list_file)
         # only write predictions if it's a test list
-        if "train" in list_file:
+        if "train" in os.path.basename(list_file):
             predict_write_file = None
             oversample = True
         else:
