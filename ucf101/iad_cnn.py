@@ -66,12 +66,14 @@ def list_to_filenames(list_file):
     iad_dir_list = [x for x in iad_dir_list if 'tfrecord' in x]
 
     for l in lines:
+        found_files = 0
         sample, label = l.split()
         sample_basename = os.path.basename(sample)
         iad_file_filter = sample_basename + "*.tfrecord"
-        print("getting files for %s" % sample_basename)
+        print("getting files from dir list [%s] for %s" % (len(iad_dir_list), sample_basename))
         for f in iad_dir_list:
           if fnmatch.fnmatch(f, iad_file_filter):
+            found_files += 1
             iad_file_path = os.path.join(iad_directory, f)
 
             class_name = sample_basename.split('_')[1]
@@ -85,6 +87,7 @@ def list_to_filenames(list_file):
             if LOAD_MODEL is not None:
                 # if testing, just one sample
                 break
+        print("found %s samples for %s" (found_files, sample_basename))
 
     # balance classes if we're training
     print("balancing files across classes")
