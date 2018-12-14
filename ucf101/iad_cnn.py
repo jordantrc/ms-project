@@ -48,7 +48,6 @@ LAYER_GEOMETRY = {'1': (64, 16, 1),
                   }
 
 #-------------General helper functions----------------#
-
 def list_to_filenames(list_file):
     '''converts a list file to a list of filenames'''
     filenames = []
@@ -64,6 +63,7 @@ def list_to_filenames(list_file):
         lines.remove('')
 
     filenames = os.listdir(iad_directory)
+    filenames = [x for x in filenames if 'tfrecord' in x]
 
     for l in lines:
         sample, label = l.split()
@@ -73,6 +73,9 @@ def list_to_filenames(list_file):
         for f in filenames:
           if fnmatch.fnmatch(f, iad_file_filter):
             iad_file_path = os.path.join(iad_directory, f)
+            if LOAD_MODEL is not None:
+                # if we're testing, just the first sample
+                break
 
             class_name = sample_basename.split('_')[1]
             if class_name in class_counts:
