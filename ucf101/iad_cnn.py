@@ -9,11 +9,11 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/testlist01.txt'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/train.list'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
+LOAD_MODEL = None
 EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
@@ -64,16 +64,19 @@ def list_to_filenames(list_file):
     for l in lines:
         sample, label = l.split()
         sample_basename = os.path.basename(sample)
-        iad_file = sample_basename + ".tfrecord"
-        iad_file_path = os.path.join(iad_directory, iad_file)
+        iad_file_filter = sample_basename + "*.tfrecord"
+        filenames = os.listdir(iad_directory)
+        for f in filenames:
+          if fnmatch.fnmatch(f, iad_file_filter):
+            iad_file_path = os.path.join(iad_directory, f)
 
-        class_name = sample_basename.split('_')[1]
-        if class_name in class_counts:
-            class_counts[class_name] += 1
-            class_files[class_name].append(iad_file_path)
-        else:
-            class_counts[class_name] = 1
-            class_files[class_name] = [iad_file_path]
+            class_name = sample_basename.split('_')[1]
+            if class_name in class_counts:
+                class_counts[class_name] += 1
+                class_files[class_name].append(iad_file_path)
+            else:
+                class_counts[class_name] = 1
+                class_files[class_name] = [iad_file_path]
 
     # balance classes if we're training
     if LOAD_MODEL is None:
