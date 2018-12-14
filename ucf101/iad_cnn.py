@@ -63,11 +63,12 @@ def list_to_filenames(list_file):
     if '' in lines:
         lines.remove('')
 
+    filenames = os.listdir(iad_directory)
+
     for l in lines:
         sample, label = l.split()
         sample_basename = os.path.basename(sample)
         iad_file_filter = sample_basename + "*.tfrecord"
-        filenames = os.listdir(iad_directory)
         for f in filenames:
           if fnmatch.fnmatch(f, iad_file_filter):
             iad_file_path = os.path.join(iad_directory, f)
