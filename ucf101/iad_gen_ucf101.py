@@ -146,17 +146,18 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         writer = tf.python_io.TFRecordWriter(video_name)
         writer.write(ex.SerializeToString())
 
-        # generate the image
-        for i, d in enumerate(thresholded_data):
-            img_name = os.path.join(directory, s + "_" + str(new_index) + "_" + str(i) + ".jpg")
-            print("write test image to: %s" % img_name)
-            #print("single layer type = %s, shape = %s" % (type(d), str(thresholded_data[layer_to_test].shape)))
-            pixels = np.squeeze(d, axis=2)
-            rescaled = (255.0 / pixels.max() * (pixels - pixels.min())).astype(np.uint8)
-            img = Image.fromarray(rescaled)
-            img = img.convert("L")
-            # img = img.resize((img.width * 10, img.height))
-            img.save(img_name, quality=95)
+        # generate images with 5% chance
+        if random.random() < 0.05:
+          for i, d in enumerate(thresholded_data):
+              img_name = os.path.join(directory, "%s_%02d_%s.jpg" % (s, new_index, i))
+              print("write test image to: %s" % img_name)
+              #print("single layer type = %s, shape = %s" % (type(d), str(thresholded_data[layer_to_test].shape)))
+              pixels = np.squeeze(d, axis=2)
+              rescaled = (255.0 / pixels.max() * (pixels - pixels.min())).astype(np.uint8)
+              img = Image.fromarray(rescaled)
+              img = img.convert("L")
+              # img = img.resize((img.width * 10, img.height))
+              img.save(img_name, quality=95)
 
 
 def conv3d(name, l_input, w, b):
