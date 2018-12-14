@@ -70,7 +70,6 @@ def list_to_filenames(list_file):
         sample, label = l.split()
         sample_basename = os.path.basename(sample)
         iad_file_filter = sample_basename + "*.tfrecord"
-        print("getting files from dir list [%s] for %s" % (len(iad_dir_list), sample_basename))
         for f in iad_dir_list:
           if fnmatch.fnmatch(f, iad_file_filter):
             found_files += 1
@@ -87,7 +86,7 @@ def list_to_filenames(list_file):
             if LOAD_MODEL is not None:
                 # if testing, just one sample
                 break
-        print("found %s samples for %s" % (found_files, sample_basename))
+        print("found %s samples out of %s for %s with filter %s" % (found_files, len(iad_dir_list), sample_basename, iad_file_filter))
 
     # balance classes if we're training
     print("balancing files across classes")
