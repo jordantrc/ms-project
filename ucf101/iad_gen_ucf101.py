@@ -376,7 +376,7 @@ def run_test():
         else:
           epochs = 1
 
-        for i in range(epochs):
+        for e in range(epochs):
           next_start_pos = 0
 
           for step in xrange(steps):
@@ -409,7 +409,7 @@ def run_test():
               #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
               # generate IAD output
-              print("[%s:%s:%s]" % (list_file, i, step))
+              print("[%s:%s:%s]" % (list_file, e, step))
               convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
 
           if predict_write_file is not None:
