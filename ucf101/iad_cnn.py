@@ -2,6 +2,8 @@
 #
 # Convolutional Neural Network for IAD data for the UCF101 dataset
 #
+
+import fnmatch
 import os
 import random
 import tensorflow as tf
