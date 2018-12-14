@@ -87,7 +87,7 @@ def list_to_filenames(list_file):
             if LOAD_MODEL is not None:
                 # if testing, just one sample
                 break
-        print("found %s samples for %s" (found_files, sample_basename))
+        print("found %s samples for %s" % (found_files, sample_basename))
 
     # balance classes if we're training
     print("balancing files across classes")
