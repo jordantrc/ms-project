@@ -11,11 +11,11 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 10
-FILE_LIST = 'train-test-splits/train.list'
+BATCH_SIZE = 1
+FILE_LIST = 'train-test-splits/test.list'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-LOAD_MODEL = None
+#LOAD_MODEL = None
 EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
@@ -114,6 +114,7 @@ def list_to_filenames(list_file):
                 class_filenames = class_files[k]
                 while len(class_filenames) < max_class_count:
                     class_filenames.append(random.sample(class_files[k], 1))
+                filenames.extend(class_filenames)
 
     else:
         if CLASSES_TO_INCLUDE == 'all':
