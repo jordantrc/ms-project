@@ -99,6 +99,7 @@ def list_to_filenames(list_file):
 
         # add files to filenames, add as many as possible and then
         # sample the remainder less than max_class_count
+        print("oversample size = %s" % max_class_count)
         if CLASSES_TO_INCLUDE == 'all':
             keys = class_counts.keys()
         else:
