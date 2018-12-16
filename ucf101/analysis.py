@@ -19,10 +19,12 @@ def confusion_matrix(predictions, labels, classes):
     y_pred = []
 
     for p in predictions:
-    	y_pred.append(p[0])
+    	pred = classes[p[0]]
+    	y_pred.append(pred)
 
     for l in labels:
-    	y_true.append(l[0])
+    	true = classes[l[0]]
+    	y_true.append(true)
 
     cm = metrics.confusion_matrix(y_true, y_pred, classes)
 
