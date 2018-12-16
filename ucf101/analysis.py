@@ -57,14 +57,14 @@ def per_class_table(predictions, labels, classes, csv_file):
 			class_table[class_name]['false'] += 1
 
 	#print("class, true, false, accuracy")
-	csvwrite.writerow(['class', 'true', 'false', 'accuracy'])
+	csvwriter.writerow(['class', 'true', 'false', 'accuracy'])
 	for k in sorted(class_table.keys()):
 		num_true = float(class_table[k]['true'])
 		num_false = float(class_table[k]['false'])
 		total = num_true + num_false
 		row = [k, class_table[k]['true'], class_table[k]['false'], float(num_true / total)]
 		#print("%s, %s, %s, %.04f" % (row))
-		csvwrite.writerow(row)
+		csvwriter.writerow(row)
 
 
 def plot_confusion_matrix(cm, classes, filename,
