@@ -108,7 +108,12 @@ def list_to_filenames(list_file):
         for k in keys:
             oversample = max_class_count - class_counts[k]
             filenames.extend(class_files[k])
-            filenames.extend(random.sample(class_files[k], oversample))
+            if len(class_files[k]) >= oversample:
+                filenames.extend(random.sample(class_files[k], oversample))
+            else:
+                class_filenames = class_files[k]
+                while len(class_filenames) < max_class_count:
+                    class_filenames.append(random.sample(class_files[k], 1))
 
     else:
         if CLASSES_TO_INCLUDE == 'all':
