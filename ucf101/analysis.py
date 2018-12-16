@@ -84,7 +84,7 @@ def plot_confusion_matrix(cm, classes, filename,
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45, fontsize=3)
+    plt.xticks(tick_marks, classes, rotation=90, fontsize=3)
     plt.yticks(tick_marks, classes, fontsize=3)
 
 
