@@ -6,6 +6,7 @@
 import fnmatch
 import os
 import random
+import sys
 import tensorflow as tf
 
 import analysis
