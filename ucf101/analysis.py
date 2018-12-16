@@ -6,6 +6,7 @@ from sklearn import metrics
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import csv
 
 
 def confusion_matrix(predictions, labels, classes):
@@ -31,8 +32,11 @@ def confusion_matrix(predictions, labels, classes):
     return cm
 
 
-def per_class_table(predictions, labels, classes):
+def per_class_table(predictions, labels, classes, csv_file):
 	'''generates statistics on a per-class basis'''
+	csv_fd = open(csv_file, 'w', newline='')
+    csvwriter = csv.writer(csv_fd, delimiter=' ',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
 	y_true = []
 	y_pred = []
 
@@ -53,17 +57,15 @@ def per_class_table(predictions, labels, classes):
 		else:
 			class_table[class_name]['false'] += 1
 
-	print("class, true, false, accuracy")
+	#print("class, true, false, accuracy")
+	csvwrite.writerow(['class', 'true', 'false', 'accuracy'])
 	for k in sorted(class_table.keys()):
 		num_true = float(class_table[k]['true'])
 		num_false = float(class_table[k]['false'])
 		total = num_true + num_false
-		print("%s, %s, %s, %.02f" % 
-					(k, 
-					 class_table[k]['true'],
-					 class_table[k]['false'],
-					 float(num_true / total)
-					 ))
+		row = [k, class_table[k]['true'], class_table[k]['false'], float(num_true / total)]
+		#print("%s, %s, %s, %.04f" % (row))
+		csvwrite.writerow(row)
 
 
 def plot_confusion_matrix(cm, classes, filename,

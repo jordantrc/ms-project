@@ -412,7 +412,7 @@ def main():
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, class_list, "layer4.pdf")
         print("per-class accuracy:")
-        analysis.per_class_table(predictions, true_classes, class_list)
+        analysis.per_class_table(predictions, true_classes, class_list, 'test_run.csv')
 
 
 if __name__ == "__main__":
