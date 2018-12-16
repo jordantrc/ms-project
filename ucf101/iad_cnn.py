@@ -297,6 +297,9 @@ def main():
     else:
         training = False
 
+    # get the run name
+    run_name = sys.argv[1]
+
     # get the list of classes
     class_list = get_class_list(CLASS_INDEX_FILE)
 
@@ -410,9 +413,9 @@ def main():
 
         cm = analysis.confusion_matrix(predictions, true_classes, class_list)
         print("confusion matrix = %s" % cm)
-        analysis.plot_confusion_matrix(cm, class_list, "layer4.pdf")
+        analysis.plot_confusion_matrix(cm, class_list, run_name + ".pdf")
         print("per-class accuracy:")
-        analysis.per_class_table(predictions, true_classes, class_list, 'test_run.csv')
+        analysis.per_class_table(predictions, true_classes, class_list, run_name + '.csv')
 
 
 if __name__ == "__main__":
