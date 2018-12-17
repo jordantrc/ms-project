@@ -54,7 +54,6 @@ def list_to_filenames(list_file):
     filenames = []
     class_counts = {}
     class_files = {}
-    iad_directory = '/home/jordanc/datasets/UCF-101/iad'
 
     with open(list_file, 'r') as list_fd:
         text = list_fd.read()
@@ -63,32 +62,19 @@ def list_to_filenames(list_file):
     if '' in lines:
         lines.remove('')
 
-    iad_dir_list = os.listdir(iad_directory)
-    iad_dir_list = [x for x in iad_dir_list if 'tfrecord' in x]
-    print("iad_dir_list sample = %s" % (iad_dir_list[0:5]))
-
     for l in lines:
         found_files = 0
         sample, label = l.split()
         sample_basename = os.path.basename(sample)
-        iad_file_filter = sample_basename + "*.tfrecord"
-        for f in iad_dir_list:
-          if fnmatch.fnmatch(f, iad_file_filter):
-            found_files += 1
-            iad_file_path = os.path.join(iad_directory, f)
 
-            class_name = sample_basename.split('_')[1]
-            if class_name in class_counts:
-                class_counts[class_name] += 1
-                class_files[class_name].append(iad_file_path)
-            else:
-                class_counts[class_name] = 1
-                class_files[class_name] = [iad_file_path]
+        class_name = sample_basename.split('_')[1]
+        if class_name in class_counts:
+            class_counts[class_name] += 1
+            class_files[class_name].append(sample)
+        else:
+            class_counts[class_name] = 1
+            class_files[class_name] = [sample]
 
-            if LOAD_MODEL is not None:
-                # if testing, just one sample
-                break
-        print("found %s samples out of %s for %s with filter %s" % (found_files, len(iad_dir_list), sample_basename, iad_file_filter))
 
     # balance classes if we're training
     print("balancing files across classes")
