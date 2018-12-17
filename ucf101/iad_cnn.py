@@ -12,11 +12,11 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/test-iad.list'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/train-iad.list'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
-#LOAD_MODEL = None
+LOAD_MODEL = None
 EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
@@ -271,15 +271,12 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
 
     # dropout
-    fc1 = tf.nn.dropout(fc1, dropout)
-
-    # drop connect
-    #fc1 = _drop_connect(fc1, dropout)
+    #fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout with dropconnect
     w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
     b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
-    #w_fc2 = _drop_connect(w_fc2, dropout)
+    w_fc2 = _drop_connect(w_fc2, dropout)
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
 
