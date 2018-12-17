@@ -12,11 +12,11 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/test-iad.list'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/train-iad.list'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
-#LOAD_MODEL = None
+LOAD_MODEL = None
 EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
@@ -39,7 +39,7 @@ LEARNING_RATE = 1e-3
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-FIRST_CNN_WIDTH = 32
+FIRST_CNN_WIDTH = 16
 LAYER = 5
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
@@ -329,7 +329,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
+    logits = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
