@@ -95,7 +95,7 @@ def list_to_filenames(list_file):
         for k in keys:
             oversample = max_class_count - class_counts[k]
             filenames.extend(class_files[k])
-            if len(class_files[k]) >= oversample:
+            if oversample <= len(class_files[k]):
                 filenames.extend(random.sample(class_files[k], oversample))
             else:
                 class_filenames = class_files[k]
@@ -111,6 +111,7 @@ def list_to_filenames(list_file):
 
         for k in sorted(keys):
             filenames.extend(class_files[k])
+    print("number of files = %s" % len(filenames))
 
     return filenames
 
