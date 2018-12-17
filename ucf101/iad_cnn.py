@@ -271,12 +271,12 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
 
     # dropout
-    #fc1 = tf.nn.dropout(fc1, dropout)
+    fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout with dropconnect
     w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
     b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
-    w_fc2 = _drop_connect(w_fc2, dropout)
+    #w_fc2 = _drop_connect(w_fc2, dropout)
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
 
