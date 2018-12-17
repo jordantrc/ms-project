@@ -12,8 +12,8 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 10
-FILE_LIST = 'train-test-splits/train-iad.list'
+BATCH_SIZE = 1
+FILE_LIST = 'train-test-splits/test-iad.list'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
 LOAD_MODEL = None
@@ -120,6 +120,10 @@ def save_model(sess, saver, step):
     saver.save(sess, save_path)
 
 #-------------CNN Functions---------------------------#
+
+def _drop_connect(W, p):
+    # from https://nickcdryan.com/2017/06/13/dropconnect-implementation-in-python-and-tensorflow/
+    return tf.nn.dropout(W, keep_prob=p) * p
 
 def _weight_variable(name, shape):
     initial = tf.truncated_normal_initializer(stddev=WEIGHT_STDDEV)
@@ -269,9 +273,13 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     # dropout
     fc1 = tf.nn.dropout(fc1, dropout)
 
-    # readout
+    # drop connect
+    #fc1 = _drop_connect(fc1, dropout)
+
+    # readout with dropconnect
     w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
     b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
+    #w_fc2 = _drop_connect(w_fc2, dropout)
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
 
