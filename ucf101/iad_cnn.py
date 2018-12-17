@@ -77,8 +77,8 @@ def list_to_filenames(list_file):
 
 
     # balance classes if we're training
-    print("balancing files across classes")
     if LOAD_MODEL is None:
+        print("balancing files across classes")
         max_class_count = -1
         for k in class_counts.keys():
             if class_counts[k] > max_class_count:
@@ -100,7 +100,7 @@ def list_to_filenames(list_file):
             else:
                 class_filenames = class_files[k]
                 while len(class_filenames) < max_class_count:
-                    class_filenames.append(random.sample(class_files[k], 1))
+                    class_filenames.append(random.sample(class_files[k], 1)[0])
                 filenames.extend(class_filenames)
 
     else:
@@ -111,7 +111,6 @@ def list_to_filenames(list_file):
 
         for k in sorted(keys):
             filenames.extend(class_files[k])
-    print("number of files = %s" % len(filenames))
 
     return filenames
 
