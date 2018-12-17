@@ -12,11 +12,11 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/test-iad.list'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/train-iad.list'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
-#LOAD_MODEL = None
+LOAD_MODEL = None
 EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
@@ -26,8 +26,8 @@ NUM_CLASSES = 101
 CLASSES_TO_INCLUDE = 'all'
 
 # neural network variables
-WEIGHT_STDDEV = 0.1
-BIAS = 0.1
+WEIGHT_STDDEV = 0.04
+BIAS = 0.04
 LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
