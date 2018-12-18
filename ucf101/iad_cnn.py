@@ -215,7 +215,7 @@ def get_variables_softmax(model_name, num_channels=1):
                 'W_0': _weight_variable('W_0', [num_features, NUM_CLASSES])
                 }
         biases = {
-                'b_0': _bias_variable([NUM_CLASSES])
+                'b_0': _bias_variable('b_0', [NUM_CLASSES])
         }
     return weights, biases
 
