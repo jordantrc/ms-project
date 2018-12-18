@@ -39,7 +39,7 @@ LEARNING_RATE = 1e-3
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-FIRST_CNN_WIDTH = 32
+FIRST_CNN_WIDTH = -1
 LAYER = 5
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
@@ -161,13 +161,14 @@ def _parse_function(example):
     img = tf.reshape(img, img_geom, "parse_reshape")
 
     # determine padding
-    layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2])
+    if FIRST_CNN_WIDTH != -1:
+        layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2])
 
-    # pad the image
-    pad_shape = [[0, 0], [0, 0], [0, layer_dim3_pad], [0, 0]]
-    padding = tf.constant(pad_shape)
-    img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
-    print("img shape = %s" % img.get_shape())
+        # pad the image
+        pad_shape = [[0, 0], [0, 0], [0, layer_dim3_pad], [0, 0]]
+        padding = tf.constant(pad_shape)
+        img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
+        print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
     img = tf.squeeze(img, 0)
