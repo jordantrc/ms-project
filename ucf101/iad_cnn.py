@@ -298,7 +298,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
 def softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
-    x = tf.reshape(x, [-1, geom[0] * geom[1]])
+    x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
     return model
 
