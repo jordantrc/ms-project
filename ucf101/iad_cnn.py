@@ -24,7 +24,7 @@ NUM_CLASSES = 101
 #                      'BalanceBeam', 'BandMarching', 'Fencing', 'FloorGymnastics', 'Haircut', 'Hammering',
 #                      'HeadMassage', 'HighJump', 'HulaHoop', 'JavelinThrow', 'JumpingJack', 'Kayaking']
 CLASSES_TO_INCLUDE = 'all'
-TRAINING_DATA_SAMPLE = 0.75
+TRAINING_DATA_SAMPLE = 0.25
 
 # neural network variables
 WEIGHT_STDDEV = 0.1
@@ -40,7 +40,7 @@ LEARNING_RATE = 1e-3
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-FIRST_CNN_WIDTH = -1
+FIRST_CNN_WIDTH = 32
 LAYER = 5
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
