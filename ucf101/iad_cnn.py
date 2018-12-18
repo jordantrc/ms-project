@@ -337,7 +337,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_softmax('ucf101_iad')
+    weights, biases = get_variables_lenet('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -359,7 +359,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
+    logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
