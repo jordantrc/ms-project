@@ -12,11 +12,11 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/test-iad.list'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/train-iad.list'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
-#LOAD_MODEL = None
+LOAD_MODEL = None
 EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
@@ -208,7 +208,16 @@ def get_variables_mctnet(model_name, num_channels=1):
     return weights, biases
 
 def get_variables_softmax(model_name, num_channels=1):
-    return None
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    num_features = geom[0] * geom[1] * num_channels
+    with tf.variable_scope(model_name) as var_scope:
+        weights = {
+                'W_0': _weight_variable('W_0', [num_features, NUM_CLASSES])
+                }
+        biases = {
+                'b_0': _bias_variable([NUM_CLASSES])
+        }
+    return weights, biases
 
 
 def cnn_mctnet(x, batch_size, weights, biases, dropout):
@@ -287,9 +296,11 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     return logits
 
 
-def softmax_regression(x, batch_size, weights, biases):
-    return None
-
+def softmax_regression(x, batch_size, weights, biases, dropout):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    x = tf.reshape(x, [-1, geom[0] * geom[1]])
+    model = tf.matmul(x, weights['W_0']) + biases['b_0']
+    return model
 
 
 def main():
@@ -322,7 +333,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_lenet('ucf101_iad')
+    weights, biases = get_variables_softmax('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -344,7 +355,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits = cnn_lenet(x, BATCH_SIZE, weights, biases, dropout)
+    logits = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
