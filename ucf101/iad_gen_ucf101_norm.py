@@ -155,12 +155,12 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
           #print("new min for layer %s, row %s - %s < %s" % (j, k, row_min, mins[j][k]))
           mins[j][k] = row_min
 
-        # save the layer data
-        # sample_sequence_layer.npy
-        npy_filename = "%s_%02d_%s.npy" % (s, new_index, j + 1)
-        npy_path = os.path.join(NPY_DIRECTORY, npy_filename)
-        np.save(npy_path, l)
-        print("write npy to %s" % (npy_path))
+      # save the layer data
+      # sample_sequence_layer.npy
+      npy_filename = "%s_%02d_%s.npy" % (s, new_index, j + 1)
+      npy_path = os.path.join(NPY_DIRECTORY, npy_filename)
+      np.save(npy_path, l)
+      print("write npy to %s" % (npy_path))
 
   return mins, maxes
 
