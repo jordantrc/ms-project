@@ -52,6 +52,7 @@ def _bytes_feature(value):
 
 def make_sequence_example(img_raw, label, example_id, num_channels):
     """creates the tfrecord example"""
+    assert len(img_raw) == 5
     features = dict()
     features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
     features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
@@ -231,6 +232,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
         s_index = i * 5
         sequence = int(sample_files[s_index].split("_")[4])
         sample_layer_files = sample_files[s_index:s_index + 5]
+        assert len(sample_layer_files) == 5
         
         # threshold the layer data
         thresholded_data = []
@@ -249,6 +251,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
           thresholded_data.append(rethreshold_data)
 
         # create tfrecord and write to file
+        assert len(thresholded_data) == 5
         ex = make_sequence_example(thresholded_data, label, sample_name + "_" + str(sequence), 1)
         tfrecord_path = os.path.join(IAD_DIRECTORY, "%s_%02d.tfrecord" % (sample_name, sequence))
         print("write tfrecord to: %s" % tfrecord_path)
