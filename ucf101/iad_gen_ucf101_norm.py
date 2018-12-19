@@ -137,7 +137,10 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
         layer_data = np.squeeze(l, axis=0)
         data_ratio = float(layer_data.shape[0] / 16.0)  # num columns / 16
         #print("layer_data shape = %s, ratio = %s" % (str(layer_data.shape), data_ratio))
-        thresholded_data.append(thresholding(layer_data, data_ratio, compression_method, thresholding_approach))
+        data = thresholding(layer_data, data_ratio, compression_method, thresholding_approach)
+        if l.shape[0] == 64:
+          print("layer 1 thresholded data = %s" % (data))
+        thresholded_data.append(data)
 
     # for each layer, determine the min, max values for each row
     for j, l in enumerate(thresholded_data):
