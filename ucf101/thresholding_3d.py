@@ -224,6 +224,8 @@ def thresholding(activation_map, data_ratio, compression_method={"type":"max", "
 	assert thresholding_method in THRESHOLDING_OPTIONS, "Thresh_method must be in "+str(THRESHOLDING_OPTIONS)+", is: "+ str(thresholding_method)
 
 	num_events = activation_map.shape[-1]
+	print("num_events = %s" % num_events)
+	sys.exit(0)
 	initial_length = activation_map.shape[0]
 
 	#only perform thresholding on the un-padded region of the input
