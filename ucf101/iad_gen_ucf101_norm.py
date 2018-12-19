@@ -141,7 +141,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
     for j, l in enumerate(thresholded_data):
       #print("%s l.shape = %s, mins[j].shape = %s" % (j, l.shape, mins[j].shape))
       assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
-      for k, row in enumerate(l.shape[0]):
+      for k, row in enumerate(l):
         row_max = np.max(row)
         row_min = np.min(row)
         print("row = %s, max = %s, min = %s" % (row, row_max, row_min))
