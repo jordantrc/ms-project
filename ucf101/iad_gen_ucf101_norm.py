@@ -165,7 +165,32 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
   return mins, maxes
 
 
-def convert_to_IAD_input(directory, layers, sample_names, labels, compression_method, thresholding_approach):
+def rethreshold_iad(iad, mins=None, maxes=None):
+  '''re-threshold given iad with new max and mins'''
+  for index in range(iad.shape[0]):
+    data_row = iad[index]
+
+    if mins is not None:
+      max_val_divider = maxes[index] - mins[index]
+      data_row -= max_vals[index]
+      if max_val_divider != 0:
+        data_row /= max_val_divider
+      else:
+        data_row = list(np.zeros_like(data_row))
+
+    # for either training or testing, clip values at between [0.0, 1.0]
+    floor_values = data_row > 1.0
+    data_row[floor_values] = 1.0
+
+    ceil_valies = data_row < 0.0
+    data_row[ceil_values] = 0.0
+
+    iad[index] = data_row
+
+  return iad
+
+
+def threshold_data(list_file, training=False, mins=None, maxes=None):
     '''
     Provides the training input for the ITR network by generating an IAD from the
     activation map of the C3D network. Outputs two dictionaries. The first contains
@@ -177,7 +202,67 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     -sess: the tensorflow Session
     -c3d_model: the c3d network model
     '''
-    num_layers = 5
+    print("thresholding data for %s" % list_file)
+    count = 0
+
+    # get the list of files from the npy directory
+    npy_files = sorted(os.listdir(NPY_DIRECTORY))
+
+    # filter to only the files included in the list_file
+    for f in list_file:
+      sample_files = []
+      filepath, label = f.split()
+      sample_name = os.path.basename(filepath)
+      
+      # obtain full list of files for each sample
+      for n in npy_files:
+        if sample_name in n:
+          sample_files.append(n)
+
+      # for each sample file, threshold the activations and create the tfrecord output
+      # split sample files into lists by sequence number
+      num_samples = len(sample_files) / 5
+      for i in range(num_samples):
+        s_index = i * 5
+        sequence = sample_files[s_index].split("_")[4]
+        sample_layer_files = sample_files[s_index:s_index + 5]
+        
+        # threshold the layer data
+        thresholded_data = []
+        for l, s in enumerate(sample_layer_files):
+          layer_data = np.load(os.path.join(NPY_DIRECTORY, s))
+          if training:
+            # threshold using the min and maxes for the layer
+            layer_mins = mins[l]
+            layer_maxes = maxes[l]
+            thresholded_data.append(rethreshold_iad(layer_data, layers_mins, layer_maxes))
+          else:
+            # truncate layer values to be between 0.0 and 1.0
+            thresholded_data.append(rethreshold_iad(layer_data))
+
+        ex = make_sequence_example(thresholded_data, label, sample_name + "_" + str(sequence), 1)
+        tfrecord_path = os.path.join(IAD_DIRECTORY, "%s_%02d.tfrecord" % (sample_name, sequence))
+        print("write tfrecord to: %s" % tfrecord_path)
+        writer = tf.python_io.TFRecordWriter(tfrecord_path)
+        writer.write(ex.SerializeToString())
+        count += 1
+
+        # generate images with 5% chance
+        if random.random() < 0.05:
+          for i, d in enumerate(thresholded_data):
+              img_name = os.path.join(IAD_DIRECTORY, "%s_%02d_%s.jpg" % (sample_name, new_index, i))
+              print("write test image to: %s" % img_name)
+              #print("single layer type = %s, shape = %s" % (type(d), str(thresholded_data[layer_to_test].shape)))
+              pixels = np.squeeze(d, axis=2)
+              rescaled = (255.0 / pixels.max() * (pixels - pixels.min())).astype(np.uint8)
+              img = Image.fromarray(rescaled)
+              img = img.convert("L")
+              # img = img.resize((img.width * 10, img.height))
+              img.save(img_name, quality=95)
+
+      print("generated %s tfrecord files for %s" % (count, list_file))
+
+    '''num_layers = 5
     assert len(layers) % num_layers == 0
     # assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths (%s/%s)" % (len(layers), len(sample_names))
     # print("sample_names = %s" % (sample_names))
@@ -214,7 +299,7 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
               img = Image.fromarray(rescaled)
               img = img.convert("L")
               # img = img.resize((img.width * 10, img.height))
-              img.save(img_name, quality=95)
+              img.save(img_name, quality=95)'''
 
 
 def conv3d(name, l_input, w, b):
@@ -323,7 +408,7 @@ def layer_array(layer, value):
   return a
 
 
-def generate_iads():
+def generate_iads(list_file, training=False):
     max_vals = [
                 layer_array(0, np.NINF),
                 layer_array(1, np.NINF),
@@ -339,9 +424,7 @@ def generate_iads():
                 layer_array(4, np.Inf)
                 ]
 
-    num_train_videos = len(list(open(TRAIN_LIST, 'r')))
-    num_test_videos = len(list(open(TEST_LIST,'r')))
-    print("Number of train videos = {}, test videos = {}".format(num_train_videos, num_test_videos))
+    num_videos = len(list(open(list_file, 'r')))
 
     # Get the sets of images and labels for training, validation, and
     images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size * gpu_num)
@@ -396,70 +479,69 @@ def generate_iads():
 
     # And then after everything is built, start the training loop.
     #for list_file in [TEST_LIST, TRAIN_LIST]:
-    for list_file in [TEST_LIST]:
-        print("Generting IADs for %s" % list_file)
-        # only write predictions if it's a test list
-        if "train" in os.path.basename(list_file):
-            predict_write_file = None
-            oversample = True
-        else:
-            oversample = False
-            predict_write_file = "predict_ret.txt"
-            write_file = open(predict_write_file, "w", 0)
-        
-        # determine if oversampling should be used
-        num_videos = len(list(open(list_file, 'r')))
-        steps = num_videos
-        if oversample:
-          epochs = 10
-        else:
-          epochs = 1
+    print("Generting IADs for %s" % list_file)
+    # only write predictions if it's a test list
+    if training:
+        predict_write_file = None
+        epochs = 10
+    else:
+        predict_write_file = "predict_ret.txt"
+        write_file = open(predict_write_file, "w", 0)
+        epochs = 1
+    
+    # determine if oversampling should be used
+    for e in range(epochs):
+      next_start_pos = 0
 
-        for e in range(epochs):
-          next_start_pos = 0
-
-          for step in xrange(steps):
-              # Fill a feed dictionary with the actual set of images and labels
-              # for this particular training step.
-              start_time = time.time()
-              test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
-                      c3d_model.read_clip_and_label(
-                              IMAGE_DIRECTORY,
-                              list_file,
-                              FLAGS.batch_size * gpu_num,
-                              start_pos=next_start_pos
-                              )
-              predict_score, layers_out = sess.run([norm_score, layers],
-                      feed_dict={images_placeholder: test_images}
-                      )
-
-              if predict_write_file is not None:
-                  for i in range(0, valid_len):
-                    true_label = test_labels[i],
-                    top1_predicted_label = np.argmax(predict_score[i])
-                    # Write results: true label, class prob for true label, predicted label, class prob for predicted label
-                    write_file.write('{}, {}, {}, {}\n'.format(
-                            true_label[0],
-                            predict_score[i][true_label],
-                            top1_predicted_label,
-                            predict_score[i][top1_predicted_label]))
-
-              #for i, l in enumerate(layers_out):
-              #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
-
-              # add to min/max values, store the temporary activation result
-              min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none")
-              #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
-              end_time = time.time()
-              print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, steps, end_time - start_time))
+      for step in xrange(num_videos):
+          # Fill a feed dictionary with the actual set of images and labels
+          # for this particular training step.
+          start_time = time.time()
+          test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
+                  c3d_model.read_clip_and_label(
+                          IMAGE_DIRECTORY,
+                          list_file,
+                          FLAGS.batch_size * gpu_num,
+                          start_pos=next_start_pos
+                          )
+          predict_score, layers_out = sess.run([norm_score, layers],
+                  feed_dict={images_placeholder: test_images}
+                  )
 
           if predict_write_file is not None:
-              write_file.close()
-        print("done generating IADs for %s" % list_file)
+              for i in range(0, valid_len):
+                true_label = test_labels[i],
+                top1_predicted_label = np.argmax(predict_score[i])
+                # Write results: true label, class prob for true label, predicted label, class prob for predicted label
+                write_file.write('{}, {}, {}, {}\n'.format(
+                        true_label[0],
+                        predict_score[i][true_label],
+                        top1_predicted_label,
+                        predict_score[i][top1_predicted_label]))
 
+          #for i, l in enumerate(layers_out):
+          #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
+
+          # add to min/max values, store the temporary activation result
+          min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none")
+          #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+          end_time = time.time()
+          print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, steps, end_time - start_time))
+
+      if predict_write_file is not None:
+          write_file.close()
+    print("done generating IADs for %s" % list_file)
+
+    return min_vals, max_vals
 
 def main():
-  generate_iads()
+  # generate testing data first
+  generate_iads(TEST_LIST)
+  threshold_data(TEST_LIST)
+
+  # generate and threshold training data
+  #mins, maxes = generate_iads(TRAIN_LIST, training=True)
+  #threshold_data(TRAIN_LIST, training=True, mins, maxes)
 
 if __name__ == '__main__':
   main()
