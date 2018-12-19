@@ -144,7 +144,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
       for k, row in enumerate(l):
         row_max = np.max(row)
         row_min = np.min(row)
-        print("row = %s, max = %s, min = %s" % (row, row_max, row_min))
+        print("row = %s, max = %s, min = %s" % (k, row_max, row_min))
 
         if row_max > maxes[j][k]:
           print("new max for layer %s, row %s - %s > %s" % (j, k, row_max, maxes[j][k]))
@@ -447,7 +447,7 @@ def generate_iads():
               #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
               # add to min/max values, store the temporary activation result
-              min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, THRESHOLDING)
+              min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none")
               #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
               end_time = time.time()
               print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, steps, end_time - start_time))

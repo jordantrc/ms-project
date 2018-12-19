@@ -3,7 +3,7 @@ import threading, math
 
 import peak_finding
 
-THRESHOLDING_OPTIONS = ["mean", "histogram", "entropy", "norm"]
+THRESHOLDING_OPTIONS = ["mean", "histogram", "entropy", "norm", "none", "min_max_norm"]
 
 class CountDownLatch(object):
 	#A Count down latch class to assist in multithreading
@@ -24,7 +24,7 @@ class CountDownLatch(object):
 			self.lock.wait()
 		self.lock.release()
 
-def threshold_activations(activations, out, latch, thresholding_method):
+def threshold_activations(activations, out, latch, thresholding_method, index = None, max_val = None, min_val = None):
 	'''
 	Perform the specified thresholding method on the activations. 
 		-activations: a numpy array the compressed spatial expression of filters
@@ -45,6 +45,43 @@ def threshold_activations(activations, out, latch, thresholding_method):
 			activations /= activations.max()
 		else:
 			activations = list(np.zeros_like(activations))
+		returned_values = activations
+	elif(thresholding_method == "min_max_norm"):
+		# Perform scaling/normalization
+
+		#print("index:", index)
+		#if(index == 1 and np.min(activations) != min_val[index]):
+		#	print("mismatch:", min_val[index], np.min(activations))
+		
+		max_val_divider = max_val[index] - min_val[index]
+		activations -= min_val[index]
+		if(max_val_divider != 0):
+			activations /= max_val_divider
+		else:
+			activations = list(np.zeros_like(activations))
+		
+		#ceil and floor all values outside of the max min value range
+		#pre_cf  = np.copy(activations)
+
+		floor_values = activations > 1.0
+		activations[floor_values] = 1.0
+
+
+		ceil_values = activations < 0.0
+		
+
+		#print(ceil_values)
+		#print(activations)
+
+		activations[ceil_values] = 0.0
+		
+		#if(pre_cf.all() != activations.all()):
+		#	print("activations, don't match "+str(min_val[index])+ ' '+str(max_val[index]))
+
+
+
+
+
 		returned_values = activations
 
 	else:
@@ -110,12 +147,11 @@ def threshold_activations(activations, out, latch, thresholding_method):
 			# select the threshold number that performed the best
 			threshold = bin_edges[min_val]
 			returned_values = activations > threshold
-	
+
 	out.append(returned_values)
 	latch.count_down()
 
-
-def compress_activations(activations, out, compression_method, compression_latch, thresholding_method):
+def compress_activations(activations, out, compression_method, compression_latch, thresholding_method, index = None, max_val=None, min_val=None):
 	#separate the activations into spatial subdivisions
 	activation_divisions = []
 
@@ -132,40 +168,47 @@ def compress_activations(activations, out, compression_method, compression_latch
 				activation_divisions.append(np.max(restruct, axis=1))
 
 	elif(compression_method["type"] == "peaks"):
-		#print("start_gen")
 		activation_divisions = peak_finding.peak_finding_fast(activations, n = compression_method["value"])
-		#print("stop_gen")
-	#print("activation_divisions: ", len(activation_divisions))
+
 	#perform thresholding on each of the spatial subdivisions
+
+
 	thresholded_activations = []
-	for i in range(len(activation_divisions)):
-		thresholded_activations.append([])
-
-	activation_latch = CountDownLatch(len(activation_divisions))
-	list_of_threads = []
-	for i in range(len(activation_divisions)):
-		#print("start")
-		if(len(activation_divisions[i]) > 0):
-			t = threading.Thread(target = threshold_activations, args = (activation_divisions[i], thresholded_activations[i], activation_latch, thresholding_method, ))
-			# threshold_activations(activation_divisions[i], thresholded_activations[i], None, thresholding_method)
-			list_of_threads.append(t)
-			t.start()
-		else:
-			#print("err: ", i, activation_divisions[i])
-			activation_latch.count_down()
-
+	if (thresholding_method != "none"):
 		
-	# wait for all threads to finish
-	activation_latch.await()
-	#print("finished")
-	#for i in activation_divisions:
-	#	print(i)
-	out.append( np.array(thresholded_activations).squeeze() )
-	#print("out_shape:", np.array(thresholded_activations).squeeze().shape)
-	compression_latch.count_down()
-	# return np.array(thresholded_activations).squeeze()
+		for i in range(len(activation_divisions)):
+			thresholded_activations.append([])
 
-def thresholding(activation_map, compression_method={"type":"max", "value":-1}, thresholding_method="basic"):
+		activation_latch = CountDownLatch(len(activation_divisions))
+		list_of_threads = []
+		for i in range(len(activation_divisions)):
+			#print("start")
+			if(len(activation_divisions[i]) > 0):
+				t = None
+				if(thresholding_method == "min_max_norm"):
+					assert max_val != None, "max_val variable must be set"
+					assert min_val != None, "max_val variable must be set"
+					t = threading.Thread(target = threshold_activations, args = (activation_divisions[i], thresholded_activations[i], activation_latch, thresholding_method,index+i, max_val,min_val,))
+				else:
+					t = threading.Thread(target = threshold_activations, args = (activation_divisions[i], thresholded_activations[i], activation_latch, thresholding_method,))
+				list_of_threads.append(t)
+				t.start()
+			else:
+				#print("err: ", i, activation_divisions[i])
+				activation_latch.count_down()
+
+		# wait for all threads to finish
+		activation_latch.await()
+
+	else:
+		thresholded_activations = activation_divisions
+	
+
+	#print(thresholded_activations[0][:5])
+	out.append( np.array(thresholded_activations).squeeze() )
+	compression_latch.count_down()
+
+def thresholding(activation_map, data_ratio, compression_method={"type":"max", "value":-1}, thresholding_method="none", max_val=None, min_val=None):
 	'''
 	Perform the specified thresholding method on the entire activation map provided. 
 		-activation_map: a 4D numpy array containing the output of a 3D-CNN convolution
@@ -177,16 +220,14 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 
 	# asserts to make sure input is correctly formed
 	assert len(activation_map.shape) == 4, "input to 'feature_to_event' must be 4D matrix, input has "+str(len(activation_map.shape))+" dimensions"
-	# assert data_ratio > 0.0 and data_ratio <= 1.0, "Data ratio parmater must be a float 0 < x <= 1, is :" + str(data_ratio)
+	assert data_ratio > 0.0 and data_ratio <= 1.0, "Data ratio parmater must be a float 0 < x <= 1, is :" + str(data_ratio)
 	assert thresholding_method in THRESHOLDING_OPTIONS, "Thresh_method must be in "+str(THRESHOLDING_OPTIONS)+", is: "+ str(thresholding_method)
 
 	num_events = activation_map.shape[-1]
 	initial_length = activation_map.shape[0]
-	# print("num_events = %s, initial_length = %s" % (num_events, initial_length))
 
 	#only perform thresholding on the un-padded region of the input
-	activation_map = np.array(activation_map)
-	# print("activation_map shape = %s" % str(activation_map.shape))
+	activation_map = np.array(activation_map)[:int(data_ratio*activation_map.shape[0])]
 
 	#set up a list to contain the identified start and stop times
 	thresholded_activations = []
@@ -201,35 +242,44 @@ def thresholding(activation_map, compression_method={"type":"max", "value":-1}, 
 		# isolate the activations for filter 'i' and perform the thresholding for 
 		# this feature in its own thread
 		#activations = np.reshape(activation_map[...,i], (activation_map.shape[0], -1)) 
-		# activations = activation_map[...,i]
 		activations = activation_map[...,i]
 
-		t = threading.Thread(target = compress_activations, args = (activations, thresholded_activations[i], compression_method, latch, thresholding_method, ))
-		# thresholded_activations[i] = compress_activations(activations, thresholded_activations[i], compression_method, None, thresholding_method)
-		# print("thresholded_activations[%s] shape = %s" % (i, str(thresholded_activations[i].shape)))
+		t = threading.Thread(target = compress_activations, args = (activations, thresholded_activations[i], compression_method, latch, thresholding_method, i, max_val, min_val, ))
 
 		list_of_threads.append(t)
 		t.start()
-
+		
 	# wait for all threads to finish
 	latch.await()
-	# print("compression_finished:", np.array(thresholded_activations).squeeze().shape)
+	#print("compression_finished:", np.array(thresholded_activations).squeeze().shape)
 
 	# pad and resize array for use in the ITR network
 	#thresholded_activations *= 255
 
 	#NEED TO ORGANIZE 3D-IAD
 
-	thresholded_activations = np.array(thresholded_activations)
-	# print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
-	#thresholded_activations = thresholded_activations.squeeze() #.astype(np.int64)
-	#print("thresholded_activations shape = %s" % str(thresholded_activations.shape))
-	#print("thresholded_activations[0]:", thresholded_activations[0][:5])
-	thresholded_activations = np.transpose(thresholded_activations, (0,2,1))
 
-	thresholded_activations = np.pad(thresholded_activations, 
-									((0,0), (0,initial_length-thresholded_activations.shape[1]), (0,0)), 
-									'constant', 
-									constant_values=(0,0))
-	# print("thresholded_activations: ", thresholded_activations.shape)
+	thresholded_activations = np.array(thresholded_activations).squeeze()#.astype(np.int64)
+	#print("thresholded_activations[0]:", thresholded_activations[0][:5])
+
+	#print(thresholded_activations[0][:5])
+	
+	
+	if(len(thresholded_activations.shape) > 2):
+		thresholded_activations = np.transpose(thresholded_activations, (0,2,1))
+	'''
+		thresholded_activations = np.pad(thresholded_activations, 
+										((0,0), (0,initial_length-thresholded_activations.shape[1]), (0,0)), 
+										'constant', 
+										constant_values=(0,0))
+	else:
+		thresholded_activations = np.pad(thresholded_activations, 
+										((0,0), (0,initial_length-thresholded_activations.shape[1])), 
+										'constant', 
+										constant_values=(0,0))
+	print("thresholded_activations: ", thresholded_activations.shape)
+	'''
+
+	#print("thresholded_activations: ", thresholded_activations.shape)
+	
 	return thresholded_activations 
