@@ -145,14 +145,14 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
       for k, row in enumerate(l):
         row_max = np.max(row)
         row_min = np.min(row)
-        print("row = %s, max = %s, min = %s" % (k, row_max, row_min))
+        #print("row = %s, max = %s, min = %s" % (k, row_max, row_min))
 
         if row_max > maxes[j][k]:
-          print("new max for layer %s, row %s - %s > %s" % (j, k, row_max, maxes[j][k]))
+          #print("new max for layer %s, row %s - %s > %s" % (j, k, row_max, maxes[j][k]))
           maxes[j][k] = row_max
 
         if row_min < mins[j][k]:
-          print("new min for layer %s, row %s - %s < %s" % (j, k, row_min, mins[j][k]))
+          #print("new min for layer %s, row %s - %s < %s" % (j, k, row_min, mins[j][k]))
           mins[j][k] = row_min
 
         # save the layer data
