@@ -134,16 +134,17 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
     thresholded_data = []
     for l in sample_layers:
         layer_data = np.squeeze(l, axis=0)
-        print("layer_data shape = %s" % str(layer_data.shape))
+        #print("layer_data shape = %s" % str(layer_data.shape))
         thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
 
     # for each layer, determine the min, max values for each row
     for j, l in enumerate(thresholded_data):
-      print("%s l.shape = %s, mins[j].shape = %s" % (j, l.shape, mins[j].shape))
-      '''assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
+      #print("%s l.shape = %s, mins[j].shape = %s" % (j, l.shape, mins[j].shape))
+      assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
       for k, row in enumerate(l.shape[0]):
         row_max = np.max(row)
         row_min = np.min(row)
+        print("row = %s, max = %s, min = %s" % (row, row_max, row_min))
 
         if row_max > maxes[j][k]:
           print("new max for layer %s, row %s - %s > %s" % (j, k, row_max, maxes[j][k]))
@@ -158,7 +159,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
         npy_filename = "%s_%02d_%s.npy" % (s, new_index, j + 1)
         npy_path = os.path.join(NPY_DIRECTORY, npy_filename)
         np.save(npy_path, l)
-        print("write npy to %s" % (npy_path))'''
+        print("write npy to %s" % (npy_path))
 
   return mins, maxes
 
