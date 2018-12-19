@@ -245,7 +245,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
             # threshold using the min and maxes for the layer
             layer_mins = mins[l]
             layer_maxes = maxes[l]
-            rethreshold_data = rethreshold_iad(layer_data, layers_mins, layer_maxes)
+            rethreshold_data = rethreshold_iad(layer_data, layer_mins, layer_maxes)
           else:
             # truncate layer values to be between 0.0 and 1.0
             rethreshold_data = rethreshold_iad(layer_data)
