@@ -1,7 +1,8 @@
-# iad.py
+# iad_gen_ucf101_norm.py
 # 
 # contains the code for generating IAD images from the
-# trained model.
+# trained model, normalizes all data based on observed max
+# and min values.
 
 import fnmatch
 import time
@@ -18,7 +19,8 @@ MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
 TRAIN_LIST = 'train-test-splits/train.list'
 TEST_LIST = 'train-test-splits/test.list'
-IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad'
+IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/'
+NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/npy/'
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
 CROP_SIZE = 112
@@ -27,6 +29,14 @@ CHANNELS = 3
 NUM_FRAMES_PER_CLIP = 16
 COMPRESSION = {"type": "max", "value": 1, "num_channels": 1}
 THRESHOLDING = "norm"
+
+LAYER_DIMENSIONS = [
+                    (64, 16, 1),
+                    (128, 16, 1),
+                    (256, 8, 1),
+                    (512, 4, 1),
+                    (512, 2, 1)
+                    ]
 
 # tensorflow flags
 flags = tf.app.flags
@@ -42,14 +52,6 @@ def _bytes_feature(value):
 
 def make_sequence_example(img_raw, label, example_id, num_channels):
     """creates the tfrecord example"""
-    valid_dimensions = [
-                        (64, 16, 1),
-                        (128, 16, 1),
-                        (256, 8, 1),
-                        (512, 4, 1),
-                        (512, 2, 1)
-                        ]
-
     features = dict()
     features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
     features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
@@ -58,7 +60,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
     for i, img in enumerate(img_raw):
         layer = i + 1
         #print("img shape = %s" % str(img.shape))
-        assert img.shape == valid_dimensions[i], "invalid dimensions for img"
+        assert img.shape == LAYER_DIMENSIONS[i], "invalid dimensions for img"
         img = img.tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img)
 
@@ -94,6 +96,66 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
     return example
 
 
+def get_file_sequence(directory, sample, extension):
+  '''find the next sequence number for oversampling'''
+  # get a list of files matching this name from the directory
+  file_list = os.listdir(directory)
+  file_list = [x for x in file_list if extension in x]
+
+  matching_samples = []
+  pattern = sample + "*" + extension
+  for f in file_list:
+    if fnmatch.fnmatch(f, pattern):
+      matching_samples.append(f)
+  
+  # if there are already samples, just pick the next index
+  if len(matching_samples) > 0:
+    last_index = int(sorted(matching_samples)[-1].split('_')[4].split('.')[0])
+  else:
+    last_index = -1
+  new_index = last_index + 1
+
+  return new_index
+
+
+def get_min_maxes(directory, layers, sample_names, labels, mins, maxes):
+  '''returns new minimums and maximum values determined from the activation layers'''
+  num_layers = 5
+  assert len(layers) % num_layers == 0
+
+  for i, s in enumerate(sample_names):
+    # get a list of files matching this name from the directory
+    new_index = get_file_sequence(NPY_DIRECTORY, s, '.npy')
+
+    s_index = i * num_layers
+    sample_layers = layers[s_index:s_index + num_layers]  # layers ordered from 1 to 5
+    assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
+
+    # for each layer, determine the min, max values for each row
+    for j, l in enumerate(sample_layers):
+      assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
+      for k, row in enumerate(l.shape[0]):
+        row_max = np.max(row)
+        row_min = np.min(row)
+
+        if row_max > maxes[j][k]:
+          print("new max for layer %s, row %s - %s > %s" % (j, k, row_max, maxes[j][k]))
+          maxes[j][k] = row_max
+
+        if row_min < mins[j][k]:
+          print("new min for layer %s, row %s - %s < %s" % (j, k, row_min, mins[j][k]))
+          mins[j][k] = row_min
+
+        # save the layer data
+        # sample_sequence_layer.npy
+        npy_filename = "%s_%02d_%s.npy" % (s, new_index, j + 1)
+        npy_path = os.path.join(NPY_DIRECTORY, npy_filename)
+        np.save(npy_path, l)
+        print("write npy to %s" % (npy_path))
+
+  return mins, maxes
+
+
 def convert_to_IAD_input(directory, layers, sample_names, labels, compression_method, thresholding_approach):
     '''
     Provides the training input for the ITR network by generating an IAD from the
@@ -111,23 +173,9 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
     # assert (len(layers) / num_layers) == len(sample_names), "layers list and sample_names list have different lengths (%s/%s)" % (len(layers), len(sample_names))
     # print("sample_names = %s" % (sample_names))
 
-    file_list = os.listdir(directory)
-    file_list = [x for x in file_list if 'tfrecord' in x]
-
     for i, s in enumerate(sample_names):
         # get a list of files matching this name from the directory
-        matching_samples = []
-        pattern = s + "*.tfrecord"
-        for f in file_list:
-          if fnmatch.fnmatch(f, pattern):
-            matching_samples.append(f)
-        
-        # if there are already samples, just pick the next index
-        if len(matching_samples) > 0:
-          last_index = int(sorted(matching_samples)[-1].split('_')[4].split('.')[0])
-        else:
-          last_index = -1
-        new_index = last_index + 1
+        new_index = get_file_sequence(directory, s, '.tfrecord')
         video_name = os.path.join(directory, "%s_%02d.tfrecord" % (s, new_index))
 
         s_index = i * num_layers
@@ -293,6 +341,7 @@ def _variable_on_cpu(name, shape, initializer):
     var = tf.get_variable(name, shape, initializer=initializer)
   return var
 
+
 def _variable_with_weight_decay(name, shape, stddev, wd):
   var = _variable_on_cpu(name, shape, tf.truncated_normal_initializer(stddev=stddev))
   if wd is not None:
@@ -300,7 +349,29 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
     tf.add_to_collection('losses', weight_decay)
   return var
 
+
+def layer_array(layer, value):
+  a = np.empty((LAYER_DIMENSIONS[layer][0]))
+  a[:] = value
+  return a
+
+
 def generate_iads(max_vals, min_vals):
+    max_vals = {
+                '1': layer_array(0, np.NINF),
+                '2': layer_array(1, np.NINF),
+                '3': layer_array(2, np.NINF),
+                '4': layer_array(3, np.NINF),
+                '5': layer_array(4, np.NINF)
+               }
+    min_vals = {
+                '1': layer_array(0, np.Inf),
+                '2': layer_array(1, np.Inf),
+                '3': layer_array(2, np.Inf),
+                '4': layer_array(3, np.Inf),
+                '5': layer_array(4, np.Inf)
+                }
+
     num_train_videos = len(list(open(TRAIN_LIST, 'r')))
     num_test_videos = len(list(open(TEST_LIST,'r')))
     print("Number of train videos = {}, test videos = {}".format(num_train_videos, num_test_videos))
@@ -357,7 +428,8 @@ def generate_iads(max_vals, min_vals):
     saver.restore(sess, MODEL)
 
     # And then after everything is built, start the training loop.
-    for list_file in [TEST_LIST, TRAIN_LIST]:
+    #for list_file in [TEST_LIST, TRAIN_LIST]:
+    for list_file in [TEST_LIST]:
         print("Generting IADs for %s" % list_file)
         # only write predictions if it's a test list
         if "train" in os.path.basename(list_file):
@@ -408,10 +480,11 @@ def generate_iads(max_vals, min_vals):
               #for i, l in enumerate(layers_out):
               #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
-              # generate IAD output
-              convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
+              # add to min/max values, store the temporary activation result
+              min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals)
+              #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
               end_time = time.time()
-              print("[%s:%s:%s - %.3fs]" % (list_file, e, step, end_time - start_time))
+              print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, steps, end_time - start_time))
 
           if predict_write_file is not None:
               write_file.close()
