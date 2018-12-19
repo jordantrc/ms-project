@@ -225,10 +225,11 @@ def thresholding(activation_map, data_ratio, compression_method={"type":"max", "
 
 	num_events = activation_map.shape[-1]
 	initial_length = activation_map.shape[0]
-	print("num_events = %s, initial_length = %s" % (num_events, initial_length))
+	#print("num_events = %s, initial_length = %s" % (num_events, initial_length))
 
 	#only perform thresholding on the un-padded region of the input
-	activation_map = np.array(activation_map)[:int(data_ratio*activation_map.shape[0])]
+	#activation_map = np.array(activation_map)[:int(data_ratio*activation_map.shape[0])]
+	activation_map = np.array(activation_map)
 
 	#set up a list to contain the identified start and stop times
 	thresholded_activations = []
