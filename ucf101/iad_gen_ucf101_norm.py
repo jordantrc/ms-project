@@ -229,7 +229,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
       num_samples = len(sample_files) / 5
       for i in range(num_samples):
         s_index = i * 5
-        sequence = sample_files[s_index].split("_")[4]
+        sequence = int(sample_files[s_index].split("_")[4])
         sample_layer_files = sample_files[s_index:s_index + 5]
         
         # threshold the layer data
