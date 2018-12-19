@@ -133,7 +133,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes):
 
     # for each layer, determine the min, max values for each row
     for j, l in enumerate(sample_layers):
-      print("l.shape = %s, mins[j] = %s" % (l.shape, mins[j]))
+      print("l = %s, mins[j] = %s" % (l, mins[j]))
       assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
       for k, row in enumerate(l.shape[0]):
         row_max = np.max(row)
