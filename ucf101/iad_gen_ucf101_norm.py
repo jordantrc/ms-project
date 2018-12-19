@@ -203,13 +203,17 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
     -c3d_model: the c3d network model
     '''
     print("thresholding data for %s" % list_file)
+    with open(list_file, 'r') as fd:
+      file_list = fd.read().split('\n')
+    while '' in file_list:
+      file_list.remove('')
     count = 0
 
     # get the list of files from the npy directory
     npy_files = sorted(os.listdir(NPY_DIRECTORY))
 
     # filter to only the files included in the list_file
-    for f in list_file:
+    for f in file_list:
       sample_files = []
       filepath, label = f.split()
       sample_name = os.path.basename(filepath)
