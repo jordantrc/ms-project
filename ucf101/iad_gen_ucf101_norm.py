@@ -557,7 +557,7 @@ def main():
 
   # generate and threshold training data
   mins, maxes = generate_iads(TRAIN_LIST, training=True)
-  threshold_data(TRAIN_LIST, training=True, mins, maxes)
+  threshold_data(TRAIN_LIST, training=True, mins=mins, maxes=maxes)
 
 if __name__ == '__main__':
   main()
