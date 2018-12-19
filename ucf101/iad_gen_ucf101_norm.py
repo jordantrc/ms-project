@@ -193,6 +193,9 @@ def convert_to_IAD_input(directory, layers, sample_names, labels, compression_me
         thresholded_data = []
         for l in sample_layers:
             layer_data = np.squeeze(l, axis=0)
+            data_ratio = float(layer_data[0] / 16.0)  # num columns / 16
+            print("layer_data shape = %s, data_ratio = %.02f" % (layer_data.shape, data_ratio))
+            sys.exit(0)
             thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
             # print("thresholded_data shape = %s" % str(thresholded_data.shape))
 
