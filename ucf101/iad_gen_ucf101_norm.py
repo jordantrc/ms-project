@@ -259,7 +259,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
         # generate images with 5% chance
         if random.random() < 0.5:
           for i, d in enumerate(thresholded_data):
-              img_name = os.path.join(IAD_DIRECTORY, "%s_%02d_%s.jpg" % (sample_name, new_index, i))
+              img_name = os.path.join(IAD_DIRECTORY, "%s_%02d_%s.jpg" % (sample_name, sequence, i))
               print("write test image to: %s" % img_name)
               #print("single layer type = %s, shape = %s" % (type(d), str(thresholded_data[layer_to_test].shape)))
               pixels = np.squeeze(d, axis=2)
