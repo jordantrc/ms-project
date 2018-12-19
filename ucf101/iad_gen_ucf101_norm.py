@@ -216,6 +216,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
     for f in file_list:
       sample_files = []
       filepath, label = f.split()
+      label = int(label)
       sample_name = os.path.basename(filepath)
       
       # obtain full list of files for each sample
@@ -252,7 +253,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
         count += 1
 
         # generate images with 5% chance
-        if random.random() < 0.05:
+        if random.random() < 0.5:
           for i, d in enumerate(thresholded_data):
               img_name = os.path.join(IAD_DIRECTORY, "%s_%02d_%s.jpg" % (sample_name, new_index, i))
               print("write test image to: %s" % img_name)
