@@ -240,11 +240,15 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
             # threshold using the min and maxes for the layer
             layer_mins = mins[l]
             layer_maxes = maxes[l]
-            thresholded_data.append(rethreshold_iad(layer_data, layers_mins, layer_maxes))
+            rethreshold_data = rethreshold_iad(layer_data, layers_mins, layer_maxes)
           else:
             # truncate layer values to be between 0.0 and 1.0
-            thresholded_data.append(rethreshold_iad(layer_data))
+            rethreshold_data = rethreshold_iad(layer_data)
 
+          rethreshold_data = np.expand_dims(rethreshold_data, 2)
+          thresholded_data.append(rethreshold_data)
+
+        # create tfrecord and write to file
         ex = make_sequence_example(thresholded_data, label, sample_name + "_" + str(sequence), 1)
         tfrecord_path = os.path.join(IAD_DIRECTORY, "%s_%02d.tfrecord" % (sample_name, sequence))
         print("write tfrecord to: %s" % tfrecord_path)
