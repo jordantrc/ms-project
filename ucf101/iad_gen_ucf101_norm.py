@@ -17,7 +17,7 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/train-test.list'
+TRAIN_LIST = 'train-test-splits/train.list'
 TEST_LIST = 'train-test-splits/test.list'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/npy/'
@@ -552,8 +552,8 @@ def generate_iads(list_file, training=False):
 
 def main():
   # generate testing data first
-  #generate_iads(TEST_LIST)
-  #threshold_data(TEST_LIST)
+  generate_iads(TEST_LIST)
+  threshold_data(TEST_LIST)
 
   # generate and threshold training data
   mins, maxes = generate_iads(TRAIN_LIST, training=True)
