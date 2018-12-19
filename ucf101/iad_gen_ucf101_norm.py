@@ -263,7 +263,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
         count += 1
 
         # generate images with 5% chance
-        if random.random() < 0.5:
+        if random.random() < 0.05:
           for i, d in enumerate(thresholded_data):
               img_name = os.path.join(IAD_DIRECTORY, "%s_%02d_%s.jpg" % (sample_name, sequence, i))
               print("write test image to: %s" % img_name)
@@ -556,6 +556,7 @@ def main():
   threshold_data(TEST_LIST)
 
   # generate and threshold training data
+  tf.reset_default_graph()
   mins, maxes = generate_iads(TRAIN_LIST, training=True)
   threshold_data(TRAIN_LIST, training=True, mins=mins, maxes=maxes)
 
