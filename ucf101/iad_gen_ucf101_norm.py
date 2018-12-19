@@ -182,7 +182,7 @@ def rethreshold_iad(iad, mins=None, maxes=None):
     floor_values = data_row > 1.0
     data_row[floor_values] = 1.0
 
-    ceil_valies = data_row < 0.0
+    ceil_values = data_row < 0.0
     data_row[ceil_values] = 0.0
 
     iad[index] = data_row
