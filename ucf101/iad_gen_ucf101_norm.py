@@ -501,8 +501,9 @@ def generate_iads(list_file, training=False):
     # determine if oversampling should be used
     for e in range(epochs):
       next_start_pos = 0
+      valid_files_processed = 0
 
-      for step in xrange(num_videos):
+      while valid_files_processed < num_videos:
           # Fill a feed dictionary with the actual set of images and labels
           # for this particular training step.
           start_time = time.time()
@@ -530,12 +531,12 @@ def generate_iads(list_file, training=False):
 
           #for i, l in enumerate(layers_out):
           #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
-
+          valid_files_processed += valid_len
           # add to min/max values, store the temporary activation result
           min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none")
           #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
           end_time = time.time()
-          print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, num_videos, end_time - start_time))
+          print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, valid_files_processed, num_videos, end_time - start_time))
 
       if predict_write_file is not None:
           write_file.close()
