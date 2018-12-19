@@ -118,7 +118,7 @@ def get_file_sequence(directory, sample, extension):
   return new_index
 
 
-def get_min_maxes(directory, layers, sample_names, labels, mins, maxes):
+def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compression_method, thresholding_approach):
   '''returns new minimums and maximum values determined from the activation layers'''
   num_layers = 5
   assert len(layers) % num_layers == 0
@@ -131,9 +131,14 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes):
     sample_layers = layers[s_index:s_index + num_layers]  # layers ordered from 1 to 5
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
 
+    thresholded_data = []
+    for l in sample_layers:
+        layer_data = np.squeeze(l, axis=0)
+        thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
+
     # for each layer, determine the min, max values for each row
-    for j, l in enumerate(sample_layers):
-      print("l.shape = %s, mins[j].shape = %s" % (l.shape, mins[j].shape))
+    for j, l in enumerate(thresholded_data):
+      print("l.shape = %s, mins[j].shape = %s" % (layer_data.shape, mins[j].shape))
       assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
       for k, row in enumerate(l.shape[0]):
         row_max = np.max(row)
@@ -440,7 +445,7 @@ def generate_iads():
               #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
 
               # add to min/max values, store the temporary activation result
-              min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals)
+              min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, THRESHOLDING)
               #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
               end_time = time.time()
               print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, steps, end_time - start_time))
