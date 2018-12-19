@@ -176,7 +176,7 @@ def rethreshold_iad(iad, mins=None, maxes=None):
 
     if mins is not None:
       max_val_divider = maxes[index] - mins[index]
-      data_row -= max_vals[index]
+      data_row -= maxes[index]
       if max_val_divider != 0:
         data_row /= max_val_divider
       else:
