@@ -133,7 +133,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes):
 
     # for each layer, determine the min, max values for each row
     for j, l in enumerate(sample_layers):
-      print("l = %s, mins[j] = %s" % (l, mins[j]))
+      print("l.shape = %s, mins[j].shape = %s" % (l.shape, mins[j].shape))
       assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
       for k, row in enumerate(l.shape[0]):
         row_max = np.max(row)
@@ -316,20 +316,20 @@ def layer_array(layer, value):
 
 
 def generate_iads():
-    max_vals = {
-                '1': layer_array(0, np.NINF),
-                '2': layer_array(1, np.NINF),
-                '3': layer_array(2, np.NINF),
-                '4': layer_array(3, np.NINF),
-                '5': layer_array(4, np.NINF)
-               }
-    min_vals = {
-                '1': layer_array(0, np.Inf),
-                '2': layer_array(1, np.Inf),
-                '3': layer_array(2, np.Inf),
-                '4': layer_array(3, np.Inf),
-                '5': layer_array(4, np.Inf)
-                }
+    max_vals = [
+                layer_array(0, np.NINF),
+                layer_array(1, np.NINF),
+                layer_array(2, np.NINF),
+                layer_array(3, np.NINF),
+                layer_array(4, np.NINF)
+               ]
+    min_vals = [
+                layer_array(0, np.Inf),
+                layer_array(1, np.Inf),
+                layer_array(2, np.Inf),
+                layer_array(3, np.Inf),
+                layer_array(4, np.Inf)
+                ]
 
     num_train_videos = len(list(open(TRAIN_LIST, 'r')))
     num_test_videos = len(list(open(TEST_LIST,'r')))
