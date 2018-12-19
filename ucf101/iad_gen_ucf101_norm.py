@@ -526,7 +526,7 @@ def generate_iads(list_file, training=False):
           min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none")
           #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
           end_time = time.time()
-          print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, steps, end_time - start_time))
+          print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, step, num_videos, end_time - start_time))
 
       if predict_write_file is not None:
           write_file.close()
