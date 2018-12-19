@@ -135,10 +135,8 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
     for l in sample_layers:
         layer_data = np.squeeze(l, axis=0)
         data_ratio = float(layer_data.shape[0] / 16.0)  # num columns / 16
-        print("layer_data shape = %s, data_ratio = %.02f" % (layer_data.shape, data_ratio))
-        sys.exit(0)
         #print("layer_data shape = %s" % str(layer_data.shape))
-        thresholded_data.append(thresholding(layer_data, compression_method, thresholding_approach))
+        thresholded_data.append(thresholding(layer_data, data_ratio, compression_method, thresholding_approach))
 
     # for each layer, determine the min, max values for each row
     for j, l in enumerate(thresholded_data):
