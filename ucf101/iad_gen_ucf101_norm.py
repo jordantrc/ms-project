@@ -138,8 +138,8 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
 
     # for each layer, determine the min, max values for each row
     for j, l in enumerate(thresholded_data):
-      print("l.shape = %s, mins[j].shape = %s" % (layer_data.shape, mins[j].shape))
-      assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
+      print("%s l.shape = %s, mins[j].shape = %s" % (j, layer_data.shape, mins[j].shape))
+      '''assert l.shape[0] == mins[j].shape[0], "l.shape[0] %s != mins[i].shape[0] %s" % (l.shape[0], mins[j].shape[0])
       for k, row in enumerate(l.shape[0]):
         row_max = np.max(row)
         row_min = np.min(row)
@@ -157,7 +157,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
         npy_filename = "%s_%02d_%s.npy" % (s, new_index, j + 1)
         npy_path = os.path.join(NPY_DIRECTORY, npy_filename)
         np.save(npy_path, l)
-        print("write npy to %s" % (npy_path))
+        print("write npy to %s" % (npy_path))'''
 
   return mins, maxes
 
