@@ -17,8 +17,8 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/train.list'
-TEST_LIST = 'train-test-splits/iad-test.list'
+TRAIN_LIST = 'train-test-splits/train-test.list'
+TEST_LIST = 'train-test-splits/test.list'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/npy/'
 NUM_CLASSES = 101
@@ -60,7 +60,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
 
     for i, img in enumerate(img_raw):
         layer = i + 1
-        print("img shape = %s" % str(img.shape))
+        #print("img shape = %s" % str(img.shape))
         assert img.shape == LAYER_DIMENSIONS[i], "invalid dimensions for img"
         img = img.tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img)
@@ -138,8 +138,8 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
         data_ratio = float(layer_data.shape[0] / 16.0)  # num columns / 16
         #print("layer_data shape = %s, ratio = %s" % (str(layer_data.shape), data_ratio))
         data = thresholding(layer_data, data_ratio, compression_method, thresholding_approach)
-        if i == 0:
-          print("layer 0 thresholded data = %s, min = %s" % (data, np.min(data)))
+        #if i == 0:
+        #  print("layer 0 thresholded data = %s, min = %s" % (data, np.min(data)))
         thresholded_data.append(data)
 
     # for each layer, determine the min, max values for each row
@@ -552,12 +552,12 @@ def generate_iads(list_file, training=False):
 
 def main():
   # generate testing data first
-  generate_iads(TEST_LIST)
-  threshold_data(TEST_LIST)
+  #generate_iads(TEST_LIST)
+  #threshold_data(TEST_LIST)
 
   # generate and threshold training data
-  #mins, maxes = generate_iads(TRAIN_LIST, training=True)
-  #threshold_data(TRAIN_LIST, training=True, mins, maxes)
+  mins, maxes = generate_iads(TRAIN_LIST, training=True)
+  threshold_data(TRAIN_LIST, training=True, mins, maxes)
 
 if __name__ == '__main__':
   main()
