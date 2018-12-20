@@ -169,20 +169,19 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
   return mins, maxes
 
 
-def rethreshold_iad(iad, mins=None, maxes=None):
+def rethreshold_iad(iad, mins, maxes):
   '''re-threshold given iad with new max and mins'''
   for index in range(iad.shape[0]):
     data_row = iad[index]
 
-    if mins is not None:
-      max_val_divider = maxes[index] - mins[index]
-      data_row -= maxes[index]
-      if max_val_divider != 0:
-        data_row /= max_val_divider
-      else:
-        data_row = list(np.zeros_like(data_row))
+    max_val_divider = maxes[index] - mins[index]
+    data_row -= maxes[index]
+    if max_val_divider != 0:
+      data_row /= max_val_divider
+    else:
+      data_row = list(np.zeros_like(data_row))
 
-    # for either training or testing, clip values at between [0.0, 1.0]
+    # clip values between [0.0, 1.0]
     floor_values = data_row > 1.0
     data_row[floor_values] = 1.0
 
@@ -241,15 +240,10 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
         thresholded_data = []
         for l, s in enumerate(sample_layer_files):
           layer_data = np.load(os.path.join(NPY_DIRECTORY, s))
-          if training:
-            # threshold using the min and maxes for the layer
-            layer_mins = mins[l]
-            layer_maxes = maxes[l]
-            rethreshold_data = rethreshold_iad(layer_data, layer_mins, layer_maxes)
-          else:
-            # truncate layer values to be between 0.0 and 1.0
-            rethreshold_data = rethreshold_iad(layer_data)
-
+          # threshold using the min and maxes for the layer
+          layer_mins = mins[l]
+          layer_maxes = maxes[l]
+          rethreshold_data = rethreshold_iad(layer_data, layer_mins, layer_maxes)
           rethreshold_data = np.expand_dims(rethreshold_data, 2)
           thresholded_data.append(rethreshold_data)
 
@@ -498,7 +492,7 @@ def generate_iads(list_file, training=False):
     # only write predictions if it's a test list
     if training:
         predict_write_file = None
-        epochs = 10
+        epochs = 5
     else:
         predict_write_file = "predict_ret.txt"
         write_file = open(predict_write_file, "w", 0)
@@ -551,14 +545,14 @@ def generate_iads(list_file, training=False):
     return min_vals, max_vals
 
 def main():
-  # generate testing data first
-  generate_iads(TEST_LIST)
-  threshold_data(TEST_LIST)
-
-  # generate and threshold training data
-  tf.reset_default_graph()
+  # generate training data, obtain max values first
   mins, maxes = generate_iads(TRAIN_LIST, training=True)
   threshold_data(TRAIN_LIST, training=True, mins=mins, maxes=maxes)
+
+  tf.reset_default_graph()
+  generate_iads(TEST_LIST)
+  threshold_data(TEST_LIST, mins=mins, maxes=maxes)
+
 
 if __name__ == '__main__':
   main()
