@@ -18,7 +18,7 @@ def main():
 
     list_file = sys.argv[1]
     directory = sys.argv[2]
-    assert os.isdir(directory)
+    assert os.path.isdir(directory)
     extension = sys.argv[3]
 
     # get the samples from the file
