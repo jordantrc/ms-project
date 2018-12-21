@@ -177,7 +177,7 @@ def rethreshold_iad(iad, mins, maxes):
 
     max_val_divider = maxes[index] - mins[index]
     data_row -= maxes[index]
-    if max_val_divider != 0:
+    if max_val_divider != 0.0:
       data_row /= max_val_divider
     else:
       data_row = list(np.zeros_like(data_row))
