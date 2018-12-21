@@ -21,6 +21,7 @@ TRAIN_LIST = 'train-test-splits/train.list'
 TEST_LIST = 'train-test-splits/test.list'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/npy/'
+TRAIN_EPOCHS = 5
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
 CROP_SIZE = 112
@@ -492,7 +493,7 @@ def generate_iads(list_file, training=False):
     # only write predictions if it's a test list
     if training:
         predict_write_file = None
-        epochs = 5
+        epochs = TRAIN_EPOCHS
     else:
         predict_write_file = "predict_ret.txt"
         write_file = open(predict_write_file, "w", 0)
