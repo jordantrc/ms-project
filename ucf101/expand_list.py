@@ -35,7 +35,7 @@ def main():
     # traverse the list of samples, looking for subsamples
     fd = open("%s_expanded" % (list_file), 'w')
     subsamples = []
-    for f in dir_list:
+    for f in sorted(dir_list):
         base = "_".join(f.split('_')[0:4])
         for l in lines:
             if base in l:
