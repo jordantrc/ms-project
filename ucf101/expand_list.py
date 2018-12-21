@@ -33,7 +33,7 @@ def main():
     dir_list = [x for x in dir_list if extension in x]
 
     # traverse the list of samples, looking for subsamples
-    fd = open("%s_expanded" % (list_file))
+    fd = open("%s_expanded" % (list_file), 'w')
     subsamples = []
     for f in dir_list:
         base = "_".join(f.split('_')[0:4])
