@@ -21,7 +21,7 @@ TRAIN_LIST = 'train-test-splits/train.list'
 TEST_LIST = 'train-test-splits/test.list'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm/npy/'
-TRAIN_EPOCHS = 5
+TRAIN_EPOCHS = 1
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
 CROP_SIZE = 112
@@ -545,6 +545,7 @@ def generate_iads(list_file, training=False):
 
     return min_vals, max_vals
 
+
 def main():
   # generate training data, obtain max values first
   mins, maxes = generate_iads(TRAIN_LIST, training=True)
@@ -553,6 +554,13 @@ def main():
   tf.reset_default_graph()
   generate_iads(TEST_LIST)
   threshold_data(TEST_LIST, mins=mins, maxes=maxes)
+
+  # save the mins and maxes
+  for i, m in enumerate(mins):
+    file_path = os.path.join(NPY_DIRECTORY, "min_%s.npy" % (i))
+    np.save(m, file_path)
+    file_path = os.path.join(NPY_DIRECTORY, "max_%s.npy" % (i))
+    np.save(maxes[i], file_path)
 
 
 if __name__ == '__main__':
