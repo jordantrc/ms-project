@@ -172,6 +172,8 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
 
 def rethreshold_iad(iad, mins, maxes):
   '''re-threshold given iad with new max and mins'''
+  assert iad.shape[0] == mins.shape[0], "iad and mins/maxes different shapes %s/%s" % (iad.shape[0], mins.shape[0])
+
   for index in range(iad.shape[0]):
     data_row = iad[index]
 
@@ -239,11 +241,12 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
         
         # threshold the layer data
         thresholded_data = []
-        for l, s in enumerate(sample_layer_files):
+        for s in enumerate(sample_layer_files):
+          layer_num = s.split('.')[0].split('_')[-1]
           layer_data = np.load(os.path.join(NPY_DIRECTORY, s))
           # threshold using the min and maxes for the layer
-          layer_mins = mins[l]
-          layer_maxes = maxes[l]
+          layer_mins = mins[layer_num]
+          layer_maxes = maxes[layer_num]
           rethreshold_data = rethreshold_iad(layer_data, layer_mins, layer_maxes)
           rethreshold_data = np.expand_dims(rethreshold_data, 2)
           thresholded_data.append(rethreshold_data)
