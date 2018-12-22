@@ -17,7 +17,7 @@ FILE_LIST = 'train-test-splits/train.list_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
 LOAD_MODEL = None
-EPOCHS = 2
+EPOCHS = 5
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
 #                      'YoYo', 'BabyCrawling', 'BaseballPitch', 'BenchPress', 'Bowling', 'Drumming',
