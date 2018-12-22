@@ -12,12 +12,12 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 1
-FILE_LIST = 'train-test-splits/test.list_expanded'
+BATCH_SIZE = 10
+FILE_LIST = 'train-test-splits/train.list_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_5_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 1
+LOAD_MODEL = None
+EPOCHS = 2
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
 #                      'YoYo', 'BabyCrawling', 'BaseballPitch', 'BenchPress', 'Bowling', 'Drumming',
@@ -50,6 +50,24 @@ LAYER_GEOMETRY = {'1': (64, 16, 1),
                   }
 
 #-------------General helper functions----------------#
+def save_settings(run_name):
+    '''saves the parameters to a file'''
+    with open('runs/%s_parameters.txt' % run_name, 'w') as fd:
+        fd.write("BATCH_SIZE = %s\n" % BATCH_SIZE)
+        fd.write("FILE_LIST = %s\n" % FILE_LIST)
+        fd.write("MODEL_SAVE_DIR = %s\n" % MODEL_SAVE_DIR)
+        fd.write("LOAD_MODEL = %s\n" % LOAD_MODEL)
+        fd.write("EPOCHS = %s\n" % EPOCHS)
+        fd.write("CLASSES_TO_INCLUDE = %s\n" % CLASSES_TO_INCLUDE)
+        fd.write("TRAINING_DATA_SAMPLE = %s\n" % TRAINING_DATA_SAMPLE)
+        fd.write("WEIGHT_STDDEV = %s\n" % WEIGHT_STDDEV)
+        fd.write("BIAS = %s\n" % BIAS)
+        fd.write("LEAKY_RELU_ALPHA = %s\n" % LEAKY_RELU_ALPHA)
+        fd.write("DROPOUT = %s\n" % DROPOUT)
+        fd.write("LEARNING_RATE = %s\n" % LEARNING_RATE)
+        fd.write("LAYER = %s\n" % LAYER)
+
+
 def list_to_filenames(list_file):
     '''converts a list file to a list of filenames'''
     filenames = []
@@ -314,6 +332,7 @@ def main():
 
     # get the run name
     run_name = sys.argv[1]
+    save_settings(run_name)
 
     # get the list of classes
     class_list = get_class_list(CLASS_INDEX_FILE)
@@ -430,9 +449,9 @@ def main():
 
         cm = analysis.confusion_matrix(predictions, true_classes, class_list)
         print("confusion matrix = %s" % cm)
-        analysis.plot_confusion_matrix(cm, class_list, run_name + ".pdf")
+        analysis.plot_confusion_matrix(cm, class_list, "runs/" + run_name + ".pdf")
         print("per-class accuracy:")
-        analysis.per_class_table(predictions, true_classes, class_list, run_name + '.csv')
+        analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_name + '.csv')
 
 
 if __name__ == "__main__":
