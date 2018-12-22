@@ -41,7 +41,7 @@ LEARNING_RATE = 1e-3
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 FIRST_CNN_WIDTH = 32
-LAYER = 5
+LAYER = 4
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
