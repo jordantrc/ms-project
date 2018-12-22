@@ -560,9 +560,9 @@ def main():
   # save the mins and maxes
   for i, m in enumerate(mins):
     file_path = os.path.join(NPY_DIRECTORY, "min_%s.npy" % (i))
-    np.save(m, file_path)
+    np.save(file_path, m)
     file_path = os.path.join(NPY_DIRECTORY, "max_%s.npy" % (i))
-    np.save(maxes[i], file_path)
+    np.save(file_path, maxes[i])
 
 
 if __name__ == '__main__':
