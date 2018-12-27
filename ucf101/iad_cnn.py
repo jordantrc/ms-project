@@ -12,12 +12,12 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 10
-FILE_LIST = 'train-test-splits/train.list_expanded'
+BATCH_SIZE = 1
+FILE_LIST = 'train-test-splits/test.list_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 LOAD_MODEL = 'iad_models/iad_model_layer_1_step_final.ckpt'
-LOAD_MODEL = None
-EPOCHS = 5
+#LOAD_MODEL = None
+EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
 #                      'YoYo', 'BabyCrawling', 'BaseballPitch', 'BenchPress', 'Bowling', 'Drumming',
