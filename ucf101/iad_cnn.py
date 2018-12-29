@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -38,8 +38,8 @@ CLASSES_TO_INCLUDE = 'all'
 TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
-WEIGHT_STDDEV = 0.1
-BIAS = 0.1
+WEIGHT_STDDEV = 0.04
+BIAS = 0.04
 LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
