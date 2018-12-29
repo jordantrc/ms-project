@@ -214,7 +214,7 @@ def main():
         dataset = dataset.repeat(1)
     dataset_iterator = dataset.make_initializable_iterator()
     x, y_true = dataset_iterator.get_next()
-    y_true_class = tf.arg_max(y_true)
+    y_true_class = tf.arg_max(y_true, axis=1)
 
     # placeholders
     prediction_grid = tf.placeholder(shape=[None, 2], dtype=tf.float32)
