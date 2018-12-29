@@ -13,12 +13,22 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-BATCH_SIZE = 10
-FILE_LIST = 'train-test-splits/train.list_expanded'
-MODEL_SAVE_DIR = 'iad_models/'
-LOAD_MODEL = 'iad_models/iad_model_layer_4_step_final.ckpt'
-#LOAD_MODEL = None
-EPOCHS = 10
+LAYER = 5
+SETTINGS = 'train'
+#SETTINGS = 'test'
+
+if SETTINGS == 'train':
+    BATCH_SIZE = 10
+    FILE_LIST = 'train-test-splits/train.list_expanded'
+    MODEL_SAVE_DIR = 'iad_models/'
+    LOAD_MODEL = None
+    EPOCHS = 5
+elif SETTINGS == 'test':
+    BATCH_SIZE = 1
+    FILE_LIST = 'train-test-splits/test.list_expanded'
+    MODEL_SAVE_DIR = 'iad_models/'
+    LOAD_MODEL = 'iad_models/iad_svm_model_layer_%s_step_final.ckpt' % LAYER
+    EPOCHS = 1
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
 #                      'YoYo', 'BabyCrawling', 'BaseballPitch', 'BenchPress', 'Bowling', 'Drumming',
@@ -27,11 +37,6 @@ NUM_CLASSES = 101
 CLASSES_TO_INCLUDE = 'all'
 TRAINING_DATA_SAMPLE = 1.0
 
-# neural network variables
-WEIGHT_STDDEV = 0.1
-BIAS = 0.1
-LEAKY_RELU_ALPHA = 0.04
-DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 
 # the layer from which to load the activation map
@@ -41,8 +46,6 @@ LEARNING_RATE = 1e-3
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-FIRST_CNN_WIDTH = 32
-LAYER = 4
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
@@ -136,7 +139,7 @@ def list_to_filenames(list_file):
 
 
 def save_model(sess, saver, step):
-    save_path = os.path.join(MODEL_SAVE_DIR, "iad_model_layer_%s_step_%s.ckpt" % (LAYER, step))
+    save_path = os.path.join(MODEL_SAVE_DIR, "iad_svm_model_layer_%s_step_%s.ckpt" % (LAYER, step))
     saver.save(sess, save_path)
 
 #-------------SVM Functions---------------------------#
@@ -180,12 +183,14 @@ def main():
     '''main function'''
     if LOAD_MODEL is None:
         training = True
+        run_type = 'train'
     else:
         training = False
+        run_type = 'test'
 
     # get the run name
     run_name = sys.argv[1]
-    save_settings(run_name)
+    save_settings(run_name + "_" + run_type)
 
     # get the list of classes
     class_list = get_class_list(CLASS_INDEX_FILE)
@@ -219,18 +224,46 @@ def main():
         dataset = dataset.repeat(1)
     dataset_iterator = dataset.make_initializable_iterator()
     x, y_true = dataset_iterator.get_next()
+    y_true_class = tf.arg_max(y_true)
 
     # placeholders
     prediction_grid = tf.placeholder(shape=[None, 2], dtype=tf.float32)
     
     # variables
-    b = tf.Variable(tf.random_normal(shape=[3, BATCH_SIZE]))
+    b = tf.Variable(tf.random_normal(shape=[NUM_CLASSES, BATCH_SIZE]))
     gamma = tf.constant(-1.0)
     dist = tf.reduce_sum(tf.square(x), 1)
     dist = tf.reshape(dist, [-1, 1])
     sq_dists = tf.add(tf.subtract(dist, tf.multiply(2., tf.matmul(x, tf.transpose(x)))), tf.transpose(dist))
     svm_kernel = tf.exp(tf.multiply(gamma, tf.abs(sq_dists)))
 
+    # batch multiplication
+    def reshape_matmul(mat):
+        v1 = tf.expand_dims(mat, 1)
+        v2 = tf.reshape(v1, [NUM_CLASSES, BATCH_SIZE, 1])
+        return tf.matmul(v2, v1)
+
+    # loss
+    model_output = tf.matmul(b, svm_kernel)
+    first_term = tf.reduce_sum(b)
+    b_vec_cross = reshape_matmul(tf.transpose(b), b)
+    y_true_cross = reshape_matmul(y_true)
+    second_term = tf.reduce_sum(tf.multiply(svm_kernel, tf.multiply(b_vec_cross, y_true_cross)), [1, 2])
+    loss = tf.reduce_sum(tf.negative(tf.subtract(first_term, second_term)))
+
+    rA = tf.reshape(tf.reduce_sum(tf.square(x), 1), [-1, 1])
+    rB = tf.reshape(tf.reduce_sum(tf.square(prediction_grid), 1), [-1, 1])
+
+    pred_sq_dist = tf.add(tf.subtract(rA, tf.multiply(2., tf.matmul(x, tf.transpose(prediction_grid)))), tf.transpose(rB))
+    pred_kernel = tf.exp(tf.multiply(gamma, tf.abs(pred_sq_dist)))
+
+    prediction_output = tf.matmul(tf.multiply(y_true, b), pred_kernel)
+    y_pred_class = tf.arg_max(prediction_output - tf.expand_dims(tf.reduce_mean(prediction_output, 1), 1), 0)
+    accuracy = tf.reduce_mean(tf.cast(tf.equal(prediction, tf.argmax(y_true, 0)), tf.float32))
+
+    # operations
+    train_op = tf.train.GradientDescentOptimizer(LEARNING_RATE)
+    train_step = train_op.minimize(loss)
 
     # initializer
     init_op = tf.global_variables_initializer()
@@ -246,7 +279,7 @@ def main():
         # loop until out of data
         while True:
             try:
-                train_result = sess.run([train_op, accuracy, x, logits], feed_dict={dropout: DROPOUT})
+                train_result = sess.run([train_op, accuracy, x])
                 if step != 0 and step % 100 == 0:
                     print("step %s, accuracy = %s" % (step, train_result[1]))
                     # save the current model every 1000 steps
@@ -270,10 +303,10 @@ def main():
         # loop until out of data
         while True:
             try:
-                test_result = sess.run([accuracy, x, logits, y_pred_class, y_true_class], feed_dict={dropout: 1.0})
+                test_result = sess.run([accuracy, x, y_pred_class, y_true_class])
                 cumulative_accuracy += test_result[0]
-                predictions.append(test_result[3])
-                true_classes.append(test_result[4])
+                predictions.append(test_result[2])
+                true_classes.append(test_result[3])
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
                           (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
