@@ -224,7 +224,7 @@ def main():
     gamma = tf.constant(GAMMA)
     dist = tf.reduce_sum(tf.square(x), 1)
     dist = tf.reshape(dist, [-1, 1])
-    sq_dists = tf.add(tf.subtract(dist, tf.multiply(2., tf.matmul(x, tf.transpose(x)))), tf.transpose(dist))
+    sq_dists = tf.add(tf.subtract(dist, tf.multiply(2., tf.matmul(x, tf.transpose(x, perm=[0, 3, 2, 1])))), tf.transpose(dist))
     svm_kernel = tf.exp(tf.multiply(gamma, tf.abs(sq_dists)))
 
     # batch multiplication
