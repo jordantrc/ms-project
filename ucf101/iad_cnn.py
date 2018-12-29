@@ -12,9 +12,9 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 1
+LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -51,7 +51,9 @@ LEARNING_RATE = 1e-3
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-FIRST_CNN_WIDTH = 16
+FIRST_CNN_WIDTH = 16  # mctnet
+FIRST_CNN_WIDTH = 32  # lenet
+FIRST_CNN_WIDTH = -1  # softmax
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
@@ -368,7 +370,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_mctnet('ucf101_iad')
+    weights, biases = get_variables_softmax('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -390,7 +392,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
+    logits = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
