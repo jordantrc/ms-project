@@ -38,6 +38,7 @@ CLASSES_TO_INCLUDE = 'all'
 TRAINING_DATA_SAMPLE = 1.0
 
 LEARNING_RATE = 1e-3
+GAMMA = -1.0
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -64,11 +65,8 @@ def save_settings(run_name):
         fd.write("EPOCHS = %s\n" % EPOCHS)
         fd.write("CLASSES_TO_INCLUDE = %s\n" % CLASSES_TO_INCLUDE)
         fd.write("TRAINING_DATA_SAMPLE = %s\n" % TRAINING_DATA_SAMPLE)
-        fd.write("WEIGHT_STDDEV = %s\n" % WEIGHT_STDDEV)
-        fd.write("BIAS = %s\n" % BIAS)
-        fd.write("LEAKY_RELU_ALPHA = %s\n" % LEAKY_RELU_ALPHA)
-        fd.write("DROPOUT = %s\n" % DROPOUT)
         fd.write("LEARNING_RATE = %s\n" % LEARNING_RATE)
+        fd.write("GAMMA = %s\n" % GAMMA)
         fd.write("LAYER = %s\n" % LAYER)
 
 
@@ -231,7 +229,7 @@ def main():
     
     # variables
     b = tf.Variable(tf.random_normal(shape=[NUM_CLASSES, BATCH_SIZE]))
-    gamma = tf.constant(-1.0)
+    gamma = tf.constant(GAMMA)
     dist = tf.reduce_sum(tf.square(x), 1)
     dist = tf.reshape(dist, [-1, 1])
     sq_dists = tf.add(tf.subtract(dist, tf.multiply(2., tf.matmul(x, tf.transpose(x)))), tf.transpose(dist))
