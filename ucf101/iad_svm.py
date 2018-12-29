@@ -157,15 +157,6 @@ def _parse_function(example):
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     img = tf.reshape(img, img_geom, "parse_reshape")
 
-    # determine padding
-    if FIRST_CNN_WIDTH != -1:
-        layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2])
-
-        # pad the image
-        pad_shape = [[0, 0], [0, 0], [0, layer_dim3_pad], [0, 0]]
-        padding = tf.constant(pad_shape)
-        img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
-        print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
     img = tf.squeeze(img, 0)
