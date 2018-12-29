@@ -214,7 +214,7 @@ def main():
         dataset = dataset.repeat(1)
     dataset_iterator = dataset.make_initializable_iterator()
     x, y_true = dataset_iterator.get_next()
-    y_true_class = tf.arg_max(y_true, axis=1)
+    y_true_class = tf.argmax(y_true, axis=1)
 
     # placeholders
     prediction_grid = tf.placeholder(shape=[None, 2], dtype=tf.float32)
@@ -248,7 +248,7 @@ def main():
     pred_kernel = tf.exp(tf.multiply(gamma, tf.abs(pred_sq_dist)))
 
     prediction_output = tf.matmul(tf.multiply(y_true, b), pred_kernel)
-    y_pred_class = tf.arg_max(prediction_output - tf.expand_dims(tf.reduce_mean(prediction_output, 1), 1), 0)
+    y_pred_class = tf.argmax(prediction_output - tf.expand_dims(tf.reduce_mean(prediction_output, 1), 1), axis=0)
     accuracy = tf.reduce_mean(tf.cast(tf.equal(prediction, tf.argmax(y_true, 0)), tf.float32))
 
     # operations
