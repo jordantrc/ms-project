@@ -212,6 +212,7 @@ def main():
     sess = tf.Session(config=config)
 
     # dataset iterator
+    input_filenames = tf.placeholder(tf.string, shape=[None])
     dataset = tf.data.TFRecordDataset(input_filenames)
     dataset = dataset.map(_parse_function)
     dataset = dataset.batch(BATCH_SIZE)
