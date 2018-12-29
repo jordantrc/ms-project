@@ -42,7 +42,7 @@ WEIGHT_STDDEV = 0.2
 BIAS = 0.2
 LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
-LEARNING_RATE = 1e-2
+LEARNING_RATE = 1e-3
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
