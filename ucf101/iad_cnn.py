@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -332,6 +332,10 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
+
+    # apply dropout
+    model = tf.nn.dropout(model, dropout)
+
     return model
 
 
