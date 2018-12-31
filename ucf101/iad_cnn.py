@@ -41,8 +41,9 @@ TRAINING_DATA_SAMPLE = 1.0
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
-DROPOUT = 0.95
+DROPOUT = 0.85
 LEARNING_RATE = 1e-3
+BETA = 0.01  # used for the L2 regularization loss function
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -403,6 +404,9 @@ def main():
 
     # loss and optimizer
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+    # Loss function using L2 Regularization
+    regularizer = tf.nn.l2_loss(weights)
+    loss = tf.reduce_mean(loss + BETA * regularizer)
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
     train_op = optimizer.minimize(loss)
 
