@@ -41,7 +41,7 @@ TRAINING_DATA_SAMPLE = 1.0
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
-DROPOUT = 0.85
+DROPOUT = 1.0
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 
