@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -41,7 +41,7 @@ TRAINING_DATA_SAMPLE = 1.0
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
-DROPOUT = 0.8
+DROPOUT = 0.95
 LEARNING_RATE = 1e-3
 
 # the layer from which to load the activation map
