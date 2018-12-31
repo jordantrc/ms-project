@@ -218,29 +218,29 @@ def main():
 
     # placeholders
     prediction_grid = tf.placeholder(shape=[None, 2], dtype=tf.float32)
-    
+
     # variables
     b = tf.Variable(tf.random_normal(shape=[NUM_CLASSES, BATCH_SIZE]))
     gamma = tf.constant(GAMMA)
     dist = tf.reduce_sum(tf.square(x), 1)
     dist = tf.reshape(dist, [-1, 1])
-    sq_dists = tf.add(tf.subtract(dist, tf.multiply(2., tf.matmul(x, tf.transpose(x, perm=[0, 3, 2, 1])))), tf.transpose(dist))
+    sq_dists = tf.multiply(2., tf.matmul(x, tf.transpose(x)))
     svm_kernel = tf.exp(tf.multiply(gamma, tf.abs(sq_dists)))
 
     # batch multiplication
-    def reshape_matmul(mat):
+    def reshape_matmul(mat, _size):
         v1 = tf.expand_dims(mat, 1)
-        v2 = tf.reshape(v1, [NUM_CLASSES, BATCH_SIZE, 1])
+        v2 = tf.reshape(v1, [NUM_CLASSES, _size, 1])
         return tf.matmul(v2, v1)
 
-    # loss
-    model_output = tf.matmul(b, svm_kernel)
+    # compute SVM model
     first_term = tf.reduce_sum(b)
-    b_vec_cross = reshape_matmul(tf.transpose(b), b)
-    y_true_cross = reshape_matmul(y_true)
+    b_vec_cross = tf.matmul(tf.transpose(b), b)
+    y_true_cross = reshape_matmul(y_true, BATCH_SIZE)
     second_term = tf.reduce_sum(tf.multiply(svm_kernel, tf.multiply(b_vec_cross, y_true_cross)), [1, 2])
     loss = tf.reduce_sum(tf.negative(tf.subtract(first_term, second_term)))
 
+    # Gaussian (RBF) prediction kernel
     rA = tf.reshape(tf.reduce_sum(tf.square(x), 1), [-1, 1])
     rB = tf.reshape(tf.reduce_sum(tf.square(prediction_grid), 1), [-1, 1])
 
