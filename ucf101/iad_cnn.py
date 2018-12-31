@@ -405,7 +405,7 @@ def main():
     # loss and optimizer
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
     # Loss function using L2 Regularization
-    regularizer = tf.nn.l2_loss(weights)
+    regularizer = tf.nn.l2_loss(weights['W_0'])
     loss = tf.reduce_mean(loss + BETA * regularizer)
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
     train_op = optimizer.minimize(loss)
