@@ -155,11 +155,11 @@ def _parse_function(example):
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
-    img = tf.reshape(img, img_geom, "parse_reshape")
+    #img = tf.reshape(img, img_geom, "parse_reshape")
 
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
-    #print("img shape = %s" % img.get_shape())
-    img = tf.squeeze(img, 0)
+    print("img shape = %s" % img.get_shape())
+    #img = tf.squeeze(img, 0)
 
     label = tf.cast(parsed_features['label'], tf.int64)
     label = tf.one_hot(label, depth=NUM_CLASSES)
