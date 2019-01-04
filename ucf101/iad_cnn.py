@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 2
 TRAINING_SETTINGS = 'train'
-#TRAINING_SETTINGS = 'test'
+TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -280,7 +280,9 @@ def cnn_mctnet(x, batch_size, weights, biases, dropout):
 
     logits = tf.add(tf.matmul(conv4_flat, w_fc1), b_fc1)
 
-    return logits
+    conv_layers = [conv1, conv4]
+
+    return logits, conv_layers
 
 
 def cnn_lenet(x, batch_size, weights, biases, dropout):
@@ -326,7 +328,9 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
 
-    return logits
+    conv_layers = [pool1]
+
+    return logits, conv_layers
 
 
 def softmax_regression(x, batch_size, weights, biases, dropout):
@@ -334,7 +338,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
 
-    return model
+    return model, None
 
 
 def main():
@@ -394,7 +398,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
+    logits, conv_layers = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
@@ -425,7 +429,7 @@ def main():
         # loop until out of data
         while True:
             try:
-                train_result = sess.run([train_op, accuracy, x, logits], feed_dict={dropout: DROPOUT})
+                train_result = sess.run([train_op, accuracy, x, logits, conv_layers], feed_dict={dropout: DROPOUT})
                 if step != 0 and step % 100 == 0:
                     print("step %s, accuracy = %s" % (step, train_result[1]))
                     # save the current model every 1000 steps
