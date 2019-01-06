@@ -12,21 +12,21 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 5
+LAYER = 1
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
-    FILE_LIST = 'train-test-splits/train-75.list_expanded'
-    MODEL_SAVE_DIR = 'iad_75_models/'
+    FILE_LIST = 'train-test-splits/train-50.list_expanded'
+    MODEL_SAVE_DIR = 'iad_50_models/'
     LOAD_MODEL = None
     EPOCHS = 5
 elif TRAINING_SETTINGS == 'test':
     BATCH_SIZE = 1
-    FILE_LIST = 'train-test-splits/test-75.list_expanded'
-    MODEL_SAVE_DIR = 'iad_75_models/'
-    LOAD_MODEL = 'iad_75_models/iad_model_layer_%s_step_final.ckpt' % LAYER
+    FILE_LIST = 'train-test-splits/test-50.list_expanded'
+    MODEL_SAVE_DIR = 'iad_50_models/'
+    LOAD_MODEL = 'iad_50_models/iad_model_layer_%s_step_final.ckpt' % LAYER
     EPOCHS = 1
 
 NUM_CLASSES = 101
