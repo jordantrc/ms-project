@@ -12,21 +12,21 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 5
+LAYER = 1
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
-    FILE_LIST = 'train-test-splits/train-50.list_expanded'
-    MODEL_SAVE_DIR = 'iad_50_models/'
+    FILE_LIST = 'train-test-splits/train-25.list_expanded'
+    MODEL_SAVE_DIR = 'iad_25_models/'
     LOAD_MODEL = None
     EPOCHS = 5
 elif TRAINING_SETTINGS == 'test':
     BATCH_SIZE = 1
-    FILE_LIST = 'train-test-splits/test-50.list_expanded'
-    MODEL_SAVE_DIR = 'iad_50_models/'
-    LOAD_MODEL = 'iad_50_models/iad_model_layer_%s_step_final.ckpt' % LAYER
+    FILE_LIST = 'train-test-splits/test-25.list_expanded'
+    MODEL_SAVE_DIR = 'iad_25_models/'
+    LOAD_MODEL = 'iad_25_models/iad_model_layer_%s_step_final.ckpt' % LAYER
     EPOCHS = 1
 
 NUM_CLASSES = 101
@@ -53,8 +53,8 @@ BETA = 0.01  # used for the L2 regularization loss function
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 FIRST_CNN_WIDTH = 16  # mctnet
-#FIRST_CNN_WIDTH = 32  # lenet
-#FIRST_CNN_WIDTH = -1  # softmax
+FIRST_CNN_WIDTH = 32  # lenet
+FIRST_CNN_WIDTH = -1  # softmax
 LAYER_GEOMETRY = {'1': (64, 16, 1),
                   '2': (128, 16, 1),
                   '3': (256, 8, 1),
@@ -376,7 +376,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_mctnet('ucf101_iad')
+    weights, biases = get_variables_softmax('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -398,7 +398,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
+    logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
