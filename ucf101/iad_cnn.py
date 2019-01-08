@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -257,17 +257,17 @@ def get_variables_temporal_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_rows = geom[0]
     num_columns = geom[1]
-    divisor = 1
+    multiplier = 4
 
     weights = {}
     biases = {}
     with tf.variable_scope(model_name) as var_scope:
         for i in range(num_columns):
             str_i = str(i)
-            weights['W_0_' + str_i] = _weight_variable('W_0_' + str_i, [num_rows, num_rows / divisor])
-            biases['b_0_' + str_i] = _bias_variable('b_0_' + str_i, [num_rows / divisor])
+            weights['W_0_' + str_i] = _weight_variable('W_0_' + str_i, [num_rows, num_rows * multiplier])
+            biases['b_0_' + str_i] = _bias_variable('b_0_' + str_i, [num_rows * multiplier])
         
-        weights['W_1'] = _weight_variable('W_1', [num_rows * num_columns / divisor, NUM_CLASSES])
+        weights['W_1'] = _weight_variable('W_1', [num_rows * num_columns * multiplier, NUM_CLASSES])
         biases['b_1'] = _bias_variable('b_1', [NUM_CLASSES])
 
     return weights, biases
@@ -383,7 +383,9 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     # second layer
     model = tf.concat(models, 1)
     print("model shape = %s" % (model.get_shape().as_list()))
-    model = tf.nn.dropout(model, dropout)
+    #model = tf.nn.dropout(model, dropout)
+    # drop connect
+    model = _drop_connect(model, dropout)
     model = tf.matmul(model, weights['W_1']) + biases['b_1']
 
     return model, []
