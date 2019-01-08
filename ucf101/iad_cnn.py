@@ -12,21 +12,21 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 5
+LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
-    FILE_LIST = 'train-test-splits/train-25.list_expanded'
-    MODEL_SAVE_DIR = 'iad_25_models/'
+    FILE_LIST = 'train-test-splits/train.list_expanded'
+    MODEL_SAVE_DIR = 'iad_models/'
     LOAD_MODEL = None
     EPOCHS = 5
 elif TRAINING_SETTINGS == 'test':
     BATCH_SIZE = 1
-    FILE_LIST = 'train-test-splits/test-25.list_expanded'
-    MODEL_SAVE_DIR = 'iad_25_models/'
-    LOAD_MODEL = 'iad_25_models/iad_model_layer_%s_step_final.ckpt' % LAYER
+    FILE_LIST = 'train-test-splits/test.list_expanded'
+    MODEL_SAVE_DIR = 'iad_models/'
+    LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
     EPOCHS = 1
 
 NUM_CLASSES = 101
@@ -52,14 +52,14 @@ BETA = 0.01  # used for the L2 regularization loss function
 # layer 3 - 256 features x 8 time slices
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
-FIRST_CNN_WIDTH = 16  # mctnet
+#FIRST_CNN_WIDTH = 16  # mctnet
 #FIRST_CNN_WIDTH = 32  # lenet
-#FIRST_CNN_WIDTH = -1  # softmax
-LAYER_GEOMETRY = {'1': (64, 16, 1),
-                  '2': (128, 16, 1),
-                  '3': (256, 8, 1),
-                  '4': (512, 4, 1),
-                  '5': (512, 2, 1)
+FIRST_CNN_WIDTH = -1  # softmax
+LAYER_GEOMETRY = {'1': (64, 16, 1),  # 1,024
+                  '2': (128, 16, 1),  # 2,048
+                  '3': (256, 8, 1),  # 2,048
+                  '4': (512, 4, 1),  # 2,048
+                  '5': (512, 2, 1)  # 1,024
                   }
 
 #-------------General helper functions----------------#
@@ -253,6 +253,31 @@ def get_variables_softmax(model_name, num_channels=1):
     return weights, biases
 
 
+def get_variables_temporal_softmax(model_name, num_channels=1):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    num_rows = geom[0]
+    num_columns = geom[1]
+
+    first_layer_width = num_rows / 4
+
+    weights = {}
+    biases = {}
+    with tf.variable_scope(model_name) as var_scope:
+        weights['W_0a'] = _weight_variable('W_0a', [num_rows, num_rows / 4])
+        weights['W_0b'] = _weight_variable('W_0b', [num_rows, num_rows / 4])
+        weights['W_0c'] = _weight_variable('W_0c', [num_rows, num_rows / 4])
+        weights['W_0d'] = _weight_variable('W_0d', [num_rows, num_rows / 4])
+        weights['W_1'] = _weight_variable('W_1', [num_rows, NUM_CLASSES])
+
+        biases['b_0a'] = _bias_variable('b_0a', [num_rows / 4])
+        biases['b_0b'] = _bias_variable('b_0b', [num_rows / 4])
+        biases['b_0c'] = _bias_variable('b_0c', [num_rows / 4])
+        biases['b_0d'] = _bias_variable('b_0d', [num_rows / 4])
+        biases['b_1'] = _bias_variable('b_1', [NUM_CLASSES])
+
+    return weights, biases
+
+
 def cnn_mctnet(x, batch_size, weights, biases, dropout):
      # first layer
     conv1 = _conv2d(x, weights['W_0'], biases['b_0'])
@@ -341,6 +366,24 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     return model, []
 
 
+def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    x_sliced = x[:, :, :]
+    model = []
+
+    # first layer
+    model[0] = tf.matmul(x[0], weights['W_0a']) + biases['b_0a']
+    model[1] = tf.matmul(x[0], weights['W_0b']) + biases['b_0b']
+    model[2] = tf.matmul(x[0], weights['W_0c']) + biases['b_0c']
+    model[3] = tf.matmul(x[0], weights['W_0d']) + biases['b_0d']
+
+    # second layer
+    model = tf.concat(model)
+    model = tf.matmul(model, weights['W_1'] + biases['b_1'])
+
+    return model, []
+
+
 def main():
     '''main function'''
     if LOAD_MODEL is None:
@@ -376,7 +419,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_mctnet('ucf101_iad')
+    weights, biases = get_variables_temporal_softmax('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -398,7 +441,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = cnn_mctnet(x, BATCH_SIZE, weights, biases, dropout)
+    logits, conv_layers = temporal_softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)

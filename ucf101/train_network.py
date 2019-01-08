@@ -460,6 +460,7 @@ with tf.Session(config=config) as sess:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate, name="optimizer")
     elif OPTIMIZER == 'Adam':
         learning_rate = tf.placeholder(tf.float32, shape=[])
+        learning_rate = 1e-3
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
     train_op = optimizer.minimize(loss_op, name="train")
