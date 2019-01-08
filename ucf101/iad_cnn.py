@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 1
 TRAINING_SETTINGS = 'train'
-#TRAINING_SETTINGS = 'test'
+TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -357,8 +357,12 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
 def softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
+    
+    # layer 1
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
+    
+    # layer 2
     model = tf.nn.dropout(model, dropout)
     model = tf.matmul(model, weights['W_1']) + biases['b_1']
 
