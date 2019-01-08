@@ -258,8 +258,6 @@ def get_variables_temporal_softmax(model_name, num_channels=1):
     num_rows = geom[0]
     num_columns = geom[1]
 
-    first_layer_width = num_rows / 4
-
     weights = {}
     biases = {}
     with tf.variable_scope(model_name) as var_scope:
