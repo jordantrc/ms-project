@@ -263,10 +263,10 @@ def get_variables_temporal_softmax(model_name, num_channels=1):
     weights = {}
     biases = {}
     with tf.variable_scope(model_name) as var_scope:
-        weights['W_0a'] = _weight_variable('W_0a', [num_rows, num_rows / 4])
-        weights['W_0b'] = _weight_variable('W_0b', [num_rows, num_rows / 4])
-        weights['W_0c'] = _weight_variable('W_0c', [num_rows, num_rows / 4])
-        weights['W_0d'] = _weight_variable('W_0d', [num_rows, num_rows / 4])
+        weights['W_0a'] = _weight_variable('W_0a', [num_rows, num_rows / 4, 1])
+        weights['W_0b'] = _weight_variable('W_0b', [num_rows, num_rows / 4, 1])
+        weights['W_0c'] = _weight_variable('W_0c', [num_rows, num_rows / 4, 1])
+        weights['W_0d'] = _weight_variable('W_0d', [num_rows, num_rows / 4, 1])
         weights['W_1'] = _weight_variable('W_1', [num_rows, NUM_CLASSES])
 
         biases['b_0a'] = _bias_variable('b_0a', [num_rows / 4])
