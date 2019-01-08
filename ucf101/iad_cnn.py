@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -257,20 +257,17 @@ def get_variables_temporal_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_rows = geom[0]
     num_columns = geom[1]
+    divisor = 1
 
     weights = {}
     biases = {}
     with tf.variable_scope(model_name) as var_scope:
-        weights['W_0a'] = _weight_variable('W_0a', [num_rows, num_rows])
-        weights['W_0b'] = _weight_variable('W_0b', [num_rows, num_rows])
-        weights['W_0c'] = _weight_variable('W_0c', [num_rows, num_rows])
-        weights['W_0d'] = _weight_variable('W_0d', [num_rows, num_rows])
-        weights['W_1'] = _weight_variable('W_1', [num_rows * 4, NUM_CLASSES])
-
-        biases['b_0a'] = _bias_variable('b_0a', [num_rows])
-        biases['b_0b'] = _bias_variable('b_0b', [num_rows])
-        biases['b_0c'] = _bias_variable('b_0c', [num_rows])
-        biases['b_0d'] = _bias_variable('b_0d', [num_rows])
+        for i in range(num_columns):
+            str_i = str(i)
+            weights['W_0_' + str_i] = _weight_variable('W_0_' + str_i, [num_rows, num_rows / divisor])
+            biases['b_0_' + str_i] = _bias_variable('b_0_' + str_i, [num_rows / divisor])
+        
+        weights['W_1'] = _weight_variable('W_1', [num_rows * num_columns / divisor, NUM_CLASSES])
         biases['b_1'] = _bias_variable('b_1', [NUM_CLASSES])
 
     return weights, biases
@@ -367,20 +364,21 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
 def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+    num_rows = geom[0]
+    num_cols = geom[1]
 
     x_slices = []
-    x_slices.append(x[:, 0:512])
-    x_slices.append(x[:, 512:1024])
-    x_slices.append(x[:, 1024:1536])
-    x_slices.append(x[:, 1536:2048])
+    for i in range(num_cols):
+        start = i * num_rows
+        end = (i + 1) * num_rows
+        x_slices.append(x[:, start:end])
 
     models = []
 
     # first layer
-    models.append(tf.matmul(x_slices[0], weights['W_0a']) + biases['b_0a'])
-    models.append(tf.matmul(x_slices[1], weights['W_0b']) + biases['b_0b'])
-    models.append(tf.matmul(x_slices[2], weights['W_0c']) + biases['b_0c'])
-    models.append(tf.matmul(x_slices[3], weights['W_0d']) + biases['b_0d'])
+    for i in range(num_cols):
+        str_i = str(i)
+        models.append(tf.matmul(x_slices[0], weights['W_0_' + str_i]) + biases['b_0_' + str_i])
 
     # second layer
     model = tf.concat(models, 1)
