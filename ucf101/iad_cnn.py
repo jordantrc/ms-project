@@ -12,9 +12,9 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 5
+LAYER = 1
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -432,7 +432,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_temporal_softmax('ucf101_iad')
+    weights, biases = get_variables_softmax('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -454,7 +454,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = temporal_softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
+    logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
