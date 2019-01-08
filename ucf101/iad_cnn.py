@@ -257,7 +257,8 @@ def get_variables_softmax(model_name, num_channels=1):
 def get_variables_temporal_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_rows = geom[0]
-    num_columns = geom[1]
+    #num_columns = geom[1]
+    num_columns = 1
 
     weights = {}
     biases = {}
