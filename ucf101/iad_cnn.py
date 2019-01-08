@@ -257,7 +257,7 @@ def get_variables_temporal_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_rows = geom[0]
     num_columns = geom[1]
-    multiplier = 4
+    multiplier = 2
 
     weights = {}
     biases = {}
@@ -367,18 +367,23 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     num_rows = geom[0]
     num_cols = geom[1]
 
+    # a 512 row x 4 column tensor will be reshaped row by row, i.e.
+    # row 0 row 1 row 2 row 3 row 4, cobe below extracts the columns
+    # into slices. Index of row 1, column 0 = row * num_columns + column
+
     x_slices = []
-    for i in range(num_cols):
-        start = i * num_rows
-        end = (i + 1) * num_rows
-        x_slices.append(x[:, start:end])
+    for i in range(num_cols):  # 0 - 3
+        x_slice = []
+        for j in range(num_rows):
+            x_slice.append(x[:, (j * num_cols) + i])
+        x_slices.append(x_slice)
 
     models = []
 
     # first layer
     for i in range(num_cols):
         str_i = str(i)
-        models.append(tf.matmul(x_slices[0], weights['W_0_' + str_i]) + biases['b_0_' + str_i])
+        models.append(tf.matmul(x_slices[i], weights['W_0_' + str_i]) + biases['b_0_' + str_i])
 
     # second layer
     model = tf.concat(models, 1)
