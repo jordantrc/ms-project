@@ -44,6 +44,7 @@ LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
+TEMP_SOFTMAX_LAYER = 256
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -257,17 +258,16 @@ def get_variables_temporal_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_rows = geom[0]
     num_columns = geom[1]
-    multiplier = 0.5
 
     weights = {}
     biases = {}
     with tf.variable_scope(model_name) as var_scope:
         for i in range(num_columns):
             str_i = str(i)
-            weights['W_0_' + str_i] = _weight_variable('W_0_' + str_i, [num_rows, num_rows * multiplier])
-            biases['b_0_' + str_i] = _bias_variable('b_0_' + str_i, [num_rows * multiplier])
+            weights['W_0_' + str_i] = _weight_variable('W_0_' + str_i, [num_rows, TEMP_SOFTMAX_LAYER])
+            biases['b_0_' + str_i] = _bias_variable('b_0_' + str_i, [TEMP_SOFTMAX_LAYER])
         
-        weights['W_1'] = _weight_variable('W_1', [num_rows * num_columns * multiplier, NUM_CLASSES])
+        weights['W_1'] = _weight_variable('W_1', [TEMP_SOFTMAX_LAYER, NUM_CLASSES])
         biases['b_1'] = _bias_variable('b_1', [NUM_CLASSES])
 
     return weights, biases
@@ -357,6 +357,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
+    model = tf.nn.dropout(model, dropout)
 
     return model, []
 
