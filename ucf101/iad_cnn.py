@@ -368,15 +368,21 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
 
 def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
-    x = tf.squeeze(x)
-    x = tf.transpose(x, [1, 0])
+    x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+
+    x_slices = []
+    x_slices.append(x[0:127])
+    x_slices.append(x[128:255])
+    x_slices.append(x[256:383])
+    x_slices.append(x[384:511])
+
     models = []
 
     # first layer
-    models.append(tf.matmul(tf.expand_dims(x[0], 1), weights['W_0a']) + biases['b_0a'])
-    models.append(tf.matmul(x[1], weights['W_0b']) + biases['b_0b'])
-    models.append(tf.matmul(x[2], weights['W_0c']) + biases['b_0c'])
-    models.append(tf.matmul(x[3], weights['W_0d']) + biases['b_0d'])
+    models.append(tf.matmul(x_slices[0], weights['W_0a']) + biases['b_0a'])
+    models.append(tf.matmul(x_slices[1], weights['W_0b']) + biases['b_0b'])
+    models.append(tf.matmul(x_slices[2], weights['W_0c']) + biases['b_0c'])
+    models.append(tf.matmul(x_slices[3], weights['W_0d']) + biases['b_0d'])
 
     # second layer
     model = tf.concat(models, 1)
