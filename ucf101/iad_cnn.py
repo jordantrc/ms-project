@@ -12,9 +12,9 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 1
+LAYER = 2
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -257,8 +257,7 @@ def get_variables_softmax(model_name, num_channels=1):
 def get_variables_temporal_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_rows = geom[0]
-    #num_columns = geom[1]
-    num_columns = 1
+    num_columns = geom[1]
 
     weights = {}
     biases = {}
@@ -367,8 +366,7 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     #x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     num_rows = geom[0]
-    #num_cols = geom[1]
-    num_cols = 1
+    num_cols = geom[1]
 
     # a 512 row x 4 column tensor will be reshaped row by row, i.e.
     # row 0 row 1 row 2 row 3 row 4, cobe below extracts the columns
