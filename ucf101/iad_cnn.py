@@ -381,7 +381,7 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     # second layer
     model = tf.concat(model, 0)
     print("model shape = %s" % (model.get_shape().as_list()))
-    model = tf.matmul(model, weights['W_1'] + biases['b_1'])
+    model = tf.matmul(model, weights['W_1']) + biases['b_1']
 
     return model, []
 
