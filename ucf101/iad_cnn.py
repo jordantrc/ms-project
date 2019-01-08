@@ -364,6 +364,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
 def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     #x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+    x = tf.squeeze(x)
     num_rows = geom[0]
     num_cols = geom[1]
 
