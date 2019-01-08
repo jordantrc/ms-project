@@ -246,10 +246,12 @@ def get_variables_softmax(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'W_0': _weight_variable('W_0', [num_features, NUM_CLASSES])
+                'W_0': _weight_variable('W_0', [num_features * 2, num_features])
+                'W_1': _weight_variable('W_1', [num_features, NUM_CLASSES])
                 }
         biases = {
-                'b_0': _bias_variable('b_0', [NUM_CLASSES])
+                'b_0': _bias_variable('b_0', [num_features])
+                'b_1': _bias_variable('b_1', [NUM_CLASSES])
         }
     return weights, biases
 
@@ -358,6 +360,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
     model = tf.nn.dropout(model, dropout)
+    model = tf.matmul(model, weights['W_1']) + biases['b_1']
 
     return model, []
 
