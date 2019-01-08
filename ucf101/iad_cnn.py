@@ -376,7 +376,7 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
         x_slice = []
         for j in range(num_rows):
             x_slice.append(x[:, (j * num_cols) + i])
-        x_slices.append(x_slice)
+        x_slices.append(tf.squeeze(x_slice))
 
     models = []
 
