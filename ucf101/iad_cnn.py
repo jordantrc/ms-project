@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 1
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -366,14 +366,15 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     #x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     num_rows = geom[0]
-    num_cols = geom[1]
+    #num_cols = geom[1]
+    num_cols = 1
 
     # a 512 row x 4 column tensor will be reshaped row by row, i.e.
     # row 0 row 1 row 2 row 3 row 4, cobe below extracts the columns
     # into slices. Index of row 1, column 0 = row * num_columns + column
 
     x_slices = []
-    for i in range(num_cols):  # 0 - 3
+    for i in range(num_cols):
         x_slice = tf.slice(x, [0, 0, i, 0], [-1, -1, 1, -1])
         x_slice = tf.squeeze(x_slice, [2, 3])  # only squeeze the final two dimensions
         x_slices.append(x_slice)
@@ -389,9 +390,9 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     # second layer
     model = tf.concat(models, 1)
     print("model shape = %s" % (model.get_shape().as_list()))
-    model = tf.nn.dropout(model, dropout)
+    #model = tf.nn.dropout(model, dropout)
     # drop connect
-    #model = _drop_connect(model, dropout)
+    model = _drop_connect(model, dropout)
     model = tf.matmul(model, weights['W_1']) + biases['b_1']
 
     return model, []
