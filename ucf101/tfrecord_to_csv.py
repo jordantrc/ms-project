@@ -62,7 +62,7 @@ def main():
         reader = tf.TFRecordReader()
         _, serialized_example = reader.read(filename_queue)
 
-        parsed_features = tf.parse_single_example(serialized_example, features_def)
+        parsed_features = tf.parse_single_example(serialized_example, features)
         frames = []
         for layer in range(1, 6):
             frames.append(tf.decode_raw(parsed_features['img/{:02d}'.format(layer)], tf.float32))
