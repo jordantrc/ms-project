@@ -5,6 +5,7 @@
 # for a dataset.
 
 import csv
+import os
 import sys
 import tensorflow as tf
 
@@ -45,12 +46,11 @@ def main():
     sess = tf.Session()
     for l in lines:
         f, c = l.split()
-        row = [f, c]
-        for example in tf.python_io.tf_record_iterator(file_name):
+        f_base = os.path.basename(f)
+        row = [f_base, c]
+        for example in tf.python_io.tf_record_iterator(f):
             features = dict()
-            features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
-            features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
-            features['num_channels'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[num_channels]))
+            features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
 
             for layer in range(1:6):
                 features['img/{:02d}'.format(layer)] = tf.FixedLenFeature((), tf.string)
