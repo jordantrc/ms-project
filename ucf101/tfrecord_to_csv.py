@@ -39,7 +39,7 @@ def main():
         header.extend(feature_header)
 
         # write the header
-        csv_writer.write_row(header)
+        csv_writer.writerow(header)
         csv_writers.append(csv_writer)
 
     # open each file in the lines list, parse the sample
@@ -65,7 +65,7 @@ def main():
                     frame_row = list(frame)
                     assert len(frame_row) == geom[0] * geom[1]
                     row.extend(frame_row)
-                    csv_writers[layer - 1].write_row()  
+                    csv_writers[layer - 1].writerow(row)  
 
 
 if __name__ == "__main__":
