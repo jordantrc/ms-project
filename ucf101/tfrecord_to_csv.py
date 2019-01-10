@@ -28,7 +28,7 @@ def main():
     csv_writers = []
     for i in range(0, 5):
         header = ['sample_name', 'class']
-        csv_fd = open(output_file_base + '_' + i + '.csv', 'wb')
+        csv_fd = open(output_file_base + '_' + str(i) + '.csv', 'wb')
         csv_fds.append(csv_fd)
         csv_writer = csv.writer(csv_fd, dialect='excel')
         
