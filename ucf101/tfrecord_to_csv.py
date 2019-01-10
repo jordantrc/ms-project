@@ -88,7 +88,7 @@ def main():
                     frame_row = list(frame_row)
                     assert len(frame_row) == geom[0] * geom[1], "layer = %s, len(frame_row) = %s, should be %s" % (layer, len(frame_row), geom[0] * geom[1])
                     row.extend(frame_row)
-                    csv_writers[layer].writerow(row)
+                    csv_writers[i].writerow(row)
                 end = time.time()
                 elapsed_time = end - start
                 print("[%s] read data from %s - %.03f" % (step, f, elapsed_time))
