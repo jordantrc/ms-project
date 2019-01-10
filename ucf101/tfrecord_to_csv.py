@@ -61,7 +61,7 @@ def main():
             with sess.as_default():
                 for layer in range(1, 6):
                     geom = LAYER_GEOMETRY[str(layer)]
-                    frame = tf.decode_raw(parsed_features['img/{:02d}'.format(layer)], tf.uint8)
+                    frame = tf.decode_raw(parsed_features['img/{:02d}'.format(layer)], tf.float32)
                     frame = frame.eval()
                     frame_row = list(frame)
                     assert len(frame_row) == geom[0] * geom[1], "layer = %s, len(frame_row) = %s, should be %s" % (layer, len(frame_row), geom[0] * geom[1])
