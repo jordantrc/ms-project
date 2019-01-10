@@ -49,6 +49,7 @@ def main():
         f_base = os.path.basename(f)
         row = [f_base, c]
         for example in tf.python_io.tf_record_iterator(f):
+            print("extracting data from %s" % (f))
             features = dict()
             features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
 
@@ -63,7 +64,7 @@ def main():
                     frame = tf.decode_raw(parsed_features['img/{:02d}'.format(layer)], tf.uint8)
                     frame = frame.eval()
                     frame_row = list(frame)
-                    assert len(frame_row) == geom[0] * geom[1], "len(frame_row) = %s, should be %s" % (len(frame_row), geom[0] * geom[1])
+                    assert len(frame_row) == geom[0] * geom[1], "layer = %s, len(frame_row) = %s, should be %s" % (layer, len(frame_row), geom[0] * geom[1])
                     row.extend(frame_row)
                     csv_writers[layer - 1].writerow(row)  
 
