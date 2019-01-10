@@ -52,13 +52,13 @@ def main():
             features = dict()
             features['label'] = tf.FixedLenFeature((), tf.int64, default_value=0)
 
-            for layer in range(1:6):
+            for layer in range(1, 6):
                 features['img/{:02d}'.format(layer)] = tf.FixedLenFeature((), tf.string)
 
             parsed_features = tf.parse_single_example(example, features)
 
             with sess.as_default():
-                for layer in range(1:6):
+                for layer in range(1, 6):
                     geom = LAYER_GEOMETRY[str(layer)]
                     frame = tf.decode_raw(parsed_features['img/{:02d}'.format(layer)], tf.uint8)
                     frame = frame.eval()
