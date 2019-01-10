@@ -81,9 +81,10 @@ def main():
                 f = filenames[step]
                 c = classes[step]
                 f_base = os.path.basename(f)
-                for layer in range(5):
+                for i in range(5):
+                    geom = LAYER_GEOMETRY[str(i + 1)]
                     row = [f_base, c]
-                    frame_row = frames_output[layer]
+                    frame_row = frames_output[i]
                     frame_row = list(frame_row)
                     assert len(frame_row) == geom[0] * geom[1], "layer = %s, len(frame_row) = %s, should be %s" % (layer, len(frame_row), geom[0] * geom[1])
                     row.extend(frame_row)
