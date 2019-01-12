@@ -303,11 +303,11 @@ def nn_jtcnet(x, batch_size, weights, biases, dropout):
     net = tf.nn.tanh(net)
 
     # second layer
-    net = tf.matmul(x, weights['W_1']) + biases['b_1']
+    net = tf.matmul(net, weights['W_1']) + biases['b_1']
     net = tf.nn.tanh(net)
 
     # third layer
-    net = tf.matmul(x, weights['W_2']) + biases['b_2']
+    net = tf.matmul(net, weights['W_2']) + biases['b_2']
     net = tf.nn.tanh(net)
 
     return net, []
