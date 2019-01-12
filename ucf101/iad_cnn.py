@@ -57,7 +57,8 @@ def save_settings(run_name):
     '''saves the parameters to a file'''
     with open('runs/%s_parameters.txt' % run_name, 'w') as fd:
         fd.write("BATCH_SIZE = %s\n" % BATCH_SIZE)
-        fd.write("FILE_LIST = %s\n" % FILE_LIST)
+        fd.write("TRAIN_FILE_LIST = %s\n" % TRAIN_FILE_LIST)
+        fd.write("TEST_FILE_LIST = %s\n" % TEST_FILE_LIST)
         fd.write("MODEL_SAVE_DIR = %s\n" % MODEL_SAVE_DIR)
         fd.write("LOAD_MODEL = %s\n" % LOAD_MODEL)
         fd.write("EPOCHS = %s\n" % EPOCHS)
