@@ -258,11 +258,11 @@ def get_variables_softmax(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'W_0': _weight_variable('W_0', [num_features, num_features]),
+                'W_0': _weight_variable('W_0', [num_features, NUM_CLASSES]),
                 'W_1': _weight_variable('W_1', [num_features, NUM_CLASSES])
                 }
         biases = {
-                'b_0': _bias_variable('b_0', [num_features]),
+                'b_0': _bias_variable('b_0', [NUM_CLASSES]),
                 'b_1': _bias_variable('b_1', [NUM_CLASSES])
         }
     return weights, biases
@@ -398,11 +398,11 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     # layer 1
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
-    model = tf.nn.relu(model)
+    #model = tf.nn.relu(model)
     
     # layer 2
-    model = tf.nn.dropout(model, dropout)
-    model = tf.matmul(model, weights['W_1']) + biases['b_1']
+    #model = tf.nn.dropout(model, dropout)
+    #model = tf.matmul(model, weights['W_1']) + biases['b_1']
 
     return model, []
 
@@ -599,7 +599,7 @@ def iad_run(run_string):
         results_fd = open("runs/" + run_string + ".txt", 'w')
         print("data exhausted, test results:")
         print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
-        results_fd.write("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
+        results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, cumulative_accuracy / step / BATCH_SIZE))
         #for i, p in enumerate(predictions):
         #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
