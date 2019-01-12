@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 5
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -217,14 +217,16 @@ def get_variables_jtcnet(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-            'W_0': _weight_variable('W_0', [num_features, num_features * 0.75]),
-            'W_1': _weight_variable('W_1', [num_features * 0.75, num_features * 0.5]),
-            'W_2': _weight_variable('W_2', [num_features * 0.5, NUM_CLASSES])
+            'W_0': _weight_variable('W_0', [num_features, num_features * 2]),
+            'W_1': _weight_variable('W_1', [num_features * 2, num_features]),
+            'W_2': _weight_variable('W_2', [num_features, num_features * 0.5]),
+            'W_3': _weight_variable('W_3', [num_features * 0.5, NUM_CLASSES])
         }
         biases = {
-            'b_0': _bias_variable('b_0', [num_features * 0.75]),
-            'b_1': _bias_variable('b_1', [num_features * 0.5]),
-            'b_2': _bias_variable('b_1', [NUM_CLASSES])
+            'b_0': _bias_variable('b_0', [num_features * 2]),
+            'b_1': _bias_variable('b_1', [num_features]),
+            'b_2': _bias_variable('b_2', [num_features * 0.5])
+            'b_3': _bias_variable('b_3', [NUM_CLASSES])
         }
     return weights, biases
 
@@ -307,8 +309,12 @@ def nn_jtcnet(x, batch_size, weights, biases, dropout):
     net = tf.nn.leaky_relu(net, alpha=LEAKY_RELU_ALPHA)
 
     # third layer
-    net = tf.nn.dropout(net, dropout)
     net = tf.matmul(net, weights['W_2']) + biases['b_2']
+    net = tf.nn.leaky_relu(net, alpha=LEAKY_RELU_ALPHA)
+
+    # third layer
+    net = tf.nn.dropout(net, dropout)
+    net = tf.matmul(net, weights['W_3']) + biases['b_3']
 
     return net, []
 
