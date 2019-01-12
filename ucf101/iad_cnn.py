@@ -535,7 +535,10 @@ def iad_run(run_string):
     if training:
         print("begin training")
         step = 0
-        sess.run(dataset_iterator.initializer, feed_dict={
+        sess.run([
+            dataset_iterator.initializer, 
+            dataset_test_iterator.initializer], 
+            feed_dict={
             input_filenames: filenames_train,
             input_filenames_test: filenames_test
             })
