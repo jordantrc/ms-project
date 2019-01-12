@@ -38,8 +38,8 @@ CLASSES_TO_INCLUDE = 'all'
 TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
-WEIGHT_STDDEV = 0.15
-BIAS = 0.15
+WEIGHT_STDDEV = 0.1
+BIAS = 0.1
 LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
@@ -307,8 +307,8 @@ def nn_jtcnet(x, batch_size, weights, biases, dropout):
     net = tf.nn.tanh(net)
 
     # third layer
+    net = tf.nn.dropout(net, dropout)
     net = tf.matmul(net, weights['W_2']) + biases['b_2']
-    net = tf.nn.tanh(net)
 
     return net, []
 
