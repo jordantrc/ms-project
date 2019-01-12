@@ -12,22 +12,10 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 5
-TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
 
-if TRAINING_SETTINGS == 'train':
-    BATCH_SIZE = 10
-    FILE_LIST = 'train-test-splits/train.list_expanded'
-    MODEL_SAVE_DIR = 'iad_models/'
-    LOAD_MODEL = None
-    EPOCHS = 5
-elif TRAINING_SETTINGS == 'test':
-    BATCH_SIZE = 1
-    FILE_LIST = 'train-test-splits/test.list_expanded'
-    MODEL_SAVE_DIR = 'iad_models/'
-    LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
-    EPOCHS = 1
+TEST_FILE_LIST = 'train-test-splits/test.list_expanded'
+TRAIN_FILE_LIST = 'train-test-splits/train.list_expanded'
+MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
 #CLASSES_TO_INCLUDE = ['ApplyEyeMakeup', 'Knitting', 'Lunges', 'HandStandPushups', 'Archery', 'MilitaryParade',
@@ -40,11 +28,12 @@ TRAINING_DATA_SAMPLE = 1.0
 # neural network variables
 WEIGHT_STDDEV = 0.1
 BIAS = 0.1
-LEAKY_RELU_ALPHA = 0.2
+LEAKY_RELU_ALPHA = 0.1
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 TEMP_SOFTMAX_LAYER = 256
+NORMALIZE_IMAGE = True
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -80,9 +69,10 @@ def save_settings(run_name):
         fd.write("DROPOUT = %s\n" % DROPOUT)
         fd.write("LEARNING_RATE = %s\n" % LEARNING_RATE)
         fd.write("LAYER = %s\n" % LAYER)
+        fd.write("NORMALIZE_IMAGE = %s\n" % NORMALIZE_IMAGE)
 
 
-def list_to_filenames(list_file):
+def list_to_filenames(list_file, balance_classes=False):
     '''converts a list file to a list of filenames'''
     filenames = []
     class_counts = {}
@@ -110,7 +100,7 @@ def list_to_filenames(list_file):
 
 
     # balance classes if we're training
-    if LOAD_MODEL is None:
+    if balance_classes:
         print("balancing files across classes")
         max_class_count = -1
         for k in class_counts.keys():
@@ -204,6 +194,8 @@ def _parse_function(example):
         print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
+    if NORMALIZE_IMAGE:
+        img = tf.image.per_image_standardization(img)
     img = tf.squeeze(img, 0)
 
     label = tf.cast(parsed_features['label'], tf.int64)
@@ -317,7 +309,6 @@ def nn_jtcnet(x, batch_size, weights, biases, dropout):
     net = tf.matmul(net, weights['W_3']) + biases['b_3']
 
     return net, []
-
 
 
 def cnn_mctnet(x, batch_size, weights, biases, dropout):
@@ -449,67 +440,78 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     return model, []
 
 
-def main():
+def iad_run(run_string):
     '''main function'''
     if LOAD_MODEL is None:
         training = True
-        run_type = 'train'
     else:
         training = False
-        run_type = 'test'
-
-    # get the run name
-    run_name = sys.argv[1]
-    save_settings(run_name + "_" + run_type)
 
     # get the list of classes
     class_list = get_class_list(CLASS_INDEX_FILE)
 
     # get the list of filenames
-    print("loading file list from %s" % FILE_LIST)
-    filenames = list_to_filenames(FILE_LIST)
-    print("%s files" % len(filenames))
-    if training:
-        random.shuffle(filenames)
-        if TRAINING_DATA_SAMPLE != 1.0:
-            filenames = random.sample(filenames, int(TRAINING_DATA_SAMPLE * len(filenames)))
+    print("loading train file list from %s" % TRAIN_FILE_LIST)
+    filenames_train = list_to_filenames(TRAIN_FILE_LIST, balance_classes=True)
+    filenames_test = list_to_filenames(TEST_FILE_LIST)
+    print("%s training files, %s testing files" % (len(filenames_train), len(filenames_test)))
+
+    random.shuffle(filenames_train)
+    if TRAINING_DATA_SAMPLE != 1.0:
+        filenames_train = random.sample(filenames_train, int(TRAINING_DATA_SAMPLE * len(filenames_train)))
 
     # ensure filenames list is evenly divisable by batch size
-    pad_filenames = len(filenames) % BATCH_SIZE
-    filenames.extend(filenames[0:pad_filenames])
-    print("filenames = %s..." % filenames[0:5])
+    pad_filenames = len(filenames_train) % BATCH_SIZE
+    filenames_train.extend(filenames_train[0:pad_filenames])
 
     # create the TensorFlow sessions
     config = tf.ConfigProto(allow_soft_placement=True)
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_jtcnet('ucf101_iad')
+    weights, biases = get_variables_softmax('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
+    input_filenames_test = tf.placeholder(tf.string, shape=[None])
     dropout = tf.placeholder(tf.float32)
 
+    # testing dataset
+    dataset_test = tf.data.TFRecordDataset(input_filenames_test)
+    dataset_test = dataset_test.map(_parse_function)
+    dataset_test = dataset_test.batch(1)
+    dataset_test = dataset_test.repeat(1000000)
+    dataset_test_iterator = dataset_test.make_initializable_iterator()
+    x_test, y_test_true = dataset_test_iterator.get_next()
+    y_test_true_class = tf.argmax(y_test_true, axis=1)
+
+    # training or evaluation dataset
     dataset = tf.data.TFRecordDataset(input_filenames)
     dataset = dataset.map(_parse_function)
     dataset = dataset.batch(BATCH_SIZE)
     if training:
-        dataset = dataset.shuffle(100)
+        dataset = dataset.shuffle(200)
         dataset = dataset.repeat(EPOCHS)
     else:
         dataset = dataset.repeat(1)
     dataset_iterator = dataset.make_initializable_iterator()
     x, y_true = dataset_iterator.get_next()
-
     y_true_class = tf.argmax(y_true, axis=1)
     print("x shape = %s" % x.get_shape().as_list())
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = nn_jtcnet(x, BATCH_SIZE, weights, biases, dropout)
+    logits, conv_layers = nn_softmax(x, BATCH_SIZE, weights, biases, dropout)
+    logits_test, _ = nn_softmax(x_test, 1, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
+
+    # testing/validation
+    y_pred_test = tf.nn.softmax(logits_test)
+    y_pred_test_class = tf.argmax(y_pred_test, axis=1)
+    correct_pred_test = tf.equal(y_pred_test_class, y_test_true_class)
+    accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
     # loss and optimizer
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
@@ -532,7 +534,10 @@ def main():
     if training:
         print("begin training")
         step = 0
-        sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
+        sess.run(dataset_iterator.initializer, feed_dict={
+            input_filenames: filenames_train,
+            input_filenames_test: filenames_test
+            })
 
         # loop until out of data
         while True:
@@ -543,6 +548,14 @@ def main():
                     # save the current model every 1000 steps
                     if step % 1000 == 0:
                         save_model(sess, saver, step)
+
+                        # mini batch validation
+                        test_accuracy = 0.0
+                        for i in range(50):
+                            test_result = sess.run([accuracy_test])
+                            test_accuracy += test_result
+                        print("mini-batch validation accuracy = %.02f" % (test_accuracy / 50.0))
+
                 # print("x = %s, logits = %s" % (train_result[2], train_result[3]))
                 step += 1
             except tf.errors.OutOfRangeError:
@@ -553,7 +566,7 @@ def main():
         print("begin testing")
         step = 0
         saver.restore(sess, LOAD_MODEL)
-        sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames})
+        sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames_test})
 
         cumulative_accuracy = 0.0
         predictions = []
@@ -573,17 +586,41 @@ def main():
                 break
 
         # wrap up, provide test results
+        results_fd = open("runs/" + run_string + ".txt", 'w')
         print("data exhausted, test results:")
         print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
+        results_fd.write("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
         #for i, p in enumerate(predictions):
         #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
         cm = analysis.confusion_matrix(predictions, true_classes, class_list)
         print("confusion matrix = %s" % cm)
-        analysis.plot_confusion_matrix(cm, class_list, "runs/" + run_name + ".pdf")
+        analysis.plot_confusion_matrix(cm, class_list, "runs/" + run_string + ".pdf")
         print("per-class accuracy:")
-        analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_name + '.csv')
+        analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
 
 if __name__ == "__main__":
-    main()
+
+    # get the run name
+    run_name = sys.argv[1]
+    save_settings(run_name + "_" + run_type)
+
+    for layer in [1, 2, 3, 4, 5]:
+        LAYER = layer
+
+        # training run
+        BATCH_SIZE = 10
+        LOAD_MODEL = None
+        EPOCHS = 5
+        run_string = run_name + "_" + LAYER + "_train"
+        save_settings(run_string)
+        iad_run(run_string)
+
+        # testing run
+        BATCH_SIZE = 1
+        LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
+        EPOCHS = 1
+        run_string = run_name + "_" + LAYER + "_test"
+        save_settings(run_string)
+        iad_run(run_string)
