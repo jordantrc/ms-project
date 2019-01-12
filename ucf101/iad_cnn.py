@@ -217,14 +217,14 @@ def get_variables_jtcnet(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-            'W_0': _weight_variable('W_0', [num_features, num_features * 0.5]),
-            'W_1': _weight_variable('W_1', [num_features * 0.5, num_features * 0.25]),
-            'W_2': _weight_variable('W_2', [num_features * 0.25, num_features * 0.125])
+            'W_0': _weight_variable('W_0', [num_features, num_features * 0.75]),
+            'W_1': _weight_variable('W_1', [num_features * 0.75, num_features * 0.5]),
+            'W_2': _weight_variable('W_2', [num_features * 0.5, NUM_CLASSES])
         }
         biases = {
-            'b_0': _bias_variable('b_0', [num_features * 0.5]),
-            'b_1': _bias_variable('b_1', [num_features * 0.25]),
-            'b_2': _bias_variable('b_1', [num_features * 0.125])
+            'b_0': _bias_variable('b_0', [num_features * 0.75]),
+            'b_1': _bias_variable('b_1', [num_features * 0.5]),
+            'b_2': _bias_variable('b_1', [NUM_CLASSES])
         }
     return weights, biases
 
