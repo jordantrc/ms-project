@@ -12,7 +12,7 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 5
+LAYER = 1
 TRAINING_SETTINGS = 'train'
 #TRAINING_SETTINGS = 'test'
 
@@ -225,7 +225,7 @@ def get_variables_jtcnet(model_name, num_channels=1):
         biases = {
             'b_0': _bias_variable('b_0', [num_features * 2]),
             'b_1': _bias_variable('b_1', [num_features]),
-            'b_2': _bias_variable('b_2', [num_features * 0.5])
+            'b_2': _bias_variable('b_2', [num_features * 0.5]),
             'b_3': _bias_variable('b_3', [NUM_CLASSES])
         }
     return weights, biases
