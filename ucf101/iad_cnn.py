@@ -583,7 +583,7 @@ def iad_run(run_string):
         # loop until out of data
         while True:
             try:
-                test_result = sess.run([accuracy, x, logits, y_pred_class, y_true_class], feed_dict={dropout: 1.0})
+                test_result = sess.run([accuracy, x, logits, y_pred_class, y_true_class])
                 cumulative_accuracy += test_result[0]
                 predictions.append(test_result[3])
                 true_classes.append(test_result[4])
