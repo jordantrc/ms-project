@@ -604,7 +604,6 @@ if __name__ == "__main__":
 
     # get the run name
     run_name = sys.argv[1]
-    save_settings(run_name + "_" + run_type)
 
     for layer in [1, 2, 3, 4, 5]:
         LAYER = layer
