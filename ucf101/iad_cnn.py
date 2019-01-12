@@ -223,7 +223,7 @@ def get_variables_jtcnet(model_name, num_channels=1):
         }
         biases = {
             'b_0': _bias_variable('b_0', [num_features * 0.5]),
-            'b_1': _bias_varianle('b_1', [num_features * 0.25]),
+            'b_1': _bias_variable('b_1', [num_features * 0.25]),
             'b_2': _bias_variable('b_1', [num_features * 0.125])
         }
     return weights, biases
