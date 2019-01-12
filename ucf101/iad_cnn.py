@@ -480,6 +480,7 @@ def iad_run(run_string):
     dataset_test = tf.data.TFRecordDataset(input_filenames_test)
     dataset_test = dataset_test.map(_parse_function)
     dataset_test = dataset_test.batch(1)
+    dataset_test = dataset_test.shuffle(500)
     dataset_test = dataset_test.repeat(1000000)
     dataset_test_iterator = dataset_test.make_initializable_iterator()
     x_test, y_test_true = dataset_test_iterator.get_next()
@@ -553,11 +554,16 @@ def iad_run(run_string):
                         save_model(sess, saver, step)
 
                         # mini batch validation
+                        if step % 10000 == 0:
+                            mini_batch_size = 1000
+                        else:
+                            mini_batch_size = 50
                         test_accuracy = 0.0
-                        for i in range(50):
+                        for i in range(mini_batch_size):
                             test_result = sess.run([accuracy_test])
                             test_accuracy += test_result[0]
                         print("mini-batch validation accuracy = %.02f" % (test_accuracy / 50.0))
+
 
                 # print("x = %s, logits = %s" % (train_result[2], train_result[3]))
                 step += 1
@@ -602,6 +608,7 @@ def iad_run(run_string):
         print("per-class accuracy:")
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
+    sess.close()
 
 if __name__ == "__main__":
 
@@ -611,6 +618,10 @@ if __name__ == "__main__":
     for layer in [1, 2, 3, 4, 5]:
         LAYER = layer
 
+        print("##############################")
+        print("BEGIN LAYER %s" % LAYER)
+        print("##############################")
+
         # training run
         BATCH_SIZE = 10
         LOAD_MODEL = None
@@ -618,6 +629,9 @@ if __name__ == "__main__":
         run_string = run_name + "_" + str(LAYER) + "_train"
         save_settings(run_string)
         iad_run(run_string)
+
+        # reset the graph
+        tf.reset_default_graph()
 
         # testing run
         BATCH_SIZE = 1
