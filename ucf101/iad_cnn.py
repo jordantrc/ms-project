@@ -14,7 +14,7 @@ from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 LAYER = 4
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
@@ -40,7 +40,7 @@ TRAINING_DATA_SAMPLE = 1.0
 # neural network variables
 WEIGHT_STDDEV = 0.1
 BIAS = 0.1
-LEAKY_RELU_ALPHA = 0.04
+LEAKY_RELU_ALPHA = 0.2
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
@@ -300,11 +300,11 @@ def nn_jtcnet(x, batch_size, weights, biases, dropout):
 
     # first layer
     net = tf.matmul(x, weights['W_0']) + biases['b_0']
-    net = tf.nn.tanh(net)
+    net = tf.nn.leaky_relu(net, alpha=LEAKY_RELU_ALPHA)
 
     # second layer
     net = tf.matmul(net, weights['W_1']) + biases['b_1']
-    net = tf.nn.tanh(net)
+    net = tf.nn.leaky_relu(net, alpha=LEAKY_RELU_ALPHA)
 
     # third layer
     net = tf.nn.dropout(net, dropout)
