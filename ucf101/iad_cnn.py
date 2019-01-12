@@ -556,7 +556,7 @@ def iad_run(run_string):
                         test_accuracy = 0.0
                         for i in range(50):
                             test_result = sess.run([accuracy_test])
-                            test_accuracy += test_result
+                            test_accuracy += test_result[0]
                         print("mini-batch validation accuracy = %.02f" % (test_accuracy / 50.0))
 
                 # print("x = %s, logits = %s" % (train_result[2], train_result[3]))
