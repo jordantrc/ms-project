@@ -612,7 +612,7 @@ if __name__ == "__main__":
         BATCH_SIZE = 10
         LOAD_MODEL = None
         EPOCHS = 5
-        run_string = run_name + "_" + LAYER + "_train"
+        run_string = run_name + "_" + str(LAYER) + "_train"
         save_settings(run_string)
         iad_run(run_string)
 
@@ -620,6 +620,6 @@ if __name__ == "__main__":
         BATCH_SIZE = 1
         LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
         EPOCHS = 1
-        run_string = run_name + "_" + LAYER + "_test"
+        run_string = run_name + "_" + str(LAYER) + "_test"
         save_settings(run_string)
         iad_run(run_string)
