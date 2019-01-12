@@ -212,6 +212,23 @@ def _parse_function(example):
     return img, label
 
 
+def get_variables_jtcnet(model_name, num_channels=1):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    num_features = geom[0] * geom[1] * num_channels
+    with tf.variable_scope(model_name) as var_scope:
+        weights = {
+            'W_0': _weight_variable('W_0', [num_features, num_features * 0.5]),
+            'W_1': _weight_variable('W_1', [num_features * 0.5, num_features * 0.25]),
+            'W_2': _weight_variable('W_2', [num_features * 0.25, num_features * 0.125])
+        }
+        biases = {
+            'b_0': _bias_variable('b_0', [num_features * 0.5]),
+            'b_1': _bias_varianle('b_1', [num_features * 0.25]),
+            'b_2': _bias_variable('b_1', [num_features * 0.125])
+        }
+    return weights, biases
+
+
 def get_variables_lenet(model_name, num_channels=1):
     with tf.variable_scope(model_name) as var_scope:
         weights = {
@@ -273,6 +290,28 @@ def get_variables_temporal_softmax(model_name, num_channels=1):
         biases['b_1'] = _bias_variable('b_1', [NUM_CLASSES])
 
     return weights, biases
+
+
+def nn_jtcnet(x, batch_size, weights, biases, dropout):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    
+    # layer 1
+    x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+
+    # first layer
+    net = tf.matmul(x, weights['W_0']) + biases['b_0']
+    net = tf.nn.tanh(net)
+
+    # second layer
+    net = tf.matmul(x, weights['W_1']) + biases['b_1']
+    net = tf.nn.tanh(net)
+
+    # third layer
+    net = tf.matmul(x, weights['W_2']) + biases['b_2']
+    net = tf.nn.tanh(net)
+
+    return net, []
+
 
 
 def cnn_mctnet(x, batch_size, weights, biases, dropout):
@@ -439,7 +478,7 @@ def main():
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_softmax('ucf101_iad')
+    weights, biases = get_variables_jtcnet('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -461,7 +500,7 @@ def main():
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
+    logits, conv_layers = nn_jtcnet(x, BATCH_SIZE, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
