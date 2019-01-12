@@ -12,9 +12,9 @@ import tensorflow as tf
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
-LAYER = 4
+LAYER = 1
 TRAINING_SETTINGS = 'train'
-TRAINING_SETTINGS = 'test'
+#TRAINING_SETTINGS = 'test'
 
 if TRAINING_SETTINGS == 'train':
     BATCH_SIZE = 10
