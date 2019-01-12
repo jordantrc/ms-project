@@ -258,11 +258,11 @@ def get_variables_softmax(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'W_0': _weight_variable('W_0', [num_features, 256]),
-                'W_1': _weight_variable('W_1', [256, NUM_CLASSES])
+                'W_0': _weight_variable('W_0', [num_features, num_features]),
+                'W_1': _weight_variable('W_1', [num_features, NUM_CLASSES])
                 }
         biases = {
-                'b_0': _bias_variable('b_0', [256]),
+                'b_0': _bias_variable('b_0', [num_features]),
                 'b_1': _bias_variable('b_1', [NUM_CLASSES])
         }
     return weights, biases
@@ -398,7 +398,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     # layer 1
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
-    model = tf.nn.leaky_relu(model, alpha=LEAKY_RELU_ALPHA)
+    model = tf.nn.relu(model)
     
     # layer 2
     model = tf.nn.dropout(model, dropout)
@@ -626,7 +626,7 @@ if __name__ == "__main__":
         # training run
         BATCH_SIZE = 10
         LOAD_MODEL = None
-        EPOCHS = 10
+        EPOCHS = 5
         run_string = run_name + "_" + str(LAYER) + "_train"
         save_settings(run_string)
         iad_run(run_string)
