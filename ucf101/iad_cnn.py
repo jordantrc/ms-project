@@ -475,7 +475,6 @@ def iad_run(run_string):
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
     input_filenames_test = tf.placeholder(tf.string, shape=[None])
-    dropout = tf.placeholder(tf.float32)
 
     # testing dataset
     dataset_test = tf.data.TFRecordDataset(input_filenames_test)
@@ -502,8 +501,8 @@ def iad_run(run_string):
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
-    logits_test, _ = softmax_regression(x_test, 1, weights, biases, dropout)
+    logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
+    logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
@@ -546,7 +545,7 @@ def iad_run(run_string):
         # loop until out of data
         while True:
             try:
-                train_result = sess.run([train_op, accuracy, x, logits, conv_layers], feed_dict={dropout: DROPOUT})
+                train_result = sess.run([train_op, accuracy, x, logits, conv_layers])
                 if step != 0 and step % 100 == 0:
                     print("step %s, accuracy = %s" % (step, train_result[1]))
                     # save the current model every 1000 steps
