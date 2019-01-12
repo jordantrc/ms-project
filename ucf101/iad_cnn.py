@@ -28,7 +28,7 @@ TRAINING_DATA_SAMPLE = 1.0
 # neural network variables
 WEIGHT_STDDEV = 0.1
 BIAS = 0.1
-LEAKY_RELU_ALPHA = 0.1
+LEAKY_RELU_ALPHA = 0.2
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
@@ -626,7 +626,7 @@ if __name__ == "__main__":
         # training run
         BATCH_SIZE = 10
         LOAD_MODEL = None
-        EPOCHS = 5
+        EPOCHS = 10
         run_string = run_name + "_" + str(LAYER) + "_train"
         save_settings(run_string)
         iad_run(run_string)
