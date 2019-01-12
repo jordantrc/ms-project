@@ -502,8 +502,8 @@ def iad_run(run_string):
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = nn_softmax(x, BATCH_SIZE, weights, biases, dropout)
-    logits_test, _ = nn_softmax(x_test, 1, weights, biases, dropout)
+    logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, dropout)
+    logits_test, _ = softmax_regression(x_test, 1, weights, biases, dropout)
     print("logits shape = %s" % logits.get_shape().as_list())
     y_pred = tf.nn.softmax(logits)
     y_pred_class = tf.argmax(y_pred, axis=1)
