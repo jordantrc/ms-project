@@ -26,15 +26,15 @@ CLASSES_TO_INCLUDE = 'all'
 TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
-CLASSIFIER = 'logistic_regression'
+CLASSIFIER = 'softmax'
 WEIGHT_STDDEV = 0.1
 BIAS = 0.1
 LEAKY_RELU_ALPHA = 0.2
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
-TEMP_SOFTMAX_LAYER = 256
 NORMALIZE_IMAGE = True
+SOFTMAX_HIDDEN_SIZE = 512
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -257,14 +257,15 @@ def get_variables_mctnet(model_name, num_channels=1):
 def get_variables_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_features = geom[0] * geom[1] * num_channels
+
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'W_0': _weight_variable('W_0', [num_features, NUM_CLASSES]),
-                'W_1': _weight_variable('W_1', [num_features, NUM_CLASSES])
+                'W_0': _weight_variable('W_0', [num_features, SOFTMAX_HIDDEN_SIZE]),
+                'out': _weight_variable('out', [SOFTMAX_HIDDEN_SIZE, NUM_CLASSES])
                 }
         biases = {
-                'b_0': _bias_variable('b_0', [NUM_CLASSES]),
-                'b_1': _bias_variable('b_1', [NUM_CLASSES])
+                'b_0': _bias_variable('b_0', [SOFTMAX_HIDDEN_SIZE]),
+                'out': _bias_variable('out', [NUM_CLASSES])
         }
     return weights, biases
 
@@ -399,11 +400,11 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     # layer 1
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
-    #model = tf.nn.relu(model)
+    model = tf.nn.relu(model)
+    model = tf.nn.dropout(model, dropout)
     
     # layer 2
-    #model = tf.nn.dropout(model, dropout)
-    #model = tf.matmul(model, weights['W_1']) + biases['b_1']
+    model = tf.matmul(model, weights['out']) + biases['out']
 
     return model, []
 
