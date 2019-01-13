@@ -533,6 +533,10 @@ def iad_nn(run_string):
         p5 = tf.constant(0.5)  # logistic regression threshold
         W = tf.Variable(tf.random_normal([geom[0] * geom[1], NUM_CLASSES], mean=0.0, stddev=0.05))
         b = tf.Variable(tf.zeros([NUM_CLASSES]))
+
+        x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
+        x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
+
         y_pred = tf.matmul(x, W) + b
         y_pred_sigmoid = tf.sigmoid(y_pred)
         delta = tf.abs((y_true - y_pred_sigmoid))
