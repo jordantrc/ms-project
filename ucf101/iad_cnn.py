@@ -541,7 +541,7 @@ def iad_nn(run_string):
         cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y_pred), reduction_indices=[1]))
         train_op = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
         correct_pred = tf.equal(tf.argmax(y_pred, 1), y_true_class)
-        accuracy = tf.reduce_mean(tf.cast(correct_pred), tf.float32)
+        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
         # validation/testing
         y_pred_test = tf.nn.softmax(tf.matmul(x, W) + b)
