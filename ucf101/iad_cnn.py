@@ -550,7 +550,7 @@ def iad_nn(run_string):
         # testing/validation
         y_pred_test = tf.matmul(x_test, W) + b
         y_pred_test_sigmoid = tf.sigmoid(y_pred_test)
-        delta_test = tf.abs((y_true_test - y_pred_test_sigmoid))
+        delta_test = tf.abs((y_test_true - y_pred_test_sigmoid))
         correct_pred_test = tf.cast(tf.less(delta_test, p5), tf.int32)
         accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
