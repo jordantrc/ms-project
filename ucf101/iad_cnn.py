@@ -546,7 +546,7 @@ def iad_nn(run_string):
         # validation/testing
         y_pred_test = tf.nn.softmax(tf.matmul(x, W) + b)
         correct_pred_test = tf.equal(tf.argmax(y_pred_test, 1), y_test_true_class)
-        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test), tf.float32)
+        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
 
 
