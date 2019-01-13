@@ -72,6 +72,7 @@ def save_settings(run_name):
         fd.write("LEARNING_RATE = %s\n" % LEARNING_RATE)
         fd.write("LAYER = %s\n" % LAYER)
         fd.write("NORMALIZE_IMAGE = %s\n" % NORMALIZE_IMAGE)
+        fd.write("SOFTMAX_HIDDEN_SIZE = %s\n" % SOFTMAX_HIDDEN_SIZE)
 
 
 def list_to_filenames(list_file, balance_classes=False):
@@ -400,7 +401,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     # layer 1
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
-    model = tf.nn.relu(model)
+    model = tf.nn.leaky_relu(model, alpha=LEAKY_RELU_ALPHA)
     model = tf.nn.dropout(model, dropout)
     
     # layer 2
