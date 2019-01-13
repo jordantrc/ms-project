@@ -4,6 +4,7 @@
 #
 
 import fnmatch
+import math
 import os
 import random
 import sys
@@ -34,7 +35,6 @@ DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = True
-SOFTMAX_HIDDEN_SIZE = 512
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -552,8 +552,6 @@ def iad_nn(run_string):
         correct_pred_test = tf.equal(tf.argmax(y_pred_test, 1), y_test_true_class)
         accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
-
-
     # initializer
     init_op = tf.global_variables_initializer()
     saver = tf.train.Saver()
@@ -599,6 +597,7 @@ def iad_nn(run_string):
                 print("data exhausted, saving final model")
                 save_model(sess, saver, 'final')
                 break
+        final_accuracy = -1.0
     else:
         print("begin testing")
         step = 0
@@ -623,10 +622,11 @@ def iad_nn(run_string):
                 break
 
         # wrap up, provide test results
+        final_accuracy = cumulative_accuracy / step / BATCH_SIZE
         results_fd = open("runs/" + run_string + ".txt", 'w')
         print("data exhausted, test results:")
-        print("steps = %s, cumulative accuracy = %.04f" % (step, cumulative_accuracy / step / BATCH_SIZE))
-        results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, cumulative_accuracy / step / BATCH_SIZE))
+        print("steps = %s, cumulative accuracy = %.04f" % (step, final_accuracy))
+        results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, final_accuracy))
         #for i, p in enumerate(predictions):
         #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
@@ -637,37 +637,69 @@ def iad_nn(run_string):
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
     sess.close()
+    return final_accuracy
 
 if __name__ == "__main__":
 
     # get the run name
     run_name = sys.argv[1]
+    neuron_powers = list(range(1, 13))
 
-    for layer in [1, 2, 3, 4, 5]:
-        LAYER = layer
+    for power in neuron_powers:
+        SOFTMAX_HIDDEN_SIZE = math.pow(2, power)
+        best_accuracies = []
+        best_accuracies_layers = []
+        best_accuracies_hidden = []
 
         print("##############################")
-        print("BEGIN LAYER %s" % LAYER)
+        print("BEGIN HIDDEN SIZE %s" % SOFTMAX_HIDDEN_SIZE)
         print("##############################")
+        for layer in [1, 2, 3, 4, 5]:
+            accuracies = {}
+            LAYER = layer
 
-        # training run
-        BATCH_SIZE = 10
-        LOAD_MODEL = None
-        EPOCHS = 5
-        run_string = run_name + "_" + str(LAYER) + "_train"
-        save_settings(run_string)
-        iad_nn(run_string)
+            print("##############################")
+            print("BEGIN LAYER %s" % LAYER)
+            print("##############################")
 
-        # reset the graph
-        tf.reset_default_graph()
+            # training run
+            BATCH_SIZE = 10
+            LOAD_MODEL = None
+            EPOCHS = 5
+            run_string = run_name + "_" + str(LAYER) + "_train"
+            save_settings(run_string)
+            iad_nn(run_string)
 
-        # testing run
-        BATCH_SIZE = 1
-        LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
-        EPOCHS = 1
-        run_string = run_name + "_" + str(LAYER) + "_test"
-        save_settings(run_string)
-        iad_nn(run_string)
+            # reset the graph
+            tf.reset_default_graph()
 
-        # reset the graph before moving to the next layer
-        tf.reset_default_graph()
+            # testing run
+            BATCH_SIZE = 1
+            LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
+            EPOCHS = 1
+            run_string = run_name + "_" + str(LAYER) + "_test"
+            save_settings(run_string)
+            layer_accuracy = iad_nn(run_string)
+            accuracies[str(layer)] = (layer_accuracy)
+
+            # reset the graph before moving to the next layer
+            tf.reset_default_graph()
+
+        print("Final accuracies:")
+        best_accuracy = -1.0
+        best_accuracy_layer = -1
+        for k in sorted(accuracies.keys()):
+            if accuracies[k] > best_accuracy:
+                best_accuracy = accuracies[k]
+                best_accuracy_layer = k
+            print("%s: %.03f" % (k, accuracies[k]))
+        best_accuracies.append(best_accuracy)
+        best_accuracies_layers.append(best_accuracy_layer)
+        best_accuracies_hidden.append(SOFTMAX_HIDDEN_SIZE)
+
+    print("best accuracies during hyperparameter search:")
+    for i, h in enumerate(best_accuracies_hidden):
+        l = best_accuracies_layers[i]
+        a = best_accuracies[i]
+        print("num. hidden = %s, layer = %s, accuracy = %.03f" % (h, l, a))
+
