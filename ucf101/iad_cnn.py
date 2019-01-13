@@ -531,28 +531,23 @@ def iad_nn(run_string):
     elif CLASSIFIER == 'logistic_regression':
         geom = LAYER_GEOMETRY[str(LAYER)]
         p5 = tf.constant(0.5)  # logistic regression threshold
-        W = tf.Variable(tf.random_normal([geom[0] * geom[1], NUM_CLASSES], mean=0.0, stddev=0.05))
+        W = tf.Variable(tf.zeros([geom[0] * geom[1], NUM_CLASSES]))
         b = tf.Variable(tf.zeros([NUM_CLASSES]))
 
         x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
         x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
 
-        y_pred = tf.matmul(x, W) + b
-        y_pred_sigmoid = tf.sigmoid(y_pred)
-        delta = tf.abs((y_true - y_pred_sigmoid))
-        correct_pred = tf.cast(tf.less(delta, p5), tf.int32)
-        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+        y_pred = tf.nn.softmax(tf.matmul(x, W) + b)
+        cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y_pred), reduction_indices=[1]))
+        train_op = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
+        correct_pred = tf.equal(tf.argmax(y_pred, 1), y_true_class)
+        accuracy = tf.reduce_mean(tf.cast(correct_pred), tf.float32)
 
-        cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=y_pred, labels=y_true)
-        loss = tf.reduce_mean(cross_entropy)
-        train_op = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
+        # validation/testing
+        y_pred_test = tf.nn.softmax(tf.matmul(x, W) + b)
+        correct_pred_test = tf.equal(tf.argmax(y_pred_test, 1), y_test_true_class)
+        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test), tf.float32)
 
-        # testing/validation
-        y_pred_test = tf.matmul(x_test, W) + b
-        y_pred_test_sigmoid = tf.sigmoid(y_pred_test)
-        delta_test = tf.abs((y_test_true - y_pred_test_sigmoid))
-        correct_pred_test = tf.cast(tf.less(delta_test, p5), tf.int32)
-        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
 
     # initializer
