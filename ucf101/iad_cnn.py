@@ -543,7 +543,7 @@ def iad_nn(run_string):
         correct_pred = tf.cast(tf.less(delta, p5), tf.int32)
         accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-        cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits, y_true)
+        cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(y_pred, y_true)
         loss = tf.reduce_mean(cross_entropy)
         train_op = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
 
