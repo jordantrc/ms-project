@@ -538,6 +538,7 @@ def iad_nn(run_string):
         x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
 
         y_pred = tf.nn.softmax(tf.matmul(x, W) + b)
+        y_pred_class = tf.argmax(y_pred, axis=1)
         cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y_pred), reduction_indices=[1]))
         train_op = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
         correct_pred = tf.equal(tf.argmax(y_pred, 1), y_true_class)
@@ -545,6 +546,7 @@ def iad_nn(run_string):
 
         # validation/testing
         y_pred_test = tf.nn.softmax(tf.matmul(x, W) + b)
+        y_pred_test_class = tf.argmax(y_pred_test, axis=1)
         correct_pred_test = tf.equal(tf.argmax(y_pred_test, 1), y_test_true_class)
         accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
@@ -607,10 +609,10 @@ def iad_nn(run_string):
         # loop until out of data
         while True:
             try:
-                test_result = sess.run([accuracy, x, logits, y_pred_class, y_true_class])
+                test_result = sess.run([accuracy, y_pred_class, y_true_class])
                 cumulative_accuracy += test_result[0]
-                predictions.append(test_result[3])
-                true_classes.append(test_result[4])
+                predictions.append(test_result[1])
+                true_classes.append(test_result[2])
                 if step % 100 == 0:
                     print("step %s, accuracy = %s, cumulative accuracy = %s" %
                           (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
