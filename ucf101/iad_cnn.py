@@ -26,6 +26,7 @@ CLASSES_TO_INCLUDE = 'all'
 TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
+CLASSIFIER = 'logistic_regression'
 WEIGHT_STDDEV = 0.1
 BIAS = 0.1
 LEAKY_RELU_ALPHA = 0.2
@@ -442,7 +443,7 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     return model, []
 
 
-def iad_run(run_string):
+def iad_nn(run_string):
     '''main function'''
     if LOAD_MODEL is None:
         training = True
@@ -471,7 +472,8 @@ def iad_run(run_string):
     sess = tf.Session(config=config)
 
     # setup the CNN
-    weights, biases = get_variables_softmax('ucf101_iad')
+    if CLASSIFIER == 'softmax':
+        weights, biases = get_variables_softmax('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -503,29 +505,51 @@ def iad_run(run_string):
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
-    logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
-    print("logits shape = %s" % logits.get_shape().as_list())
-    y_pred = tf.nn.softmax(logits)
-    y_pred_class = tf.argmax(y_pred, axis=1)
+    if CLASSIFIER == 'softmax':
+        logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
+        logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
 
-    # testing/validation
-    y_pred_test = tf.nn.softmax(logits_test)
-    y_pred_test_class = tf.argmax(y_pred_test, axis=1)
-    correct_pred_test = tf.equal(y_pred_test_class, y_test_true_class)
-    accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
+        print("logits shape = %s" % logits.get_shape().as_list())
+        y_pred = tf.nn.softmax(logits)
+        y_pred_class = tf.argmax(y_pred, axis=1)
 
-    # loss and optimizer
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-    # Loss function using L2 Regularization
-    #regularizer = tf.nn.l2_loss(weights['W_0'])
-    #loss = tf.reduce_mean(loss + BETA * regularizer)
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
-    train_op = optimizer.minimize(loss)
+        # testing/validation
+        y_pred_test = tf.nn.softmax(logits_test)
+        y_pred_test_class = tf.argmax(y_pred_test, axis=1)
+        correct_pred_test = tf.equal(y_pred_test_class, y_test_true_class)
+        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
-    # evaluation
-    correct_pred = tf.equal(y_pred_class, y_true_class)
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+        # loss and optimizer
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+        optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
+        train_op = optimizer.minimize(loss)
+
+        # evaluation
+        correct_pred = tf.equal(y_pred_class, y_true_class)
+        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+    elif CLASSIFIER == 'logistic_regression':
+        geom = LAYER_GEOMETRY[str(LAYER)]
+        p5 = tf.constant(0.5)  # logistic regression threshold
+        W = tf.Variable(tf.random_normal([geom[0] * geom[1], NUM_CLASSES], mean=0.0, stddev=0.05))
+        b = tf.Variable(tf.zeros([NUM_CLASSES]))
+        y_pred = tf.matmul(x, W) + b
+        y_pred_sigmoid = tf.sigmoid(y_pred)
+        delta = tf.abs((y_true - y_pred_sigmoid))
+        correct_pred = tf.cast(tf.less(delta, p5), tf.int32)
+        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+        cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits, y_true)
+        loss = tf.reduce_mean(cross_entropy)
+        train_op = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
+
+        # testing/validation
+        y_pred_test = tf.matmul(x_test, W) + b
+        y_pred_test_sigmoid = tf.sigmoid(y_pred_test)
+        delta_test = tf.abs((y_true_test - y_pred_test_sigmoid))
+        correct_pred_test = tf.cast(tf.less(delta_test, p5), tf.int32)
+        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
+
 
     # initializer
     init_op = tf.global_variables_initializer()
@@ -547,7 +571,7 @@ def iad_run(run_string):
         # loop until out of data
         while True:
             try:
-                train_result = sess.run([train_op, accuracy, x, logits, conv_layers])
+                train_result = sess.run([train_op, accuracy])
                 if step != 0 and step % 100 == 0:
                     print("step %s, accuracy = %s" % (step, train_result[1]))
                     # save the current model every 1000 steps
@@ -629,7 +653,7 @@ if __name__ == "__main__":
         EPOCHS = 5
         run_string = run_name + "_" + str(LAYER) + "_train"
         save_settings(run_string)
-        iad_run(run_string)
+        iad_nn(run_string)
 
         # reset the graph
         tf.reset_default_graph()
@@ -640,7 +664,7 @@ if __name__ == "__main__":
         EPOCHS = 1
         run_string = run_name + "_" + str(LAYER) + "_test"
         save_settings(run_string)
-        iad_run(run_string)
+        iad_nn(run_string)
 
         # reset the graph before moving to the next layer
         tf.reset_default_graph()
