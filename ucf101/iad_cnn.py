@@ -659,7 +659,7 @@ if __name__ == "__main__":
         #SOFTMAX_HIDDEN_SIZE = int(math.pow(2, h))
         #hyper_var = "SOFTMAX_HIDDEN_SIZE"
         #hyper_value = SOFTMAX_HIDDEN_SIZE
-        if hyper_parameter = "dropout":
+        if hyper_parameter == "dropout":
             DROPOUT = h
             hyper_var = "Dropout"
             hyper_value = DROPOUT
