@@ -31,7 +31,7 @@ CLASSIFIER = 'softmax'
 WEIGHT_STDDEV = 0.1
 BIAS = 0.1
 LEAKY_RELU_ALPHA = 0.2
-DROPOUT = 0.5
+#DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = True
@@ -401,7 +401,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     # layer 1
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
-    model = tf.nn.leaky_relu(model, alpha=LEAKY_RELU_ALPHA)
+    #model = tf.nn.leaky_relu(model, alpha=LEAKY_RELU_ALPHA)
     model = tf.nn.dropout(model, dropout)
     
     # layer 2
@@ -643,27 +643,39 @@ if __name__ == "__main__":
 
     # get the run name
     run_name = sys.argv[1]
-    neuron_powers = list(range(12, 20))
+
+    # various hyperparameter settings
+    hyper_softmax_hidden_powers = list(range(2, 17))
+    hyper_dropout = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+    # settings for softmax hidden layer size
+    #hyper_settings = hyper_softmax_hidden_powers
+    # settings for dropout
+    hyper_settings = hyper_dropout
+
     accuracies = []
 
-    for power in neuron_powers:
-        SOFTMAX_HIDDEN_SIZE = int(math.pow(2, power))
+    for h in hyper_settings:
+        #SOFTMAX_HIDDEN_SIZE = int(math.pow(2, h))
+        #hyper_var = "SOFTMAX_HIDDEN_SIZE"
+        #hyper_value = SOFTMAX_HIDDEN_SIZE
+        if hyper_parameter = "dropout":
+            DROPOUT = h
+            hyper_var = "Dropout"
+            hyper_value = DROPOUT
 
-        print("##############################")
-        print("BEGIN HIDDEN SIZE %s" % SOFTMAX_HIDDEN_SIZE)
-        print("##############################")
         for layer in [1, 2, 3, 4, 5]:
             LAYER = layer
 
             print("##############################")
-            print("BEGIN LAYER %s" % LAYER)
+            print("%s %s - LAYER %s" % (hyper_name, h, LAYER))
             print("##############################")
 
             # training run
             BATCH_SIZE = 10
             LOAD_MODEL = None
             EPOCHS = 5
-            run_string = run_name + "_" + str(SOFTMAX_HIDDEN_SIZE) + "_" + str(LAYER) + "_train"
+            run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             iad_nn(run_string)
 
@@ -674,10 +686,10 @@ if __name__ == "__main__":
             BATCH_SIZE = 1
             LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
             EPOCHS = 1
-            run_string = run_name + "_" + str(SOFTMAX_HIDDEN_SIZE) + "_" + str(LAYER) + "_test"
+            run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
             layer_accuracy = iad_nn(run_string)
-            accuracies.append([SOFTMAX_HIDDEN_SIZE, layer, layer_accuracy])
+            accuracies.append([hyper_value, layer, layer_accuracy])
 
             # reset the graph before moving to the next layer
             tf.reset_default_graph()
