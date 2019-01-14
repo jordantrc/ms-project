@@ -644,18 +644,16 @@ if __name__ == "__main__":
     # get the run name
     run_name = sys.argv[1]
     neuron_powers = list(range(1, 13))
+    accuracies = []
 
     for power in neuron_powers:
-        SOFTMAX_HIDDEN_SIZE = math.pow(2, power)
-        best_accuracies = []
-        best_accuracies_layers = []
-        best_accuracies_hidden = []
+        SOFTMAX_HIDDEN_SIZE = int(math.pow(2, power))
+        power_accuracy = []
 
         print("##############################")
         print("BEGIN HIDDEN SIZE %s" % SOFTMAX_HIDDEN_SIZE)
         print("##############################")
         for layer in [1, 2, 3, 4, 5]:
-            accuracies = {}
             LAYER = layer
 
             print("##############################")
@@ -665,7 +663,7 @@ if __name__ == "__main__":
             # training run
             BATCH_SIZE = 10
             LOAD_MODEL = None
-            EPOCHS = 5
+            EPOCHS = 1
             run_string = run_name + "_" + str(SOFTMAX_HIDDEN_SIZE) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             iad_nn(run_string)
@@ -680,26 +678,17 @@ if __name__ == "__main__":
             run_string = run_name + "_" + str(SOFTMAX_HIDDEN_SIZE) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
             layer_accuracy = iad_nn(run_string)
-            accuracies[str(layer)] = (layer_accuracy)
+            power_accuracy.append(layer_accuracy)
 
             # reset the graph before moving to the next layer
             tf.reset_default_graph()
 
-        print("Final accuracies:")
-        best_accuracy = -1.0
-        best_accuracy_layer = -1
-        for k in sorted(accuracies.keys()):
-            if accuracies[k] > best_accuracy:
-                best_accuracy = accuracies[k]
-                best_accuracy_layer = k
-            print("%s: %.03f" % (k, accuracies[k]))
-        best_accuracies.append(best_accuracy)
-        best_accuracies_layers.append(best_accuracy_layer)
-        best_accuracies_hidden.append(SOFTMAX_HIDDEN_SIZE)
+        hidden_accuracy = [SOFTMAX_HIDDEN_SIZE]
+        hidden_accuracy.extend(power_accuracy)
+        accuracies.append(hidden_accuracy)
 
-    print("best accuracies during hyperparameter search:")
-    for i, h in enumerate(best_accuracies_hidden):
-        l = best_accuracies_layers[i]
-        a = best_accuracies[i]
-        print("num. hidden = %s, layer = %s, accuracy = %.03f" % (h, l, a))
+    # print accuracy information from all layers and hidden layer sizes
+    print("Final accuracy data:")
+    for a in accuracies:
+        print(', '.join(str(a)))
 
