@@ -685,5 +685,5 @@ if __name__ == "__main__":
     # print accuracy information from all layers and hidden layer sizes
     print("Final accuracy data:")
     for a in accuracies:
-        print(', '.join(str(a)))
+        print(a)
 
