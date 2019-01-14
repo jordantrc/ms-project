@@ -643,7 +643,7 @@ if __name__ == "__main__":
 
     # get the run name
     run_name = sys.argv[1]
-    neuron_powers = list(range(1, 13))
+    neuron_powers = list(range(12, 20))
     accuracies = []
 
     for power in neuron_powers:
