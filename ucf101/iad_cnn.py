@@ -648,7 +648,6 @@ if __name__ == "__main__":
 
     for power in neuron_powers:
         SOFTMAX_HIDDEN_SIZE = int(math.pow(2, power))
-        power_accuracy = []
 
         print("##############################")
         print("BEGIN HIDDEN SIZE %s" % SOFTMAX_HIDDEN_SIZE)
@@ -678,14 +677,10 @@ if __name__ == "__main__":
             run_string = run_name + "_" + str(SOFTMAX_HIDDEN_SIZE) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
             layer_accuracy = iad_nn(run_string)
-            power_accuracy.append(layer_accuracy)
+            accuracies.append([SOFTMAX_HIDDEN_SIZE, layer, layer_accuracy])
 
             # reset the graph before moving to the next layer
             tf.reset_default_graph()
-
-        hidden_accuracy = [SOFTMAX_HIDDEN_SIZE]
-        hidden_accuracy.extend(power_accuracy)
-        accuracies.append(hidden_accuracy)
 
     # print accuracy information from all layers and hidden layer sizes
     print("Final accuracy data:")
