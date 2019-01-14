@@ -35,6 +35,7 @@ LEAKY_RELU_ALPHA = 0.2
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = True
+SOFTMAX_HIDDEN_SIZE = 4096
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
