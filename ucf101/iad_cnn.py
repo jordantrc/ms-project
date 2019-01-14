@@ -662,7 +662,7 @@ if __name__ == "__main__":
         #hyper_value = SOFTMAX_HIDDEN_SIZE
         if hyper_parameter == "dropout":
             DROPOUT = h
-            hyper_var = "Dropout"
+            hyper_name = "Dropout"
             hyper_value = DROPOUT
 
         for layer in [1, 2, 3, 4, 5]:
