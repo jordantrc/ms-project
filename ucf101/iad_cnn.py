@@ -652,6 +652,7 @@ if __name__ == "__main__":
     #hyper_settings = hyper_softmax_hidden_powers
     # settings for dropout
     hyper_settings = hyper_dropout
+    hyper_parameter = "dropout"
 
     accuracies = []
 
