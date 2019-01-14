@@ -643,7 +643,7 @@ if __name__ == "__main__":
 
     # get the run name
     run_name = sys.argv[1]
-    neuron_powers = list(range(1, 3))
+    neuron_powers = list(range(1, 13))
     accuracies = []
 
     for power in neuron_powers:
@@ -662,7 +662,7 @@ if __name__ == "__main__":
             # training run
             BATCH_SIZE = 10
             LOAD_MODEL = None
-            EPOCHS = 1
+            EPOCHS = 5
             run_string = run_name + "_" + str(SOFTMAX_HIDDEN_SIZE) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             iad_nn(run_string)
