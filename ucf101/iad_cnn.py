@@ -28,9 +28,9 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 CLASSIFIER = 'softmax'
-WEIGHT_STDDEV = 0.1
-BIAS = 0.1
-LEAKY_RELU_ALPHA = 0.2
+WEIGHT_STDDEV = 0.15
+BIAS = 0.15
+LEAKY_RELU_ALPHA = 0.04
 #DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
@@ -262,12 +262,12 @@ def get_variables_softmax(model_name, num_channels=1):
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'W_0': _weight_variable('W_0', [num_features, SOFTMAX_HIDDEN_SIZE]),
-                'out': _weight_variable('out', [SOFTMAX_HIDDEN_SIZE, NUM_CLASSES])
+                'W_0': _weight_variable('W_0', [num_features, NUM_CLASSES]),
+                #'out': _weight_variable('out', [SOFTMAX_HIDDEN_SIZE, NUM_CLASSES])
                 }
         biases = {
-                'b_0': _bias_variable('b_0', [SOFTMAX_HIDDEN_SIZE]),
-                'out': _bias_variable('out', [NUM_CLASSES])
+                'b_0': _bias_variable('b_0', [NUM_CLASSES]),
+                #'out': _bias_variable('out', [NUM_CLASSES])
         }
     return weights, biases
 
@@ -406,7 +406,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     model = tf.nn.dropout(model, dropout)
     
     # layer 2
-    model = tf.matmul(model, weights['out']) + biases['out']
+    #model = tf.matmul(model, weights['out']) + biases['out']
 
     return model, []
 
