@@ -34,7 +34,7 @@ LEAKY_RELU_ALPHA = 0.04
 #DROPOUT = 0.5
 LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
-NORMALIZE_IMAGE = True
+NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 4096
 
 # the layer from which to load the activation map
@@ -403,7 +403,7 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
     #model = tf.nn.leaky_relu(model, alpha=LEAKY_RELU_ALPHA)
-    model = tf.nn.dropout(model, dropout)
+    model = _drop_connect(model, dropout)
     
     # layer 2
     #model = tf.matmul(model, weights['out']) + biases['out']
@@ -647,7 +647,7 @@ if __name__ == "__main__":
 
     # various hyperparameter settings
     hyper_softmax_hidden_powers = list(range(2, 17))
-    hyper_dropout = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    hyper_dropout = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
     # settings for softmax hidden layer size
     #hyper_settings = hyper_softmax_hidden_powers
