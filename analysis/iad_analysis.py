@@ -7,7 +7,7 @@ import os
 from sklearn.decomposition import IncrementalPCA
 from sklearn.neighbors import KNeighborsClassifier
 
-base_dir = ""
+base_dir = "/home/jordanc/datasets/UCF-101/csv/"
 pca_n_components = list(range(2, 21))
 ipca_batch_size = 1000
 knn_k = list(range(3, 20))
@@ -34,7 +34,7 @@ def main():
     '''main function'''
 
     for sample_size in ['25', '50', '75', '100']:
-        for layer in ['1', '2', '3', '4', '5']:
+        for layer in ['0', '1', '2', '3', '4']:
             train_file = "train_%s_%s.csv" % (sample_size, layer)
             test_file = "test_%s.csv" % [layer]
 
