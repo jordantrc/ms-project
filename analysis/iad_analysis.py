@@ -3,6 +3,7 @@
 import csv
 import numpy as np
 import os
+import sys
 
 from sklearn.decomposition import IncrementalPCA
 from sklearn.neighbors import KNeighborsClassifier
@@ -72,6 +73,7 @@ def main():
                     knn_score = classifier.score(test_x_ipca, test_y)
 
                     print("%s,%s,%s,%s,%.06f" % (sample_size, layer, n, k, knn_score))
+                    sys.stdout.flush()
 
 
 if __name__ == "__main__":
