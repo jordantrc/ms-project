@@ -1,0 +1,39 @@
+---
+title: "IAD analysis"
+output: html_notebook
+---
+
+This notebook contains the code for analyzing IAD data, which is stored in csv files. 
+
+```{r}
+# load the ggplot library
+if("ggplot2" %in% rownames(installed.packages()) == FALSE) {install.packages("ggplot2")}
+library(ggplot2)
+```
+```{r}
+setwd("D:/ms-project-data/UCF101/iad")
+train_file = "train_100_0.csv"
+iad_train = read.csv(train_file)
+iad_train[0:5]
+```
+
+```{r}
+setwd("D:/ms-project-data/UCF101/iad")
+test_file = "test_0.csv"
+iad_test = read.csv(test_file)
+iad_test[0:5]
+```
+
+
+
+```{r}
+# support vector machine
+if("e1071" %in% rownames(installed.packages()) == FALSE){install.packages("e1071")}
+library(e1071)
+
+svm.fit <- svm(class~., data=iad_train, kernel="radial", gamma=1, cost=1)
+yhat.svm <- predict(svm.fit, newdata=iad_test)
+mean((yhat.svm - test$class)^2)
+```
+
+
