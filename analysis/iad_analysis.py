@@ -36,7 +36,7 @@ def main():
     for sample_size in ['50', '75', '100']:
         for layer in ['0', '1', '2', '3', '4']:
             train_file = "train_%s_%s.csv" % (sample_size, layer)
-            test_file = "test_%s.csv" % [layer]
+            test_file = "test_%s.csv" % (layer)
 
             train_path = os.path.join(base_dir, train_file)
             test_path = os.path.join(base_dir, test_file)
