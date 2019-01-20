@@ -71,7 +71,7 @@ def main():
                     classifier.fit(train_x_ipca, train_y)
                     knn_score = classifier.score(test_x_ipca, test_y)
 
-                    print("%s, %s, %s, %.04f" % (sample_size, layer, n, knn_score))
+                    print("%s, %s, %s, %s, %.04f" % (sample_size, layer, n, k, knn_score))
 
 
 if __name__ == "__main__":
