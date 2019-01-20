@@ -33,7 +33,7 @@ def list_to_numpy(data):
 def main():
     '''main function'''
 
-    for sample_size in ['25', '50', '75', '100']:
+    for sample_size in ['50', '75', '100']:
         for layer in ['0', '1', '2', '3', '4']:
             train_file = "train_%s_%s.csv" % (sample_size, layer)
             test_file = "test_%s.csv" % [layer]
