@@ -45,12 +45,12 @@ def main():
             train = []
             test = []
 
-            with open(train_path, newline='') as csv_fd:
+            with open(train_path, 'rb') as csv_fd:
                 csv_reader = csv.reader(csv_fd)
                 for row in csv_reader:
                     train.append(row)
 
-            with open(test_path, newline='') as csv_fd:
+            with open(test_path, 'rb') as csv_fd:
                 csv_reader = csv.reader(csv_fd)
                 for row in csv_reader:
                     test.append(row)
