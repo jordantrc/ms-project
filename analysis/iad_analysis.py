@@ -63,6 +63,8 @@ def main():
             ipca = IncrementalPCA(n_components=n, batch_size=ipca_batch_size)
             ipca.fit(train_x)
 
+            print("ipca_components shape = %s" % (ipca.components_.shape))
+
             components = ",".join(ipca.components_.tolist())
             explained_variance = ",".join(ipca.explained_variance_ratio_.tolist())
 
