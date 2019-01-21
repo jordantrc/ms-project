@@ -6,10 +6,9 @@ import os
 import sys
 
 from sklearn.decomposition import IncrementalPCA
-from sklearn.neighbors import KNeighborsClassifier
 
 base_dir = "/home/jordanc/datasets/UCF-101/csv/"
-pca_n_components = list(range(2, 21))
+pca_n_components = list(range(2, 101))
 ipca_batch_size = 1000
 knn_k = list(range(3, 20))
 
@@ -35,45 +34,41 @@ def main():
     '''main function'''
 
     for sample_size in ['50', '75', '100']:
-        for layer in ['0', '1', '2', '3', '4']:
-            train_file = "train_%s_%s.csv" % (sample_size, layer)
-            test_file = "test_%s.csv" % (layer)
+        layer = '3'
+        train_file = "train_%s_%s.csv" % (sample_size, layer)
+        test_file = "test_%s.csv" % (layer)
 
-            train_path = os.path.join(base_dir, train_file)
-            test_path = os.path.join(base_dir, test_file)
+        train_path = os.path.join(base_dir, train_file)
+        test_path = os.path.join(base_dir, test_file)
 
-            # open the file and load the data
-            train = []
-            test = []
+        # open the file and load the data
+        train = []
+        test = []
 
-            with open(train_path, 'rb') as csv_fd:
-                csv_reader = csv.reader(csv_fd)
-                for row in csv_reader:
-                    train.append(row)
+        with open(train_path, 'rb') as csv_fd:
+            csv_reader = csv.reader(csv_fd)
+            for row in csv_reader:
+                train.append(row)
 
-            with open(test_path, 'rb') as csv_fd:
-                csv_reader = csv.reader(csv_fd)
-                for row in csv_reader:
-                    test.append(row)
+        with open(test_path, 'rb') as csv_fd:
+            csv_reader = csv.reader(csv_fd)
+            for row in csv_reader:
+                test.append(row)
 
-            train_x, train_y = list_to_numpy(train)
-            test_x, test_y = list_to_numpy(test)
+        train_x, train_y = list_to_numpy(train)
+        test_x, test_y = list_to_numpy(test)
 
-            # principal component analysis, cross-validation
-            for n in pca_n_components:
-                ipca = IncrementalPCA(n_components=n, batch_size=ipca_batch_size)
-                ipca.fit(train_x)
-                train_x_ipca = ipca.transform(train_x)
-                test_x_ipca = ipca.transform(test_x)
+        # principal component analysis, cross-validation
+        for n in pca_n_components:
+            ipca = IncrementalPCA(n_components=n, batch_size=ipca_batch_size)
+            ipca.fit(train_x)
 
-                # classify with KNN and principcal components
-                for k in knn_k:
-                    classifier = KNeighborsClassifier(k)
-                    classifier.fit(train_x_ipca, train_y)
-                    knn_score = classifier.score(test_x_ipca, test_y)
+            components = ",".join(ipca.components_)
+            explained_variance = ",".join(ipca.explained_variance_ratio_)
 
-                    print("%s,%s,%s,%s,%.06f" % (sample_size, layer, n, k, knn_score))
-                    sys.stdout.flush()
+            print("components,%s,%s,%s,%s" % (sample_size, layer, n, components))
+            print("explained_variance,%s,%s,%s,%s" % (sample_size, layer, n, explained_variance))
+            sys.stdout.flush()
 
 
 if __name__ == "__main__":
