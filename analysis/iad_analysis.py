@@ -65,10 +65,8 @@ def main():
 
             print("ipca_components shape = %s" % str(ipca.components_.shape))
 
-            components = ",".join(ipca.components_.tolist())
             explained_variance = ",".join(ipca.explained_variance_ratio_.tolist())
 
-            print("components,%s,%s,%s,%s" % (sample_size, layer, n, components))
             print("explained_variance,%s,%s,%s,%s" % (sample_size, layer, n, explained_variance))
             sys.stdout.flush()
 
