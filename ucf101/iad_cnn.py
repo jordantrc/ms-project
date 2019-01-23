@@ -569,7 +569,7 @@ def iad_nn(run_string):
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    if CLASSIFIER in ['softmax', 'autoencoder']:
+    if CLASSIFIER in ['softmax', 'autoencode']:
         if CLASSIFIER == 'softmax':
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
