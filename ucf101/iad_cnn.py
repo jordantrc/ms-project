@@ -287,15 +287,15 @@ def get_variables_autoencode(model_name, num_channels=1):
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'Wc_0': _weight_variable('Wc_0'), [num_features, hidden_layer1],
-                'Wc_1': _weight_variable('Wc_1'), [hidden_layer1, hidden_layer2],
-                'Wc_2': _weight_variable('Wc_2'), [hidden_layer2, hidden_layer3],
-                'Wc_3': _weight_variable('Wc_3'), [hidden_layer3, hidden_layer4],
-                'Wd_0': _weight_variable('Wd_0'), [hidden_layer4, hidden_layer3],
-                'Wd_1': _weight_variable('Wd_1'), [hidden_layer3, hidden_layer2],
-                'Wd_2': _weight_variable('Wd_2'), [hidden_layer2, hidden_layer1],
-                'Wd_3': _weight_variable('Wd_3'), [hidden_layer1, num_features],
-                'w_out': _weight_variable('w_out'), [num_features, NUM_CLASSES],
+                'Wc_0': _weight_variable('Wc_0', [num_features, hidden_layer1]),
+                'Wc_1': _weight_variable('Wc_1', [hidden_layer1, hidden_layer2]),
+                'Wc_2': _weight_variable('Wc_2', [hidden_layer2, hidden_layer3]),
+                'Wc_3': _weight_variable('Wc_3', [hidden_layer3, hidden_layer4]),
+                'Wd_0': _weight_variable('Wd_0', [hidden_layer4, hidden_layer3]),
+                'Wd_1': _weight_variable('Wd_1', [hidden_layer3, hidden_layer2]),
+                'Wd_2': _weight_variable('Wd_2', [hidden_layer2, hidden_layer1]),
+                'Wd_3': _weight_variable('Wd_3', [hidden_layer1, num_features]),
+                'w_out': _weight_variable('w_out', [num_features, NUM_CLASSES]),
         }
         biases = {
                 'bc_0': _bias_variable('bc_0', [hidden_layer1]),
