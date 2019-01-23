@@ -27,7 +27,8 @@ CLASSES_TO_INCLUDE = 'all'
 TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
-CLASSIFIER = 'softmax'
+# softmax, autoencode, 
+CLASSIFIER = 'autoencode'
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
@@ -58,6 +59,7 @@ LAYER_GEOMETRY = {'1': (64, 16, 1),  # 1,024
 def save_settings(run_name):
     '''saves the parameters to a file'''
     with open('runs/%s_parameters.txt' % run_name, 'w') as fd:
+        fd.write("CLASSIFIER = %s\n" % CLASSIFIER)
         fd.write("BATCH_SIZE = %s\n" % BATCH_SIZE)
         fd.write("TRAIN_FILE_LIST = %s\n" % TRAIN_FILE_LIST)
         fd.write("TEST_FILE_LIST = %s\n" % TEST_FILE_LIST)
@@ -272,6 +274,43 @@ def get_variables_softmax(model_name, num_channels=1):
     return weights, biases
 
 
+def get_variables_autoencode(model_name, num_channels=1):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    num_features = geom[0] * geom[1] * num_channels
+
+    # hidden layer sizes
+    hidden_layer1 = num_features / 2
+    hidden_layer2 = hidden_layer1 / 2
+    hidden_layer3 = hidden_layer2 / 2
+    hidden_layer4 = hidden_layer3 / 2
+    hidden_layer5 = hidden_layer4 / 2
+
+    with tf.variable_scope(model_name) as var_scope:
+        weights = {
+                'Wc_0': _weight_variable('Wc_0'), [num_features, hidden_layer1],
+                'Wc_1': _weight_variable('Wc_1'), [hidden_layer1, hidden_layer2],
+                'Wc_2': _weight_variable('Wc_2'), [hidden_layer2, hidden_layer3],
+                'Wc_3': _weight_variable('Wc_3'), [hidden_layer3, hidden_layer4],
+                'Wd_0': _weight_variable('Wd_0'), [hidden_layer4, hidden_layer3],
+                'Wd_1': _weight_variable('Wd_1'), [hidden_layer3, hidden_layer2],
+                'Wd_2': _weight_variable('Wd_2'), [hidden_layer2, hidden_layer1],
+                'Wd_3': _weight_variable('Wd_3'), [hidden_layer1, num_features],
+                'w_out': _weight_variable('w_out'), [num_features, NUM_CLASSES],
+        }
+        biases = {
+                'bc_0': _bias_variable('bc_0', [hidden_layer1]),
+                'bc_1': _bias_variable('bc_1', [hidden_layer2]),
+                'bc_2': _bias_variable('bc_2', [hidden_layer3]),
+                'bc_3': _bias_variable('bc_3', [hidden_layer4]),
+                'bd_0': _bias_variable('bd_0', [hidden_layer3]),
+                'bd_1': _bias_variable('bd_1', [hidden_layer2]),
+                'bd_2': _bias_variable('bd_2', [hidden_layer1]),
+                'bd_3': _bias_variable('bd_3', [num_features]),
+                'b_out': _bias_variable('b_out', [NUM_CLASSES]),
+        }
+    return weights, biases
+
+
 def get_variables_temporal_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_rows = geom[0]
@@ -396,6 +435,26 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     return logits, conv_layers
 
 
+def autoencode(x, batch_size, weights, biases):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    
+    # autoencode layers
+    x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+    model = tf.matmul(x, weights['Wc_0']) + biases['bc_0']
+    model = tf.matmul(model, weights['Wc_1']) + biases['bc_1']
+    model = tf.matmul(model, weights['Wc_2']) + biases['bc_2']
+    model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
+    model = tf.matmul(model, weights['Wd_0']) + biases['bd_0']
+    model = tf.matmul(x, weights['Wd_1']) + biases['bd_1']
+    model = tf.matmul(x, weights['Wd_2']) + biases['bd_2']
+    model = tf.matmul(x, weights['Wd_3']) + biases['bd_3']
+
+    # final 
+    model = tf.matmul(x, weights['W_out']) + biases['b_out']
+
+    return model, []
+
+
 def softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     
@@ -477,6 +536,8 @@ def iad_nn(run_string):
     # setup the CNN
     if CLASSIFIER == 'softmax':
         weights, biases = get_variables_softmax('ucf101_iad')
+    elif CLASSIFIER == 'autoencode':
+        weights, biases = get_variables_autoencode('ucf101_iad')
 
     # placeholders
     input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -508,9 +569,13 @@ def iad_nn(run_string):
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    if CLASSIFIER == 'softmax':
-        logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
-        logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
+    if CLASSIFIER in ['softmax', 'autoencoder']:
+        if CLASSIFIER == 'softmax':
+            logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
+            logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
+        elif CLASSIFIER == 'autoencode':
+            logits, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
+            logits_test, _ = autoencode(x, BATCH_SIZE, weights, biases)
 
         print("logits shape = %s" % logits.get_shape().as_list())
         y_pred = tf.nn.softmax(logits)
@@ -652,8 +717,9 @@ if __name__ == "__main__":
     # settings for softmax hidden layer size
     #hyper_settings = hyper_softmax_hidden_powers
     # settings for dropout
-    hyper_settings = hyper_dropout
-    hyper_parameter = "dropout"
+    hyper_settings = [0]
+    #hyper_settings = hyper_dropout
+    hyper_parameter = "none"
 
     accuracies = []
 
@@ -665,6 +731,9 @@ if __name__ == "__main__":
             DROPOUT = h
             hyper_name = "Dropout"
             hyper_value = DROPOUT
+        elif hyper_parameter == "none":
+            hyper_name = ""
+            hyper_value = ""
 
         for layer in [1, 2, 3, 4, 5]:
             LAYER = layer
