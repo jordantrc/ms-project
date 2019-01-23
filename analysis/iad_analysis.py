@@ -8,7 +8,7 @@ import sys
 from sklearn.decomposition import IncrementalPCA
 
 base_dir = "/home/jordanc/datasets/UCF-101/csv/"
-pca_n_components = list(range(2, 101))
+pca_n_components = list(range(2, 51))
 ipca_batch_size = 1000
 knn_k = list(range(3, 20))
 
