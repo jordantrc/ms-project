@@ -295,7 +295,7 @@ def get_variables_autoencode(model_name, num_channels=1):
                 'Wd_1': _weight_variable('Wd_1', [hidden_layer3, hidden_layer2]),
                 'Wd_2': _weight_variable('Wd_2', [hidden_layer2, hidden_layer1]),
                 'Wd_3': _weight_variable('Wd_3', [hidden_layer1, num_features]),
-                'w_out': _weight_variable('W_out', [num_features, NUM_CLASSES]),
+                'W_out': _weight_variable('W_out', [num_features, NUM_CLASSES]),
         }
         biases = {
                 'bc_0': _bias_variable('bc_0', [hidden_layer1]),
