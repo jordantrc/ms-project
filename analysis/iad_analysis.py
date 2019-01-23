@@ -65,6 +65,11 @@ def main():
         train_x, train_y = list_to_numpy(train)
         test_x, test_y = list_to_numpy(test)
 
+        print("train_x sample = %s" % (train_x[0][0:5]))
+        print("test_x sample = %s" % (test_x[0][0:5]))
+        print("train_y sample = %s" % (train_y[0:5]))
+        print("test_y sample = %s" % (test_y[0:5]))
+
         # principal component analysis, cross-validation
         for n in pca_n_components:
             ipca = IncrementalPCA(n_components=n, batch_size=ipca_batch_size)
