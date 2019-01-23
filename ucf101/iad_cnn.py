@@ -445,12 +445,12 @@ def autoencode(x, batch_size, weights, biases):
     model = tf.matmul(model, weights['Wc_2']) + biases['bc_2']
     model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
     model = tf.matmul(model, weights['Wd_0']) + biases['bd_0']
-    model = tf.matmul(x, weights['Wd_1']) + biases['bd_1']
-    model = tf.matmul(x, weights['Wd_2']) + biases['bd_2']
-    model = tf.matmul(x, weights['Wd_3']) + biases['bd_3']
+    model = tf.matmul(model, weights['Wd_1']) + biases['bd_1']
+    model = tf.matmul(model, weights['Wd_2']) + biases['bd_2']
+    model = tf.matmul(model, weights['Wd_3']) + biases['bd_3']
 
     # final 
-    model = tf.matmul(x, weights['W_out']) + biases['b_out']
+    model = tf.matmul(model, weights['W_out']) + biases['b_out']
 
     return model, []
 
