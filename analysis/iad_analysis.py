@@ -67,6 +67,7 @@ def main():
             ipca = IncrementalPCA(n_components=n, batch_size=ipca_batch_size)
             ipca.fit(train_x)
             train_x_pca = ipca.transform(train_x)
+            test_x_pca = ipca.transform(test_x)
 
             # print("ipca_components shape = %s" % str(ipca.explained_variance_ratio_.shape))
             explained_variance = [str(x) for x in ipca.explained_variance_ratio_.tolist()]
@@ -86,7 +87,7 @@ def main():
             for k in sorted(classifiers.keys()):
                 classifier = classifiers[k]
                 classifier.fit(train_x_pca, train_y)
-                score = classifier.score(test_x, test_y)
+                score = classifier.score(test_x_pca, test_y)
                 print("%s = %.06f" % (k, score))
 
 
