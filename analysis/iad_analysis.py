@@ -59,6 +59,9 @@ def main():
             for row in csv_reader:
                 test.append(row)
 
+        print("train sample = %s" % (train[1][0:5]))
+        print("test sample = %s" % (test[1][0:5]))
+
         train_x, train_y = list_to_numpy(train)
         test_x, test_y = list_to_numpy(test)
 
