@@ -159,7 +159,7 @@ def _weight_variable(name, shape):
     return tf.get_variable(name, shape, initializer=initial)
 
 def _weight_variable_scaling(name, shape):
-    initial = tf.variance_scaling_initializer()
+    initializer = tf.variance_scaling_initializer()
     return tf.Variable(initializer(shape), dtype=tf.float32)
 
 def _bias_variable(name, shape):
