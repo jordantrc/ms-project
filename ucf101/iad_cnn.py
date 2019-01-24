@@ -283,10 +283,10 @@ def get_variables_autoencode(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
 
     # hidden layer sizes
-    hidden_layer1 = 150
-    hidden_layer2 = 150
+    hidden_layer1 = 100
+    hidden_layer2 = 100
     hidden_layer3 = 50
-    hidden_layer4 = hidden_layer3 / 2
+    hidden_layer4 = 10
     hidden_layer5 = hidden_layer4 / 2
     hidden_layer6 = hidden_layer5 / 2
     hidden_layer7 = hidden_layer6 / 2
