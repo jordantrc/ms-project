@@ -459,13 +459,13 @@ def autoencode(x, batch_size, weights, biases):
     # autoencode layers
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['Wc_0']) + biases['bc_0']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wc_1']) + biases['bc_1']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wc_2']) + biases['bc_2']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
     #model = tf.matmul(model, weights['Wc_4']) + biases['bc_4']
     #model = tf.nn.sigmoid(model)
     #model = tf.matmul(model, weights['Wc_5']) + biases['bc_5']
@@ -479,13 +479,13 @@ def autoencode(x, batch_size, weights, biases):
     #model = tf.matmul(model, weights['Wd_4']) + biases['bd_4']
     #model = tf.nn.sigmoid(model)
     model = tf.matmul(model, weights['Wd_3']) + biases['bd_3']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wd_2']) + biases['bd_2']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wd_1']) + biases['bd_1']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wd_0']) + biases['bd_0']
-    model = tf.nn.sigmoid(model)
+    model = tf.nn.tanh(model)
 
     # final 
     model = tf.matmul(model, weights['W_out']) + biases['b_out']
