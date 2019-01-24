@@ -158,6 +158,10 @@ def _weight_variable(name, shape):
     initial = tf.truncated_normal_initializer(stddev=WEIGHT_STDDEV)
     return tf.get_variable(name, shape, initializer=initial)
 
+def _weight_variable_scaling(name, shape):
+    initial = tf.variance_scaling_initializer()
+    return tf.Variable(initializer(shape), dtype=tf.float32)
+
 def _bias_variable(name, shape):
     initial = tf.constant(BIAS, name=name, shape=shape)
     return tf.Variable(initial)
@@ -289,21 +293,21 @@ def get_variables_autoencode(model_name, num_channels=1):
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
-                'Wc_0': _weight_variable('Wc_0', [num_features, hidden_layer1]),
-                'Wc_1': _weight_variable('Wc_1', [hidden_layer1, hidden_layer2]),
-                'Wc_2': _weight_variable('Wc_2', [hidden_layer2, hidden_layer3]),
-                'Wc_3': _weight_variable('Wc_3', [hidden_layer3, hidden_layer4]),
-                'Wc_4': _weight_variable('Wc_4', [hidden_layer4, hidden_layer5]),
-                'Wc_5': _weight_variable('Wc_5', [hidden_layer5, hidden_layer6]),
-                'Wc_6': _weight_variable('Wc_6', [hidden_layer6, hidden_layer7]),
-                'Wd_0': _weight_variable('Wd_0', [hidden_layer7, hidden_layer6]),
-                'Wd_1': _weight_variable('Wd_1', [hidden_layer6, hidden_layer5]),
-                'Wd_2': _weight_variable('Wd_2', [hidden_layer5, hidden_layer4]),
-                'Wd_3': _weight_variable('Wd_3', [hidden_layer4, hidden_layer3]),
-                'Wd_4': _weight_variable('Wd_4', [hidden_layer3, hidden_layer2]),
-                'Wd_5': _weight_variable('Wd_5', [hidden_layer2, hidden_layer1]),
-                'Wd_6': _weight_variable('Wd_6', [hidden_layer1, num_features]),
-                'W_out': _weight_variable('W_out', [num_features, NUM_CLASSES]),
+                'Wc_0': _weight_variable_scaling('Wc_0', [num_features, hidden_layer1]),
+                'Wc_1': _weight_variable_scaling('Wc_1', [hidden_layer1, hidden_layer2]),
+                'Wc_2': _weight_variable_scaling('Wc_2', [hidden_layer2, hidden_layer3]),
+                'Wc_3': _weight_variable_scaling('Wc_3', [hidden_layer3, hidden_layer4]),
+                'Wc_4': _weight_variable_scaling('Wc_4', [hidden_layer4, hidden_layer5]),
+                'Wc_5': _weight_variable_scaling('Wc_5', [hidden_layer5, hidden_layer6]),
+                'Wc_6': _weight_variable_scaling('Wc_6', [hidden_layer6, hidden_layer7]),
+                'Wd_0': _weight_variable_scaling('Wd_0', [hidden_layer7, hidden_layer6]),
+                'Wd_1': _weight_variable_scaling('Wd_1', [hidden_layer6, hidden_layer5]),
+                'Wd_2': _weight_variable_scaling('Wd_2', [hidden_layer5, hidden_layer4]),
+                'Wd_3': _weight_variable_scaling('Wd_3', [hidden_layer4, hidden_layer3]),
+                'Wd_4': _weight_variable_scaling('Wd_4', [hidden_layer3, hidden_layer2]),
+                'Wd_5': _weight_variable_scaling('Wd_5', [hidden_layer2, hidden_layer1]),
+                'Wd_6': _weight_variable_scaling('Wd_6', [hidden_layer1, num_features]),
+                'W_out': _weight_variable_scaling('W_out', [num_features, NUM_CLASSES]),
         }
         biases = {
                 'bc_0': _bias_variable('bc_0', [hidden_layer1]),
