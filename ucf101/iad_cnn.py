@@ -783,7 +783,7 @@ if __name__ == "__main__":
             # training run
             BATCH_SIZE = 10
             LOAD_MODEL = None
-            EPOCHS = 5
+            EPOCHS = 20
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             iad_nn(run_string)
