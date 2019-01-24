@@ -284,6 +284,8 @@ def get_variables_autoencode(model_name, num_channels=1):
     hidden_layer3 = hidden_layer2 / 2
     hidden_layer4 = hidden_layer3 / 2
     hidden_layer5 = hidden_layer4 / 2
+    hidden_layer6 = hidden_layer5 / 2
+    hidden_layer7 = hidden_layer6 / 2
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
@@ -291,10 +293,16 @@ def get_variables_autoencode(model_name, num_channels=1):
                 'Wc_1': _weight_variable('Wc_1', [hidden_layer1, hidden_layer2]),
                 'Wc_2': _weight_variable('Wc_2', [hidden_layer2, hidden_layer3]),
                 'Wc_3': _weight_variable('Wc_3', [hidden_layer3, hidden_layer4]),
-                'Wd_0': _weight_variable('Wd_0', [hidden_layer4, hidden_layer3]),
-                'Wd_1': _weight_variable('Wd_1', [hidden_layer3, hidden_layer2]),
-                'Wd_2': _weight_variable('Wd_2', [hidden_layer2, hidden_layer1]),
-                'Wd_3': _weight_variable('Wd_3', [hidden_layer1, num_features]),
+                'Wc_4': _weight_variable('Wc_4', [hidden_layer4, hidden_layer5]),
+                'Wc_5': _weight_variable('Wc_5', [hidden_layer5, hidden_layer6]),
+                'Wc_6': _weight_variable('Wc_6', [hidden_layer6, hidden_layer7]),
+                'Wd_0': _weight_variable('Wd_0', [hidden_layer7, hidden_layer6]),
+                'Wd_1': _weight_variable('Wd_1', [hidden_layer6, hidden_layer5]),
+                'Wd_2': _weight_variable('Wd_2', [hidden_layer5, hidden_layer4]),
+                'Wd_3': _weight_variable('Wd_3', [hidden_layer4, hidden_layer3]),
+                'Wd_4': _weight_variable('Wd_4', [hidden_layer3, hidden_layer2]),
+                'Wd_5': _weight_variable('Wd_5', [hidden_layer2, hidden_layer1]),
+                'Wd_6': _weight_variable('Wd_6', [hidden_layer1, num_features]),
                 'W_out': _weight_variable('W_out', [num_features, NUM_CLASSES]),
         }
         biases = {
@@ -302,10 +310,16 @@ def get_variables_autoencode(model_name, num_channels=1):
                 'bc_1': _bias_variable('bc_1', [hidden_layer2]),
                 'bc_2': _bias_variable('bc_2', [hidden_layer3]),
                 'bc_3': _bias_variable('bc_3', [hidden_layer4]),
-                'bd_0': _bias_variable('bd_0', [hidden_layer3]),
-                'bd_1': _bias_variable('bd_1', [hidden_layer2]),
-                'bd_2': _bias_variable('bd_2', [hidden_layer1]),
-                'bd_3': _bias_variable('bd_3', [num_features]),
+                'bc_4': _bias_variable('bc_4', [hidden_layer5]),
+                'bc_5': _bias_variable('bc_5', [hidden_layer6]),
+                'bc_6': _bias_variable('bc_6', [hidden_layer7]),
+                'bd_0': _bias_variable('bd_0', [hidden_layer6]),
+                'bd_1': _bias_variable('bd_1', [hidden_layer5]),
+                'bd_2': _bias_variable('bd_2', [hidden_layer4]),
+                'bd_3': _bias_variable('bd_3', [hidden_layer3]),
+                'bd_4': _bias_variable('bd_4', [hidden_layer2]),
+                'bd_5': _bias_variable('bd_5', [hidden_layer1]),
+                'bd_6': _bias_variable('bd_6', [num_features]),
                 'b_out': _bias_variable('b_out', [NUM_CLASSES]),
         }
     return weights, biases
@@ -444,10 +458,16 @@ def autoencode(x, batch_size, weights, biases):
     model = tf.matmul(model, weights['Wc_1']) + biases['bc_1']
     model = tf.matmul(model, weights['Wc_2']) + biases['bc_2']
     model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
+    model = tf.matmul(model, weights['Wc_4']) + biases['bc_4']
+    model = tf.matmul(model, weights['Wc_5']) + biases['bc_5']
+    model = tf.matmul(model, weights['Wc_6']) + biases['bc_6']
     model = tf.matmul(model, weights['Wd_0']) + biases['bd_0']
     model = tf.matmul(model, weights['Wd_1']) + biases['bd_1']
     model = tf.matmul(model, weights['Wd_2']) + biases['bd_2']
     model = tf.matmul(model, weights['Wd_3']) + biases['bd_3']
+    model = tf.matmul(model, weights['Wd_4']) + biases['bd_4']
+    model = tf.matmul(model, weights['Wd_5']) + biases['bd_5']
+    model = tf.matmul(model, weights['Wd_6']) + biases['bd_6']
 
     # final 
     model = tf.matmul(model, weights['W_out']) + biases['b_out']
