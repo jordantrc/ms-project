@@ -283,9 +283,9 @@ def get_variables_autoencode(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
 
     # hidden layer sizes
-    hidden_layer1 = 128
-    hidden_layer2 = 128
-    hidden_layer3 = 32
+    hidden_layer1 = 256
+    hidden_layer2 = 256
+    hidden_layer3 = 64
     hidden_layer4 = hidden_layer3 / 2
     hidden_layer5 = hidden_layer4 / 2
     hidden_layer6 = hidden_layer5 / 2
@@ -783,7 +783,7 @@ if __name__ == "__main__":
             # training run
             BATCH_SIZE = 10
             LOAD_MODEL = None
-            EPOCHS = 20
+            EPOCHS = 5
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             iad_nn(run_string)
