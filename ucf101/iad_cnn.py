@@ -285,7 +285,7 @@ def get_variables_autoencode(model_name, num_channels=1):
     # hidden layer sizes
     hidden_layer1 = 128
     hidden_layer2 = 128
-    hidden_layer3 = 56
+    hidden_layer3 = 64
     hidden_layer4 = hidden_layer3 / 2
     hidden_layer5 = hidden_layer4 / 2
     hidden_layer6 = hidden_layer5 / 2
