@@ -283,9 +283,9 @@ def get_variables_autoencode(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
 
     # hidden layer sizes
-    hidden_layer1 = num_features / 2
-    hidden_layer2 = hidden_layer1 / 2
-    hidden_layer3 = hidden_layer2 / 2
+    hidden_layer1 = 128
+    hidden_layer2 = 128
+    hidden_layer3 = 4
     hidden_layer4 = hidden_layer3 / 2
     hidden_layer5 = hidden_layer4 / 2
     hidden_layer6 = hidden_layer5 / 2
@@ -460,12 +460,12 @@ def autoencode(x, batch_size, weights, biases):
     x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['Wc_0']) + biases['bc_0']
     model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wc_1']) + biases['bc_1']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wc_2']) + biases['bc_2']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
-    #model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wc_1']) + biases['bc_1']
+    model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wc_2']) + biases['bc_2']
+    model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
+    model = tf.nn.sigmoid(model)
     #model = tf.matmul(model, weights['Wc_4']) + biases['bc_4']
     #model = tf.nn.sigmoid(model)
     #model = tf.matmul(model, weights['Wc_5']) + biases['bc_5']
@@ -478,12 +478,12 @@ def autoencode(x, batch_size, weights, biases):
     #model = tf.nn.sigmoid(model)
     #model = tf.matmul(model, weights['Wd_4']) + biases['bd_4']
     #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wd_3']) + biases['bd_3']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wd_2']) + biases['bd_2']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wd_1']) + biases['bd_1']
-    #model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wd_3']) + biases['bd_3']
+    model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wd_2']) + biases['bd_2']
+    model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wd_1']) + biases['bd_1']
+    model = tf.nn.sigmoid(model)
     model = tf.matmul(model, weights['Wd_0']) + biases['bd_0']
     model = tf.nn.sigmoid(model)
 
