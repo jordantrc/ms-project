@@ -605,8 +605,6 @@ def iad_nn(run_string):
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
-            
-            loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
 
         elif CLASSIFIER == 'autoencode':
             geom = LAYER_GEOMETRY[str(LAYER)]
@@ -623,8 +621,6 @@ def iad_nn(run_string):
             logits = tf.nn.tanh(logits)
             logits_test = tf.matmul(x_test_autoencode, weights['W_out']) + biases['b_out']
             logits_test = tf.nn.tanh(logits)
-
-            loss = tf.reduce_mean(tf.square(x_autoencode - x))  # mean-square error
 
         print("logits shape = %s" % logits.get_shape().as_list())
         y_pred = tf.nn.softmax(logits)
