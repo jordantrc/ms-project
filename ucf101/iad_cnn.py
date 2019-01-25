@@ -489,6 +489,7 @@ def autoencode(x, batch_size, weights, biases):
 
     # final 
     model = tf.matmul(model, weights['W_out']) + biases['b_out']
+    model = tf.nn.tanh(model)
 
     return model, []
 
@@ -611,9 +612,14 @@ def iad_nn(run_string):
         if CLASSIFIER == 'softmax':
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
+            
+            loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+
         elif CLASSIFIER == 'autoencode':
             logits, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
             logits_test, _ = autoencode(x, BATCH_SIZE, weights, biases)
+
+            loss = tf.reduce_mean(tf.square(logits - x))  # mean-square error
 
         print("logits shape = %s" % logits.get_shape().as_list())
         y_pred = tf.nn.softmax(logits)
@@ -626,7 +632,6 @@ def iad_nn(run_string):
         accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
         # loss and optimizer
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
         train_op = optimizer.minimize(loss)
 
