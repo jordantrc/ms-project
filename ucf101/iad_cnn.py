@@ -454,10 +454,6 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
 
 def autoencode(x, batch_size, weights, biases):
-    geom = LAYER_GEOMETRY[str(LAYER)]
-    
-    # autoencode layers
-    x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['Wc_0']) + biases['bc_0']
     model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wc_1']) + biases['bc_1']
@@ -495,10 +491,6 @@ def autoencode(x, batch_size, weights, biases):
 
 
 def softmax_regression(x, batch_size, weights, biases, dropout):
-    geom = LAYER_GEOMETRY[str(LAYER)]
-    
-    # layer 1
-    x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
     #model = tf.nn.leaky_relu(model, alpha=LEAKY_RELU_ALPHA)
     model = _drop_connect(model, dropout)
@@ -610,14 +602,31 @@ def iad_nn(run_string):
     # get neural network response
     if CLASSIFIER in ['softmax', 'autoencode']:
         if CLASSIFIER == 'softmax':
+            geom = LAYER_GEOMETRY[str(LAYER)]
+            # layer 1
+            x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+            x_test = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
             
             loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
 
         elif CLASSIFIER == 'autoencode':
-            logits, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
-            logits_test, _ = autoencode(x, BATCH_SIZE, weights, biases)
+            geom = LAYER_GEOMETRY[str(LAYER)]
+            # layer 1
+            x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+            x_test = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+
+            x_auotencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
+            x_test_autoencode, _ = autoencode(x, BATCH_SIZE, weights, biases)
+
+            # softmax regression with output
+            # final 
+            logits = tf.matmul(x_autoencode, weights['W_out']) + biases['b_out']
+            logits = tf.nn.tanh(logits)
+            logits_test = tf.matmul(x_test_autoencode, weights['W_out']) + biases['b_out']
+            logits_test = tf.nn.tanh(logits)
 
             loss = tf.reduce_mean(tf.square(logits - x))  # mean-square error
 
