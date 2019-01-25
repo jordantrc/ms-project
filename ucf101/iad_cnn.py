@@ -283,11 +283,11 @@ def get_variables_autoencode(model_name, num_channels=1):
     num_features = geom[0] * geom[1] * num_channels
 
     # hidden layer sizes
-    hidden_layer1 = 100
-    hidden_layer2 = 100
-    hidden_layer3 = 50
-    hidden_layer4 = 25
-    hidden_layer5 = hidden_layer4 / 2
+    hidden_layer1 = 500
+    hidden_layer2 = 500
+    hidden_layer3 = 250
+    hidden_layer4 = 100
+    hidden_layer5 = 50
     hidden_layer6 = hidden_layer5 / 2
     hidden_layer7 = hidden_layer6 / 2
 
@@ -462,8 +462,8 @@ def autoencode(x, batch_size, weights, biases):
     model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
     model = tf.nn.tanh(model)
-    #model = tf.matmul(model, weights['Wc_4']) + biases['bc_4']
-    #model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wc_4']) + biases['bc_4']
+    model = tf.nn.tanh(model)
     #model = tf.matmul(model, weights['Wc_5']) + biases['bc_5']
     #model = tf.nn.sigmoid(model)
     #model = tf.matmul(model, weights['Wc_6']) + biases['bc_6']
@@ -472,8 +472,8 @@ def autoencode(x, batch_size, weights, biases):
     #model = tf.nn.sigmoid(model)
     #model = tf.matmul(model, weights['Wd_5']) + biases['bd_5']
     #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wd_4']) + biases['bd_4']
-    #model = tf.nn.sigmoid(model)
+    model = tf.matmul(model, weights['Wd_4']) + biases['bd_4']
+    model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wd_3']) + biases['bd_3']
     model = tf.nn.tanh(model)
     model = tf.matmul(model, weights['Wd_2']) + biases['bd_2']
