@@ -14,8 +14,8 @@ import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/test-75.list_expanded'
-TRAIN_FILE_LIST = 'train-test-splits/train-75.list_expanded'
+TEST_FILE_LIST = 'train-test-splits/test-50.list_expanded'
+TRAIN_FILE_LIST = 'train-test-splits/train-50.list_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
