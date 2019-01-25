@@ -483,10 +483,6 @@ def autoencode(x, batch_size, weights, biases):
     model = tf.matmul(model, weights['Wd_0']) + biases['bd_0']
     model = tf.nn.tanh(model)
 
-    # final 
-    model = tf.matmul(model, weights['W_out']) + biases['b_out']
-    model = tf.nn.tanh(model)
-
     return model, []
 
 
@@ -615,8 +611,8 @@ def iad_nn(run_string):
         elif CLASSIFIER == 'autoencode':
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
-            x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
-            x_test = tf.reshape(x, [batch_size, geom[0] * geom[1]])
+            x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
+            x_test = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
 
             x_auotencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
             x_test_autoencode, _ = autoencode(x, BATCH_SIZE, weights, biases)
