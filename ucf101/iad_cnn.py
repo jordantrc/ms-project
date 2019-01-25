@@ -633,6 +633,7 @@ def iad_nn(run_string):
         accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
         # loss and optimizer
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
         train_op = optimizer.minimize(loss)
 
