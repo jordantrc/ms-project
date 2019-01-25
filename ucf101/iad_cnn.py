@@ -14,8 +14,8 @@ import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/test.list_expanded'
-TRAIN_FILE_LIST = 'train-test-splits/train.list_expanded'
+TEST_FILE_LIST = 'train-test-splits/test-75.list_expanded'
+TRAIN_FILE_LIST = 'train-test-splits/train-75.list_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -286,7 +286,7 @@ def get_variables_autoencode(model_name, num_channels=1):
     hidden_layer1 = 500
     hidden_layer2 = 200
     hidden_layer3 = 50
-    hidden_layer4 = 5
+    hidden_layer4 = 10
     hidden_layer5 = 10
     hidden_layer6 = hidden_layer5 / 2
     hidden_layer7 = hidden_layer6 / 2
