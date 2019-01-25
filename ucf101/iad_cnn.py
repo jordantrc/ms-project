@@ -618,9 +618,7 @@ def iad_nn(run_string):
             # softmax regression with output
             # final 
             logits = tf.matmul(x_autoencode, weights['W_out']) + biases['b_out']
-            logits = tf.nn.tanh(logits)
             logits_test = tf.matmul(x_test_autoencode, weights['W_out']) + biases['b_out']
-            logits_test = tf.nn.tanh(logits)
 
         print("logits shape = %s" % logits.get_shape().as_list())
         y_pred = tf.nn.softmax(logits)
