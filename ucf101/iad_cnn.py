@@ -624,7 +624,7 @@ def iad_nn(run_string):
             logits_test = tf.matmul(x_test_autoencode, weights['W_out']) + biases['b_out']
             logits_test = tf.nn.tanh(logits)
 
-            loss = tf.reduce_mean(tf.square(logits - x))  # mean-square error
+            loss = tf.reduce_mean(tf.square(x_autoencode - x))  # mean-square error
 
         print("logits shape = %s" % logits.get_shape().as_list())
         y_pred = tf.nn.softmax(logits)
