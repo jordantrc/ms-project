@@ -614,7 +614,7 @@ def iad_nn(run_string):
             x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
             x_test = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
 
-            x_auotencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
+            x_autoencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
             x_test_autoencode, _ = autoencode(x, BATCH_SIZE, weights, biases)
 
             # softmax regression with output
