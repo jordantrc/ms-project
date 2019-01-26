@@ -290,29 +290,36 @@ def get_variables_autoencode(model_name, num_channels=1):
 
     weights = {}
     biases = {}
+    
+    # encoder weights and biases
+    # [500, 200, 50, 10]
     for i, l in enumerate(AUTOENCODER_LAYER_SIZES):
         encoder_w_id = 'We_' + str(i)
-        decoder_w_id = 'Wd_' + str(i)
         encoder_b_id = 'be_' + str(i)
-        decoder_b_id = 'bd_' + str(i)
         if i == 0:
-            # first layer
-            encoder_first_size = num_features
-            encoder_second_size = l
-            decoder_first_size = l
-            decoder_second_size = num_features
+            with tf.variable_scope(model_name) as var_scope:
+                weights[encoder_w_id] = _weight_variable(encoder_w_id, [num_features, l])
+                biases[encoder_b_id] = _bias_variable(encoder_b_id, [l])
         else:
-            encoder_first_size = AUTOENCODER_LAYER_SIZES[i - 1]
-            encoder_second_size = l
-            decoder_first_size = l
-            decoder_second_size = AUTOENCODER_LAYER_SIZES[i - 1]
+            with tf.variable_scope(model_name) as var_scope:
+                weights[encoder_w_id] = _weight_variable(encoder_w_id, [AUTOENCODER_LAYER_SIZES[i - 1], l])
+                biases[encoder_b_id] = _bias_variable(encoder_b_id, [l])
 
-        with tf.variable_scope(model_name) as var_scope:
-            weights[encoder_w_id] = _weight_variable(encoder_w_id, [encoder_first_size, encoder_second_size])
-            weights[decoder_w_id] = _weight_variable(decoder_w_id, [decoder_first_size, decoder_second_size])
-            biases[encoder_b_id] = _bias_variable(encoder_b_id, [encoder_second_size])
-            biases[decoder_b_id] = _bias_variable(decoder_b_id, [decoder_second_size])
-            
+    # decoder weights and biases
+    # [10, 50, 200, 500]
+    for i, l in enumerate(reversed(AUTOENCODER_LAYER_SIZES)):
+        decoder_w_id = 'Wd_' + str(i)
+        decoder_b_id = 'bd_' + str(i)
+        if i == len(AUTOENCODER_LAYER_SIZES) - 1:
+            with tf.variable_scope(model_name) as var_scope:
+                weights[decoder_w_id] = _weight_variable(decoder_w_id, [l, num_features])
+                biases[decoder_b_id] = _bias_variable(decoder_b_id, [num_features])
+        else:
+            with tf.variable_scope(model_name) as var_scope:
+                weights[decoder_w_id] = _weight_variable(decoder_w_id, [l, AUTOENCODER_LAYER_SIZES[i + 1]])
+                biases[decoder_b_id] = _bias_variable(decoder_b_id, [AUTOENCODER_LAYER_SIZES[i + 1]])
+
+    # output weights and biases
     with tf.variable_scope(model_name) as var_scope:
         weights['W_out'] = _weight_variable('W_out', [num_features, NUM_CLASSES])
         biases['b_out'] = _bias_variable('b_out', [NUM_CLASSES])
