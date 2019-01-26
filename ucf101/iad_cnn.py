@@ -313,6 +313,10 @@ def get_variables_autoencode(model_name, num_channels=1):
             biases[encoder_b_id] = _bias_variable(encoder_b_id, [encoder_second_size])
             biases[decoder_b_id] = _bias_variable(decoder_b_id, [decoder_second_size])
             
+    with tf.variable_scope(model_name) as var_scope:
+        weights['W_out'] = _weight_variable('W_out', [num_features, NUM_CLASSES])
+        biases['b_out'] = _bias_variable('b_out', [NUM_CLASSES])
+
     return weights, biases
 
 
