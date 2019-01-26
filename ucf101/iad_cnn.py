@@ -461,6 +461,9 @@ def autoencode(x, batch_size, weights, biases):
         if i == AUTOENCODER_NUM_LAYERS - 1:
             model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
             model = tf.nn.sigmoid(model)
+        elif i == 0:
+            model = tf.matmul(x, weights[encoder_w_id]) + biases[encoder_b_id]
+            model = tf.nn.relu(model)
         else:
             model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
             tf.nn.relu(model)
