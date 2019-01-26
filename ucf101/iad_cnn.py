@@ -290,7 +290,7 @@ def get_variables_autoencode(model_name, num_channels=1):
 
     weights = {}
     biases = {}
-    for i, l in AUTOENCODER_LAYER_SIZES:
+    for i, l in range(AUTOENCODER_LAYER_SIZES):
         encoder_w_id = 'We_' + str(i)
         decoder_w_id = 'Wd_' + str(i)
         encoder_b_id = 'be_' + str(i)
