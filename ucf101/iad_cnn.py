@@ -38,6 +38,10 @@ BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 4096
 
+# autoencoder hyper parameters
+AUTOENCODER_NUM_LAYERS = 4
+AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
+
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
 # layer 1 - 64 features x 16 time slices
@@ -282,50 +286,33 @@ def get_variables_autoencode(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_features = geom[0] * geom[1] * num_channels
 
-    # hidden layer sizes
-    hidden_layer1 = 500
-    hidden_layer2 = 200
-    hidden_layer3 = 50
-    hidden_layer4 = 10
-    hidden_layer5 = 10
-    hidden_layer6 = hidden_layer5 / 2
-    hidden_layer7 = hidden_layer6 / 2
+    assert len(AUTOENCODER_LAYER_SIZES) == AUTOENCODER_NUM_LAYERS, "Length of layer size list must match number of layers"
 
-    with tf.variable_scope(model_name) as var_scope:
-        weights = {
-                'Wc_0': _weight_variable('Wc_0', [num_features, hidden_layer1]),
-                'Wc_1': _weight_variable('Wc_1', [hidden_layer1, hidden_layer2]),
-                'Wc_2': _weight_variable('Wc_2', [hidden_layer2, hidden_layer3]),
-                'Wc_3': _weight_variable('Wc_3', [hidden_layer3, hidden_layer4]),
-                'Wc_4': _weight_variable('Wc_4', [hidden_layer4, hidden_layer5]),
-                'Wc_5': _weight_variable('Wc_5', [hidden_layer5, hidden_layer6]),
-                'Wc_6': _weight_variable('Wc_6', [hidden_layer6, hidden_layer7]),
-                'Wd_6': _weight_variable('Wd_6', [hidden_layer7, hidden_layer6]),
-                'Wd_5': _weight_variable('Wd_5', [hidden_layer6, hidden_layer5]),
-                'Wd_4': _weight_variable('Wd_4', [hidden_layer5, hidden_layer4]),
-                'Wd_3': _weight_variable('Wd_3', [hidden_layer4, hidden_layer3]),
-                'Wd_2': _weight_variable('Wd_2', [hidden_layer3, hidden_layer2]),
-                'Wd_1': _weight_variable('Wd_1', [hidden_layer2, hidden_layer1]),
-                'Wd_0': _weight_variable('Wd_0', [hidden_layer1, num_features]),
-                'W_out': _weight_variable('W_out', [num_features, NUM_CLASSES]),
-        }
-        biases = {
-                'bc_0': _bias_variable('bc_0', [hidden_layer1]),
-                'bc_1': _bias_variable('bc_1', [hidden_layer2]),
-                'bc_2': _bias_variable('bc_2', [hidden_layer3]),
-                'bc_3': _bias_variable('bc_3', [hidden_layer4]),
-                'bc_4': _bias_variable('bc_4', [hidden_layer5]),
-                'bc_5': _bias_variable('bc_5', [hidden_layer6]),
-                'bc_6': _bias_variable('bc_6', [hidden_layer7]),
-                'bd_6': _bias_variable('bd_6', [hidden_layer6]),
-                'bd_5': _bias_variable('bd_5', [hidden_layer5]),
-                'bd_4': _bias_variable('bd_4', [hidden_layer4]),
-                'bd_3': _bias_variable('bd_3', [hidden_layer3]),
-                'bd_2': _bias_variable('bd_2', [hidden_layer2]),
-                'bd_1': _bias_variable('bd_1', [hidden_layer1]),
-                'bd_0': _bias_variable('bd_0', [num_features]),
-                'b_out': _bias_variable('b_out', [NUM_CLASSES]),
-        }
+    weights = {}
+    biases = {}
+    for i, l in AUTOENCODER_LAYER_SIZES:
+        encoder_w_id = 'We_' + str(i)
+        decoder_w_id = 'Wd_' + str(i)
+        encoder_b_id = 'be_' + str(i)
+        decoder_b_id = 'bd_' + str(i)
+        if i == 0:
+            # first layer
+            encoder_first_size = num_features
+            encoder_second_size = l
+            decoder_first_size = l
+            decoder_second_size = num_features
+        else:
+            encoder_first_size = AUTOENCODER_LAYER_SIZES[i - 1]
+            encoder_second_size = l
+            decoder_first_size = l
+            decoder_second_size = AUTOENCODER_LAYER_SIZES[i - 1]
+
+        with tf.variable_scope(model_name) as var_scope:
+            weights[encoder_w_id] = _weight_variable(encoder_w_id, [encoder_first_size, encoder_second_size])
+            weights[decoder_w_id] = _weight_variable(decoder_w_id, [decoder_first_size, decoder_second_size])
+            biases[encoder_b_id] = _bias_variable(encoder_b_id, [encoder_second_size])
+            biases[decoder_b_id] = _bias_variable(decoder_b_id, [decoder_second_size])
+            
     return weights, biases
 
 
@@ -454,36 +441,24 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
 
 def autoencode(x, batch_size, weights, biases):
-    model = tf.matmul(x, weights['Wc_0']) + biases['bc_0']
-    model = tf.nn.relu(model)
-    model = tf.matmul(model, weights['Wc_1']) + biases['bc_1']
-    model = tf.nn.relu(model)
-    model = tf.matmul(model, weights['Wc_2']) + biases['bc_2']
-    model = tf.nn.relu(model)
     
-    # latent view layer
-    model = tf.matmul(model, weights['Wc_3']) + biases['bc_3']
-    model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wc_4']) + biases['bc_4']
-    #model = tf.nn.tanh(model)
-    #model = tf.matmul(model, weights['Wc_5']) + biases['bc_5']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wc_6']) + biases['bc_6']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wd_6']) + biases['bd_6']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wd_5']) + biases['bd_5']
-    #model = tf.nn.sigmoid(model)
-    #model = tf.matmul(model, weights['Wd_4']) + biases['bd_4']
-    #model = tf.nn.tanh(model)
-    model = tf.matmul(model, weights['Wd_3']) + biases['bd_3']
-    model = tf.nn.relu(model)
-    model = tf.matmul(model, weights['Wd_2']) + biases['bd_2']
-    model = tf.nn.relu(model)
-    model = tf.matmul(model, weights['Wd_1']) + biases['bd_1']
-    model = tf.nn.relu(model)
-    model = tf.matmul(model, weights['Wd_0']) + biases['bd_0']
-    model = tf.nn.relu(model)
+    # encoder
+    for i in range(0, AUTOENCODER_NUM_LAYERS):
+        encoder_w_id = 'We_' + str(i)
+        encoder_b_id = 'be_' + str(i)
+        if i == AUTOENCODER_NUM_LAYERS - 1:
+            model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
+            model = tf.nn.sigmoid(model)
+        else:
+            model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
+            tf.nn.relu(model)
+
+    # decoder
+    for i in range(AUTOENCODER_NUM_LAYERS - 1, -1, -1):
+        decoder_w_id = 'Wd_' + str(i)
+        decoder_b_id = 'bd_' + str(i)
+        model = tf.matmul(model, weights[decoder_w_id]) + biases[decoder_b_id]
+        tf.nn.relu(model)
 
     return model, []
 
