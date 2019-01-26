@@ -454,21 +454,20 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 def autoencode(x, batch_size, weights, biases):
     
     # encoder
+    # [500, 200, 50, 10]
     for i in range(0, AUTOENCODER_NUM_LAYERS):
         encoder_w_id = 'We_' + str(i)
         encoder_b_id = 'be_' + str(i)
         if i == AUTOENCODER_NUM_LAYERS - 1:
             model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
             model = tf.nn.sigmoid(model)
-        elif i == 0:
-            model = tf.matmul(x, weights[encoder_w_id]) + biases[encoder_b_id]
-            tf.nn.relu(model)
         else:
             model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
             tf.nn.relu(model)
 
     # decoder
-    for i in range(AUTOENCODER_NUM_LAYERS - 1, -1, -1):
+    # [10, 50, 200, 500]
+    for i, l in enumerate(reversed(AUTOENCODER_LAYER_SIZES)):
         decoder_w_id = 'Wd_' + str(i)
         decoder_b_id = 'bd_' + str(i)
         model = tf.matmul(model, weights[decoder_w_id]) + biases[decoder_b_id]
