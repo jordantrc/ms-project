@@ -470,7 +470,7 @@ def autoencode(x, batch_size, weights, biases):
 
     # decoder
     # [10, 50, 200, 500]
-    for i, l in enumerate(reversed(AUTOENCODER_LAYER_SIZES)):
+    for i in range(0, AUTOENCODER_NUM_LAYERS):
         decoder_w_id = 'Wd_' + str(i)
         decoder_b_id = 'bd_' + str(i)
         model = tf.matmul(model, weights[decoder_w_id]) + biases[decoder_b_id]
