@@ -288,36 +288,24 @@ def get_variables_autoencode(model_name, num_channels=1):
 
     assert len(AUTOENCODER_LAYER_SIZES) == AUTOENCODER_NUM_LAYERS, "Length of layer size list must match number of layers"
 
+    layer_pairs = [-1] * 2 * AUTOENCODER_NUM_LAYERS
+    for i, l in enumerate(AUTOENCODER_LAYER_SIZES):
+        if i == 0:
+            layer_pairs[0] = [num_features, l]
+            layer_pairs[-1] = [l, num_features]
+        else:
+            layer_pairs[i] = [AUTOENCODER_LAYER_SIZES[i - 1], l]
+            layer_pairs[-1 - i] = [l, AUTOENCODER_LAYER_SIZES[i - 1]]
+
+    # create weights and biases
     weights = {}
     biases = {}
-    
-    # encoder weights and biases
-    # [500, 200, 50, 10]
-    for i, l in enumerate(AUTOENCODER_LAYER_SIZES):
-        encoder_w_id = 'We_' + str(i)
-        encoder_b_id = 'be_' + str(i)
-        if i == 0:
-            with tf.variable_scope(model_name) as var_scope:
-                weights[encoder_w_id] = _weight_variable(encoder_w_id, [num_features, l])
-                biases[encoder_b_id] = _bias_variable(encoder_b_id, [l])
-        else:
-            with tf.variable_scope(model_name) as var_scope:
-                weights[encoder_w_id] = _weight_variable(encoder_w_id, [AUTOENCODER_LAYER_SIZES[i - 1], l])
-                biases[encoder_b_id] = _bias_variable(encoder_b_id, [l])
-
-    # decoder weights and biases
-    # [10, 50, 200, 500]
-    for i, l in enumerate(reversed(AUTOENCODER_LAYER_SIZES)):
-        decoder_w_id = 'Wd_' + str(i)
-        decoder_b_id = 'bd_' + str(i)
-        if i == len(AUTOENCODER_LAYER_SIZES) - 1:
-            with tf.variable_scope(model_name) as var_scope:
-                weights[decoder_w_id] = _weight_variable(decoder_w_id, [l, num_features])
-                biases[decoder_b_id] = _bias_variable(decoder_b_id, [num_features])
-        else:
-            with tf.variable_scope(model_name) as var_scope:
-                weights[decoder_w_id] = _weight_variable(decoder_w_id, [l, AUTOENCODER_LAYER_SIZES[i + 1]])
-                biases[decoder_b_id] = _bias_variable(decoder_b_id, [AUTOENCODER_LAYER_SIZES[i + 1]])
+    with tf.variable_scope(model_name) as var_scope:
+        for i, l in enumerate(layer_pairs):
+            weight_name = 'W_' + str(i)
+            bias_name = 'b_' + str(i)
+            weights[weight_name] = _weight_variable(weight_name, [l[0], l[1]])
+            biases[bias_name] = _bias_variable(bias_name, [l[1]])
 
     # output weights and biases
     with tf.variable_scope(model_name) as var_scope:
@@ -453,28 +441,19 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
 def autoencode(x, batch_size, weights, biases):
     
-    # encoder
-    # [500, 200, 50, 10]
-    for i in range(0, AUTOENCODER_NUM_LAYERS):
-        encoder_w_id = 'We_' + str(i)
-        encoder_b_id = 'be_' + str(i)
-        if i == AUTOENCODER_NUM_LAYERS - 1:
-            model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
-            model = tf.nn.sigmoid(model)
-        elif i == 0:
-            model = tf.matmul(x, weights[encoder_w_id]) + biases[encoder_b_id]
-            model = tf.nn.relu(model)
-        else:
-            model = tf.matmul(model, weights[encoder_w_id]) + biases[encoder_b_id]
-            tf.nn.relu(model)
 
-    # decoder
-    # [10, 50, 200, 500]
-    for i in range(0, AUTOENCODER_NUM_LAYERS):
-        decoder_w_id = 'Wd_' + str(i)
-        decoder_b_id = 'bd_' + str(i)
-        model = tf.matmul(model, weights[decoder_w_id]) + biases[decoder_b_id]
-        tf.nn.relu(model)
+    model = tf.matmul(x, weights['W_0']) + biases['b_0']
+    model = tf.nn.relu(model)
+    for i in range(1, AUTOENCODER_NUM_LAYERS * 2):
+        w_id = 'W_' + str(i)
+        b_id = 'b_' + str(i)
+        
+        if i == AUTOENCODER_NUM_LAYERS - 1:
+            model = tf.matmul(model, weights[w_id]) + biases[b_id]
+            model = tf.nn.sigmoid(model)
+        else:
+            model = tf.matmul(x, weights[w_id]) + biases[b_id]
+            model = tf.nn.relu(model)
 
     return model, []
 
