@@ -728,7 +728,11 @@ def random_layer_list(min_layers, max_layers, min_hidden_size, max_hidden_size):
     for n in range(1, num_layers - 1):
         size = random.randint(int(layers[n - 1] / 2), layers[n - 1])
         layers.append(size)
-    layers.append(random.randint(min_hidden_size, int(layers[-1] / 2)))
+
+    if int(layers[-1] / 2) <= min_hidden_size:
+        layers.append(min_hidden_size)
+    else:
+        layers.append(random.randint(min_hidden_size, int(layers[-1] / 2)))
     return layers
 
 
