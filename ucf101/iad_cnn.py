@@ -39,11 +39,11 @@ NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 4096
 
 # autoencoder hyper parameters
-#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
-AUTOENCODER_LAYER_SIZES = [512, 256, 128, 64, 32, 16, 8]
-#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
-#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
-#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
+#AUTOENCODER_LAYERS = [500, 200, 50, 10]
+#AUTOENCODER_LAYERS = [512, 256, 128, 64, 32, 16, 8]
+#AUTOENCODER_LAYERS = [500, 200, 50, 10]
+#AUTOENCODER_LAYERS = [500, 200, 50, 10]
+#AUTOENCODER_LAYERS = [500, 200, 50, 10]
 
 
 # the layer from which to load the activation map
@@ -290,14 +290,14 @@ def get_variables_autoencode(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_features = geom[0] * geom[1] * num_channels
 
-    layer_pairs = [-1] * 2 * len(AUTOENCODER_LAYER_SIZES)
-    for i, l in enumerate(AUTOENCODER_LAYER_SIZES):
+    layer_pairs = [-1] * 2 * len(AUTOENCODER_LAYERS)
+    for i, l in enumerate(AUTOENCODER_LAYERS):
         if i == 0:
             layer_pairs[0] = [num_features, l]
             layer_pairs[-1] = [l, num_features]
         else:
-            layer_pairs[i] = [AUTOENCODER_LAYER_SIZES[i - 1], l]
-            layer_pairs[-1 - i] = [l, AUTOENCODER_LAYER_SIZES[i - 1]]
+            layer_pairs[i] = [AUTOENCODER_LAYERS[i - 1], l]
+            layer_pairs[-1 - i] = [l, AUTOENCODER_LAYERS[i - 1]]
 
     # create weights and biases
     weights = {}
@@ -444,11 +444,11 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 def autoencode(x, batch_size, weights, biases):
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
     model = tf.nn.relu(model)
-    for i in range(1, len(AUTOENCODER_LAYER_SIZES) * 2):
+    for i in range(1, len(AUTOENCODER_LAYERS) * 2):
         w_id = 'W_' + str(i)
         b_id = 'b_' + str(i)
         
-        if i == len(AUTOENCODER_LAYER_SIZES) - 1:
+        if i == len(AUTOENCODER_LAYERS) - 1:
             model = tf.matmul(model, weights[w_id]) + biases[b_id]
             model = tf.nn.sigmoid(model)
         else:
@@ -720,6 +720,18 @@ def iad_nn(run_string):
     sess.close()
     return final_accuracy
 
+def random_layer_list(min_layers, max_layers, min_hidden_size, max_hidden_size):
+    layers = []
+    num_layers = random.randint(min_layers, max_layers)
+    layers.append(max_hidden_size)
+    
+    for n in range(1, num_layers - 1):
+        size = random.randint(int(layers[n - 1] / 2), layers[n - 1])
+        layers.append(size)
+    layers.append(random.randint(min_hidden_size, int(layers[-1] / 2)))
+    return layers
+
+
 if __name__ == "__main__":
 
     # get the run name
@@ -729,12 +741,17 @@ if __name__ == "__main__":
     hyper_softmax_hidden_powers = list(range(2, 17))
     hyper_dropout = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
+    # 100 autoencoder settings to test
+    layer_list = []
+    for n in range(0, 100):
+        layer_list.append(random_layer_list(2, 20, 2, 512))
+
     # settings for softmax hidden layer size
     #hyper_settings = hyper_softmax_hidden_powers
     # settings for dropout
-    hyper_settings = [0]
+    hyper_settings = layer_list
     #hyper_settings = hyper_dropout
-    hyper_parameter = "none"
+    hyper_parameter = "autoencoder_layers"
 
     accuracies = []
 
@@ -749,6 +766,11 @@ if __name__ == "__main__":
         elif hyper_parameter == "none":
             hyper_name = ""
             hyper_value = ""
+        elif hyper_parameter == "autoencoder_layers":
+            AUTOENCODER_LAYERS = h
+            hyper_name = "autoencoder_layers"
+            hyper_value = AUTOENCODER_LAYERS
+
 
         for layer in [1, 2, 3, 4, 5]:
             LAYER = layer
