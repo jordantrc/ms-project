@@ -452,7 +452,7 @@ def autoencode(x, batch_size, weights, biases):
             model = tf.matmul(model, weights[w_id]) + biases[b_id]
             model = tf.nn.sigmoid(model)
         else:
-            model = tf.matmul(x, weights[w_id]) + biases[b_id]
+            model = tf.matmul(model, weights[w_id]) + biases[b_id]
             model = tf.nn.relu(model)
 
     return model, []
