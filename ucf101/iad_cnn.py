@@ -14,8 +14,8 @@ import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/test-25.list_expanded'
-TRAIN_FILE_LIST = 'train-test-splits/train-25.list_expanded'
+TEST_FILE_LIST = 'train-test-splits/test.list_expanded'
+TRAIN_FILE_LIST = 'train-test-splits/train.list_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -39,8 +39,12 @@ NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 4096
 
 # autoencoder hyper parameters
-AUTOENCODER_NUM_LAYERS = 4
-AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
+#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
+AUTOENCODER_LAYER_SIZES = [512, 256, 128, 64, 32, 16, 8]
+#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
+#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
+#AUTOENCODER_LAYER_SIZES = [500, 200, 50, 10]
+
 
 # the layer from which to load the activation map
 # layer geometries - shallowest to deepest
@@ -286,9 +290,7 @@ def get_variables_autoencode(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_features = geom[0] * geom[1] * num_channels
 
-    assert len(AUTOENCODER_LAYER_SIZES) == AUTOENCODER_NUM_LAYERS, "Length of layer size list must match number of layers"
-
-    layer_pairs = [-1] * 2 * AUTOENCODER_NUM_LAYERS
+    layer_pairs = [-1] * 2 * len(AUTOENCODER_LAYER_SIZES)
     for i, l in enumerate(AUTOENCODER_LAYER_SIZES):
         if i == 0:
             layer_pairs[0] = [num_features, l]
@@ -440,15 +442,13 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
 
 def autoencode(x, batch_size, weights, biases):
-    
-
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
     model = tf.nn.relu(model)
-    for i in range(1, AUTOENCODER_NUM_LAYERS * 2):
+    for i in range(1, len(AUTOENCODER_LAYER_SIZES) * 2):
         w_id = 'W_' + str(i)
         b_id = 'b_' + str(i)
         
-        if i == AUTOENCODER_NUM_LAYERS - 1:
+        if i == len(AUTOENCODER_LAYER_SIZES) - 1:
             model = tf.matmul(model, weights[w_id]) + biases[b_id]
             model = tf.nn.sigmoid(model)
         else:
