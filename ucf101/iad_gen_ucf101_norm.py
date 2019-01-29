@@ -62,7 +62,7 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
     for i, img in enumerate(img_raw):
         layer = i + 1
         #print("img shape = %s" % str(img.shape))
-        assert img.shape == LAYER_DIMENSIONS[i], "invalid dimensions for img"
+        assert img.shape == LAYER_DIMENSIONS[i], "invalid dimensions for img, shape is %s" % str(img.shape)
         img = img.tostring()
         features['img/{:02d}'.format(layer)] = _bytes_feature(img)
 
