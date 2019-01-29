@@ -20,7 +20,7 @@ from itertools import cycle
 
 NUM_CLASSES = 101
 FRAMES_PER_VIDEO = 250
-NUM_FRAMES_PER_CLIP = 16
+NUM_FRAMES_PER_CLIP = 32
 CROP_SIZE = 112
 CHANNELS = 3
 
@@ -424,6 +424,45 @@ def read_clip_and_label_tfrecord(directory, filename, classes, batch_size, start
   return np_arr_data, np_arr_label, next_batch_start, read_dirnames, valid_len, sample_names
 
 
+def get_frames_data_32(filename, num_frames_per_clip=32):
+  ''' Given a directory containing extracted frames, return a video clip of
+  (num_frames_per_clip) consecutive frames as a list of np arrays '''
+  ret_arr = []
+  s_index = 0
+  pad_size = 0
+  for parent, dirnames, filenames in os.walk(filename):
+    filenames = sorted(filenames)
+    if(len(filenames) < num_frames_per_clip):
+        #return ret_arr, s_index
+        s_index = 0
+        sample = Image.open(str(filename) + "/" + str(filenames[0]))
+        height, width = sample.size
+        blank_image = np.zeros([width, height, 3], dtype=int)
+        e_index = len(filenames)
+        pad_size = num_frames_per_clip - len(filenames)
+    elif len(filenames) == num_frames_per_clip:
+        s_index = 0
+        e_index = len(filenames)
+    else:
+        # s_index calc also changed to have 50% overlap on clips
+        s_index = random.randint(0, len(filenames) - num_frames_per_clip)
+        # s_index = random.randrange(0, len(filenames) - num_frames_per_clip, int(num_frames_per_clip / 8))
+        e_index = s_index + num_frames_per_clip
+
+    for i in range(s_index, e_index):
+        image_name = str(filename) + '/' + str(filenames[i])
+        img = Image.open(image_name)
+        img_data = np.array(img)
+        ret_arr.append(img_data)
+
+    for i in range(pad_size):
+        ret_arr.append(blank_image)
+
+    assert len(ret_arr) == num_frames_per_clip, "ret_arr length (%s) != num_frames_per_clip" % len(ret_arr)
+
+  return ret_arr, s_index
+
+
 def get_frames_data(filename, num_frames_per_clip=16):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
@@ -460,7 +499,7 @@ def get_frames_data(filename, num_frames_per_clip=16):
     assert len(ret_arr) == num_frames_per_clip
   return ret_arr, s_index
 
-def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
+def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frames_per_clip=32, crop_size=112, shuffle=False):
   lines = open(filename,'r')
   read_dirnames = []
   data = []
@@ -469,7 +508,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
   batch_index = 0
   next_batch_start = -1
   lines = list(lines)
-  np_mean = np.load('crop_mean.npy').reshape([num_frames_per_clip, crop_size, crop_size, 3])
+  #np_mean = np.load('crop_mean.npy').reshape([num_frames_per_clip, crop_size, crop_size, 3])
   # Forcing shuffle, if start_pos is not specified
   if start_pos < 0:
     shuffle = True
@@ -492,7 +531,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
     tmp_label = int(line[1])
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
-    tmp_data, _ = get_frames_data(dirname, num_frames_per_clip)
+    tmp_data, _ = get_frames_data_32(dirname, num_frames_per_clip)
     img_datas = [];
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
@@ -505,7 +544,8 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
           img = np.array(cv2.resize(np.array(img),(crop_size, int(img.height * scale + 1)))).astype(np.float32)
         crop_x = int((img.shape[0] - crop_size)/2)
         crop_y = int((img.shape[1] - crop_size)/2)
-        img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:] - np_mean[j]
+        #img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:] - np_mean[j]
+        img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:]
         img_datas.append(img)
       data.append(img_datas)
       sample_names.append(sample_name)
