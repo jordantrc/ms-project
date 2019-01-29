@@ -775,7 +775,7 @@ if __name__ == "__main__":
             hyper_name = "autoencoder_layers"
             hyper_value = AUTOENCODER_LAYERS
 
-
+        trial_count = 1
         for layer in [1, 2, 3, 4, 5]:
             LAYER = layer
 
@@ -802,6 +802,10 @@ if __name__ == "__main__":
             save_settings(run_string)
             layer_accuracy = iad_nn(run_string)
             accuracies.append([hyper_value, layer, layer_accuracy])
+            print("Accuracies after %s trials:" % (trial_count))
+            for a in accuracies:
+                print(a)
+            trial_count += 1
 
             # reset the graph before moving to the next layer
             tf.reset_default_graph()

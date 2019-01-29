@@ -17,17 +17,17 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/train-25.list'
+TRAIN_LIST = 'train-test-splits/train.list'
 TEST_LIST = 'train-test-splits/test.list'
-IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_25/'
-NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_25/npy/'
+IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32/'
+NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32/npy/'
 TRAIN_EPOCHS = 10
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
 CROP_SIZE = 112
 CHANNELS = 3
 # Number of frames per video clip
-NUM_FRAMES_PER_CLIP = 16
+NUM_FRAMES_PER_CLIP = 32
 COMPRESSION = {"type": "max", "value": 1, "num_channels": 1}
 THRESHOLDING = "norm"
 
@@ -136,7 +136,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
     thresholded_data = []
     for i, l in enumerate(sample_layers):
         layer_data = np.squeeze(l, axis=0)
-        data_ratio = float(layer_data.shape[0] / 16.0)  # num columns / 16
+        data_ratio = float(layer_data.shape[0] / 32.0)  # num columns / 16
         #print("layer_data shape = %s, ratio = %s" % (str(layer_data.shape), data_ratio))
         data = thresholding(layer_data, data_ratio, compression_method, thresholding_approach)
         #if i == 0:
@@ -450,7 +450,8 @@ def generate_iads(list_file, training=False):
                 'wc4b': _variable_with_weight_decay('wc4b', [3, 3, 3, 512, 512], 0.04, 0.00),
                 'wc5a': _variable_with_weight_decay('wc5a', [3, 3, 3, 512, 512], 0.04, 0.00),
                 'wc5b': _variable_with_weight_decay('wc5b', [3, 3, 3, 512, 512], 0.04, 0.00),
-                'wd1': _variable_with_weight_decay('wd1', [8192, 4096], 0.04, 0.001),
+                #'wd1': _variable_with_weight_decay('wd1', [8192, 4096], 0.04, 0.001),
+                'wd1': _variable_with_weight_decay('wd1', [16384, 4096], 0.04, 0.001),
                 'wd2': _variable_with_weight_decay('wd2', [4096, 4096], 0.04, 0.002),
                 'out': _variable_with_weight_decay('wout', [4096, NUM_CLASSES], 0.04, 0.005)
                 }
