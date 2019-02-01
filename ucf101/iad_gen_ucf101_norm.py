@@ -17,11 +17,11 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/train.list'
+TRAIN_LIST = 'train-test-splits/train-test.list'
 TEST_LIST = 'train-test-splits/test.list'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32/npy/'
-TRAIN_EPOCHS = 10
+TRAIN_EPOCHS = 1
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
 CROP_SIZE = 112
@@ -31,13 +31,23 @@ NUM_FRAMES_PER_CLIP = 32
 COMPRESSION = {"type": "max", "value": 1, "num_channels": 1}
 THRESHOLDING = "norm"
 
-LAYER_DIMENSIONS = [
+# 16 frame layer dimensions
+LAYER_DIMENSIONS_16 = [
                     (64, 16, 1),
                     (128, 16, 1),
                     (256, 8, 1),
                     (512, 4, 1),
                     (512, 2, 1)
                     ]
+# 32 frame layer dimensions
+LAYER_DIMENSIONS_32 = [
+                    (64, 32, 1),
+                    (128, 32, 1),
+                    (256, 16, 1),
+                    (512, 8, 1),
+                    (512, 4, 1)
+                    ]
+LAYER_DIMENSIONS = LAYER_DIMENSIONS_32
 
 # tensorflow flags
 flags = tf.app.flags
