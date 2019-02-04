@@ -14,8 +14,8 @@ import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/test.list_expanded'
-TRAIN_FILE_LIST = 'train-test-splits/train.list_expanded'
+TEST_FILE_LIST = 'train-test-splits/test.list_32_expanded'
+TRAIN_FILE_LIST = 'train-test-splits/train.list_32_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -28,7 +28,7 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 # softmax, autoencode, 
-CLASSIFIER = 'autoencode'
+CLASSIFIER = 'softmax'
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
@@ -56,12 +56,23 @@ SOFTMAX_HIDDEN_SIZE = 4096
 #FIRST_CNN_WIDTH = 16  # mctnet
 #FIRST_CNN_WIDTH = 32  # lenet
 FIRST_CNN_WIDTH = -1  # softmax
-LAYER_GEOMETRY = {'1': (64, 16, 1),  # 1,024
-                  '2': (128, 16, 1),  # 2,048
-                  '3': (256, 8, 1),  # 2,048
-                  '4': (512, 4, 1),  # 2,048
-                  '5': (512, 2, 1)  # 1,024
-                  }
+# 16 frame layer dimensions
+LAYER_GEOMETRY_16 = {
+                    '1': (64, 16, 1),
+                    '2': (128, 16, 1),
+                    '3': (256, 8, 1),
+                    '4': (512, 4, 1),
+                    '5': (512, 2, 1)
+                    }
+# 32 frame layer dimensions
+LAYER_GEOMETRY_32 = {
+                    '1': (64, 32, 1),
+                    '2': (128, 32, 1),
+                    '3': (256, 16, 1),
+                    '4': (512, 8, 1),
+                    '5': (512, 4, 1)
+                    }
+LAYER_GEOMETRY = LAYER_GEOMETRY_32
 
 #-------------General helper functions----------------#
 def save_settings(run_name):
@@ -755,7 +766,7 @@ if __name__ == "__main__":
     # settings for dropout
     hyper_settings = layer_list
     #hyper_settings = hyper_dropout
-    hyper_parameter = "autoencoder_layers"
+    hyper_parameter = "none"
 
     accuracies = []
 
