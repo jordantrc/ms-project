@@ -4,7 +4,7 @@
 # on the contents of a directory. Finds all sub-samples
 # belonging to each sample in the list.
 #
-# Usage: expand_list.py <list file> <directory> <extension>
+# Usage: expand_list.py <list file> <directory> <extension> <output file>
 #
 
 import os
@@ -12,7 +12,7 @@ import sys
 
 def main():
     '''main function'''
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         print("invalid number of arguments [%s]" % len(sys.argv))
         sys.exit(1)
 
@@ -20,6 +20,7 @@ def main():
     directory = sys.argv[2]
     assert os.path.isdir(directory)
     extension = sys.argv[3]
+    output_file = sys.argv[4]
 
     # get the samples from the file
     with open(list_file, 'r') as fd:
@@ -33,7 +34,7 @@ def main():
     dir_list = [x for x in dir_list if extension in x]
 
     # traverse the list of samples, looking for subsamples
-    fd = open("%s_expanded" % (list_file), 'w')
+    fd = open(output_file, 'w')
     subsamples = []
     for f in sorted(dir_list):
         base = "_".join(f.split('_')[0:4])
