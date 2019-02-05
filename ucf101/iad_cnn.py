@@ -472,7 +472,7 @@ def autoencode(x, batch_size, weights, biases):
 def softmax_regression(x, batch_size, weights, biases, dropout):
     model = tf.matmul(x, weights['W_0']) + biases['b_0']
     #model = tf.nn.leaky_relu(model, alpha=LEAKY_RELU_ALPHA)
-    model = _drop_connect(model, dropout)
+    #model = _drop_connect(model, dropout)
     
     # layer 2
     #model = tf.matmul(model, weights['out']) + biases['out']
