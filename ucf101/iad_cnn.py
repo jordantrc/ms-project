@@ -581,7 +581,7 @@ def iad_nn(run_string):
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    if CLASSIFIER in ['softmax', 'autoencode']:
+    if CLASSIFIER in ['softmax', 'autoencode', 'lenet']:
         if CLASSIFIER == 'softmax':
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
