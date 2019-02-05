@@ -28,7 +28,7 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 # softmax, autoencode, 
-CLASSIFIER = 'softmax'
+CLASSIFIER = 'mctnet'
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
@@ -548,6 +548,8 @@ def iad_nn(run_string):
         weights, biases = get_variables_softmax('ucf101_iad')
     elif CLASSIFIER == 'lenet':
         weights, biases = get_variables_lenet('ucf101_iad')
+    elif CLASSIFIER == 'mctnet':
+        weights, biases = get_variables_mctnet('ucf101_iad')
     elif CLASSIFIER == 'autoencode':
         weights, biases = get_variables_autoencode('ucf101_iad')
 
@@ -581,7 +583,7 @@ def iad_nn(run_string):
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    if CLASSIFIER in ['softmax', 'autoencode', 'lenet']:
+    if CLASSIFIER in ['softmax', 'autoencode', 'lenet', 'mctnet']:
         if CLASSIFIER == 'softmax':
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
@@ -594,6 +596,10 @@ def iad_nn(run_string):
         elif CLASSIFIER == 'lenet':
             logits, conv_layers = cnn_lenet(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, conv_layers = cnn_lenet(x_test, 1, weights, biases, DROPOUT)
+
+        elif CLASSIFIER == 'mctnet':
+            logits, conv_layers = cnn_mctnet(x, BATCH_SIZE, weights, biases, DROPOUT)
+            logits_test, conv_layers = cnn_mctnet(x_test, 1, weights, biases, DROPOUT)
 
         elif CLASSIFIER == 'autoencode':
             geom = LAYER_GEOMETRY[str(LAYER)]
