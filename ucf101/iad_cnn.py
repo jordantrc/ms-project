@@ -546,6 +546,8 @@ def iad_nn(run_string):
     # setup the CNN
     if CLASSIFIER == 'softmax':
         weights, biases = get_variables_softmax('ucf101_iad')
+    elif CLASSIFIER == 'lenet':
+        weights, biases = get_variables_lenet('ucf101_iad')
     elif CLASSIFIER == 'autoencode':
         weights, biases = get_variables_autoencode('ucf101_iad')
 
@@ -588,6 +590,10 @@ def iad_nn(run_string):
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
+
+        elif CLASSIFIER == 'lenet':
+            logits, conv_layers = cnn_lenet(x, BATCH_SIZE, weights, biases, DROPOUT)
+            logits_test, conv_layers = cnn_lenet(x_test, 1, weights, biases, DROPOUT)
 
         elif CLASSIFIER == 'autoencode':
             geom = LAYER_GEOMETRY[str(LAYER)]
