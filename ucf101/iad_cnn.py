@@ -28,7 +28,7 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 # softmax, autoencode, 
-CLASSIFIER = 'softmax'
+CLASSIFIER = 'lenet'
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
