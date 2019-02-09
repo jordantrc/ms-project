@@ -257,12 +257,15 @@ def get_variables_lenet(model_name, num_channels=1):
     # b_fc1 = _bias_variable('b_fc1', [1024])
     # w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
     # b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    num_features = geom[0] * geom[1] * num_channels
+    pool2_flat_size = num_features * 16
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
             'W_0': _weight_variable('W_0', [3, 3, num_channels, 32]),
             'W_1': _weight_variable('W_1', [3, 3, 32, 64]),
-            'W_fc1': _weight_variable('W_fc1', [16384, 1024]),
+            'W_fc1': _weight_variable('W_fc1', [pool2_flat_size, 1024]),
             'W_fc2': _weight_variable('W_fc2', [1024, 101])
             }
         biases = {
