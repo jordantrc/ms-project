@@ -253,14 +253,23 @@ def get_variables_jtcnet(model_name, num_channels=1):
 
 
 def get_variables_lenet(model_name, num_channels=1):
+    # w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, 1024])
+    # b_fc1 = _bias_variable('b_fc1', [1024])
+    # w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
+    # b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
+
     with tf.variable_scope(model_name) as var_scope:
         weights = {
             'W_0': _weight_variable('W_0', [3, 3, num_channels, 32]),
-            'W_1': _weight_variable('W_1', [3, 3, 32, 64])
+            'W_1': _weight_variable('W_1', [3, 3, 32, 64]),
+            'W_fc1': _weight_variable('W_fc1', [16384, 1024]),
+            'W_fc2': _weight_variable('W_fc2', [1024, 101])
             }
         biases = {
             'b_0': _bias_variable('b_0', [32]),
-            'b_1': _bias_variable('b_1', [64])
+            'b_1': _bias_variable('b_1', [64]),
+            'b_fc1': _bias_variable('b_fc1', [1024]),
+            'b_fc2': _bias_variable('b_fc2', [101])
             }
     return weights, biases
 
@@ -427,25 +436,21 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
 
     # fully connected layer
     pool2_flat_size = pool2_shape[1] * pool2_shape[2] * pool2_shape[3]
-    w_fc1 = _weight_variable('W_fc1', [pool2_flat_size, 1024])
-    b_fc1 = _bias_variable('b_fc1', [1024])
 
     # flatten pool2
     #pool2_flat = tf.reshape(pool2, [-1, pool2_flat_size])
     pool2_flat = tf.layers.flatten(pool2)
     print("pool2_flat shape = %s" % pool2_flat.get_shape().as_list())
-    fc1 = tf.matmul(pool2_flat, w_fc1) + b_fc1
+    fc1 = tf.matmul(pool2_flat, weights['W_fc1']) + biases['b_fc1']
     fc1 = tf.nn.leaky_relu(fc1, alpha=LEAKY_RELU_ALPHA)
 
     # dropout
     fc1 = tf.nn.dropout(fc1, dropout)
 
     # readout with dropconnect
-    w_fc2 = _weight_variable('W_fc2', [1024, NUM_CLASSES])
-    b_fc2 = _bias_variable('b_fc2', [NUM_CLASSES])
     #w_fc2 = _drop_connect(w_fc2, dropout)
 
-    logits = tf.add(tf.matmul(fc1, w_fc2), b_fc2)
+    logits = tf.add(tf.matmul(fc1, weights['W_fc2']), biases['b_fc2'])
 
     conv_layers = [pool1]
 
