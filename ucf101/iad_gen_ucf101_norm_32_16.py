@@ -536,16 +536,16 @@ def generate_iads(list_file, training=False):
                   feed_dict={images_placeholder: test_images}
                   )
 
-          if predict_write_file is not None:
-              for i in range(0, valid_len):
-                true_label = test_labels[i],
-                top1_predicted_label = np.argmax(predict_score[i])
-                # Write results: true label, class prob for true label, predicted label, class prob for predicted label
-                write_file.write('{}, {}, {}, {}\n'.format(
-                        true_label[0],
-                        predict_score[i][true_label],
-                        top1_predicted_label,
-                        predict_score[i][top1_predicted_label]))
+          #if predict_write_file is not None:
+          #    for i in range(0, valid_len):
+          #      true_label = test_labels[i],
+          #      top1_predicted_label = np.argmax(predict_score[i])
+          #      # Write results: true label, class prob for true label, predicted label, class prob for predicted label
+          #      write_file.write('{}, {}, {}, {}\n'.format(
+          #              true_label[0],
+          #              predict_score[i][true_label],
+          #              top1_predicted_label,
+          #              predict_score[i][top1_predicted_label]))
 
           #for i, l in enumerate(layers_out):
           #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
