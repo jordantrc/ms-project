@@ -492,8 +492,8 @@ def generate_iads(list_file, training=False):
     # layers is a list of length 10 (5 * gpu_num)
     # layers[0] is a tensor with shape (1, 16, 112, 112, 64)
 
-    #logits = tf.concat(logits, 0)
-    #norm_score = tf.nn.softmax(logits)
+    logits = tf.concat(logits, 0)
+    norm_score = tf.nn.softmax(logits)
     saver = tf.train.Saver()
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     init = tf.global_variables_initializer()
@@ -529,8 +529,7 @@ def generate_iads(list_file, training=False):
                           FLAGS.batch_size * gpu_num,
                           start_pos=next_start_pos
                           )
-          #predict_score, layers_out = sess.run([norm_score, layers],
-          layers_out = sess.run([layers],
+          predict_score, layers_out = sess.run([norm_score, layers],
                   feed_dict={images_placeholder: test_images}
                   )
 
