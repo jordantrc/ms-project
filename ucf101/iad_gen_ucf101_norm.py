@@ -482,9 +482,9 @@ def generate_iads(list_file, training=False):
     layers = []
     for gpu_index in range(0, gpu_num):
         with tf.device('/gpu:%d' % gpu_index):
-            #logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
-            layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
-            #logits.append(logit)
+            logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
+            #layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
+            logits.append(logit)
             layers.extend(layer)
     #print("layers type = %s, length = %s" % (type(layers), len(layers)))
     #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
