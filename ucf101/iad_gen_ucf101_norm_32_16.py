@@ -382,9 +382,12 @@ def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
   # Output: class prediction
   #out = tf.matmul(dense2, _weights['out']) + _biases['out']
 
+  # null output
+  logits = tf.zeros([NUM_CLASSES])
+
   conv_layers = [conv1, conv2, conv3, conv4, conv5]
 
-  return conv_layers
+  return logits, conv_layers
 
 
 def placeholder_inputs(batch_size):
@@ -482,9 +485,9 @@ def generate_iads(list_file, training=False):
     layers = []
     for gpu_index in range(0, gpu_num):
         with tf.device('/gpu:%d' % gpu_index):
-            #logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
+            logit, layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
             layer = inference_c3d(images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:], 0.6, FLAGS.batch_size, weights, biases)
-            #logits.append(logit)
+            logits.append(logit)
             layers.extend(layer)
     #print("layers type = %s, length = %s" % (type(layers), len(layers)))
     #print("layers[0] type = %s, length = %s" % (type(layers[0]), len(layers[0])))
@@ -492,8 +495,8 @@ def generate_iads(list_file, training=False):
     # layers is a list of length 10 (5 * gpu_num)
     # layers[0] is a tensor with shape (1, 16, 112, 112, 64)
 
-    #logits = tf.concat(logits, 0)
-    #norm_score = tf.nn.softmax(logits)
+    logits = tf.concat(logits, 0)
+    norm_score = tf.nn.softmax(logits)
     saver = tf.train.Saver()
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     init = tf.global_variables_initializer()
