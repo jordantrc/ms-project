@@ -19,8 +19,8 @@ MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
 TRAIN_LIST = 'train-test-splits/train-75.list'
 TEST_LIST = 'train-test-splits/test-75.list'
-IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_75/'
-NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_75/npy/'
+IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d/'
+NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d/npy/'
 TRAIN_EPOCHS = 10
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
