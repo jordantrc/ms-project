@@ -532,8 +532,7 @@ def generate_iads(list_file, training=False):
                           FLAGS.batch_size * gpu_num,
                           start_pos=next_start_pos
                           )
-          #predict_score, layers_out = sess.run([norm_score, layers],
-          layers_out = sess.run([layers],
+          predict_score, layers_out = sess.run([norm_score, layers],
                   feed_dict={images_placeholder: test_images}
                   )
 
