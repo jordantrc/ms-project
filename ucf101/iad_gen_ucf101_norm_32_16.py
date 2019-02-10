@@ -21,7 +21,7 @@ TRAIN_LIST = 'train-test-splits/train-test.list'
 TEST_LIST = 'train-test-splits/test.list'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d/npy/'
-TRAIN_EPOCHS = 10
+TRAIN_EPOCHS = 1
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
 CROP_SIZE = 112
