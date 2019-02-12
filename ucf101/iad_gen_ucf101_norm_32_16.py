@@ -145,6 +145,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
   '''returns new minimums and maximum values determined from the activation layers'''
   num_layers = 5
   assert len(layers) % num_layers == 0, "layers length [%s] invalid" % len(layers)
+  sample_index_dict = {}
 
   for i, s in enumerate(sample_names):
     # get a list of files matching this name from the directory
