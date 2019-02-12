@@ -14,8 +14,8 @@ import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/test.list_32_75_expanded'
-TRAIN_FILE_LIST = 'train-test-splits/train-75.list_32_expanded'
+TEST_FILE_LIST = 'train-test-splits/test.list_32_16c3d_expanded'
+TRAIN_FILE_LIST = 'train-test-splits/train.list_32_16c3d_expanded'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -28,7 +28,7 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 # softmax, autoencode, 
-CLASSIFIER = 'lenet'
+CLASSIFIER = 'softmax'
 WEIGHT_STDDEV = 0.15
 BIAS = 0.15
 LEAKY_RELU_ALPHA = 0.04
@@ -72,7 +72,7 @@ LAYER_GEOMETRY_32 = {
                     '4': (512, 8, 1),
                     '5': (512, 4, 1)
                     }
-LAYER_GEOMETRY = LAYER_GEOMETRY_32
+LAYER_GEOMETRY = LAYER_GEOMETRY_16
 
 #-------------General helper functions----------------#
 def save_settings(run_name):
