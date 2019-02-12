@@ -72,7 +72,7 @@ LAYER_GEOMETRY_32 = {
                     '4': (512, 8, 1),
                     '5': (512, 4, 1)
                     }
-LAYER_GEOMETRY = LAYER_GEOMETRY_16
+LAYER_GEOMETRY = LAYER_GEOMETRY_32
 
 #-------------General helper functions----------------#
 def save_settings(run_name):
