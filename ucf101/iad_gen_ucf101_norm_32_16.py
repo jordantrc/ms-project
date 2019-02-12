@@ -111,7 +111,7 @@ def get_file_sequence_dict(sample_dict, sample):
   '''returns the next index for the sample'''
   if sample in sample_dict.keys():
     next_index = sample_dict[sample] + 1
-    sample_dict[sample] += 1
+    sample_dict[sample] = next_index
   else:
     next_index = 0
     sample_dict[sample] = 0
@@ -152,7 +152,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
     #new_index = get_file_sequence(NPY_DIRECTORY, s, '.npy')
     print("sample_name = %s" % s)
     new_index = get_file_sequence_dict(sample_index_dict, s)
-
+    print("sample_index_dict = %s" % sample_index_dict)
     s_index = i * num_layers
     sample_layers = layers[s_index:s_index + num_layers]  # layers ordered from 1 to 5
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
