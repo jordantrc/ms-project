@@ -23,6 +23,6 @@ do
             mkdir -p "${file[@]%.avi}"
         fi
         ffmpeg -i "$file" -vf fps=$2 "${file[@]%.avi}"/%05d.jpg
-        rm "$file"
+        #rm "$file"
     done
 done
