@@ -141,11 +141,10 @@ def get_file_sequence(directory, sample, extension):
   return new_index
 
 
-def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compression_method, thresholding_approach):
+def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compression_method, thresholding_approach, sample_index_dict):
   '''returns new minimums and maximum values determined from the activation layers'''
   num_layers = 5
   assert len(layers) % num_layers == 0, "layers length [%s] invalid" % len(layers)
-  sample_index_dict = {}
 
   for i, s in enumerate(sample_names):
     # get a list of files matching this name from the directory
@@ -153,6 +152,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
     print("sample_name = %s" % s)
     new_index = get_file_sequence_dict(sample_index_dict, s)
     print("sample_index_dict = %s" % sample_index_dict)
+
     s_index = i * num_layers
     sample_layers = layers[s_index:s_index + num_layers]  # layers ordered from 1 to 5
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
@@ -464,6 +464,7 @@ def generate_iads(list_file, training=False):
                 ]
 
     num_videos = len(list(open(list_file, 'r')))
+    sample_index_dict = {}
 
     # Get the sets of images and labels for training, validation, and
     images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size * gpu_num)
@@ -565,7 +566,7 @@ def generate_iads(list_file, training=False):
           #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
           valid_files_processed += valid_len
           # add to min/max values, store the temporary activation result
-          min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none")
+          min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none", sample_index_dict)
           #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
           end_time = time.time()
           print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, valid_files_processed, num_videos, end_time - start_time))
