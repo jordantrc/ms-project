@@ -17,10 +17,10 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/train.list'
+TRAIN_LIST = 'train-test-splits/train-75.list'
 TEST_LIST = 'train-test-splits/test.list'
-IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d/'
-NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d/npy/'
+IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d_75/'
+NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d_75/npy/'
 TRAIN_EPOCHS = 10
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
@@ -107,6 +107,17 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
 
     return example
 
+def get_file_sequence_dict(sample_dict, sample):
+  '''returns the next index for the sample'''
+  if sample in sample_dict.keys():
+    next_index = sample_dict[sample] + 1
+    sample_dict[sample] += 1
+  else:
+    next_index = 0
+    sample_dict[sample] = 0
+
+  return next_index
+
 
 def get_file_sequence(directory, sample, extension):
   '''find the next sequence number for oversampling'''
@@ -137,7 +148,8 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
 
   for i, s in enumerate(sample_names):
     # get a list of files matching this name from the directory
-    new_index = get_file_sequence(NPY_DIRECTORY, s, '.npy')
+    #new_index = get_file_sequence(NPY_DIRECTORY, s, '.npy')
+    new_index = get_file_sequence_dict(sample_index_dict, s)
 
     s_index = i * num_layers
     sample_layers = layers[s_index:s_index + num_layers]  # layers ordered from 1 to 5
