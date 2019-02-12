@@ -149,9 +149,9 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
   for i, s in enumerate(sample_names):
     # get a list of files matching this name from the directory
     #new_index = get_file_sequence(NPY_DIRECTORY, s, '.npy')
-    print("sample_name = %s" % s)
+    #print("sample_name = %s" % s)
     new_index = get_file_sequence_dict(sample_index_dict, s)
-    print("sample_index_dict = %s" % sample_index_dict)
+    #print("sample_index_dict = %s" % sample_index_dict)
 
     s_index = i * num_layers
     sample_layers = layers[s_index:s_index + num_layers]  # layers ordered from 1 to 5
