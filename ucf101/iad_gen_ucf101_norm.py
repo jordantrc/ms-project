@@ -108,6 +108,18 @@ def make_sequence_example(img_raw, label, example_id, num_channels):
     return example
 
 
+def get_file_sequence_dict(sample_dict, sample):
+  '''returns the next index for the sample'''
+  if sample in sample_dict.keys():
+    next_index = sample_dict[sample] + 1
+    sample_dict[sample] += 1
+  else:
+    next_index = 0
+    sample_dict[sample] = 0
+
+  return next_index
+
+
 def get_file_sequence(directory, sample, extension):
   '''find the next sequence number for oversampling'''
   # get a list of files matching this name from the directory
@@ -134,10 +146,12 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
   '''returns new minimums and maximum values determined from the activation layers'''
   num_layers = 5
   assert len(layers) % num_layers == 0
+  sample_index_dict = {}
 
   for i, s in enumerate(sample_names):
     # get a list of files matching this name from the directory
-    new_index = get_file_sequence(NPY_DIRECTORY, s, '.npy')
+    #new_index = get_file_sequence(NPY_DIRECTORY, s, '.npy')
+    new_index = get_file_sequence_dict(sample_index_dict, s)
 
     s_index = i * num_layers
     sample_layers = layers[s_index:s_index + num_layers]  # layers ordered from 1 to 5
