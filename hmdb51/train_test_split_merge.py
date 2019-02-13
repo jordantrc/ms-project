@@ -1,6 +1,7 @@
 # train_test_split_merge.py
 
 import os
+import re
 
 folder = "train-test-splits"
 class_index_file = "train-test-splits/class_index.txt"
@@ -10,6 +11,7 @@ class_indices = {}
 with open(class_index_file, 'r') as fd:
     raw_text = fd.read()
 lines = raw_text.split('\n')
+lines.remove('')
 for l in lines:
     class_name, index = l.split()
     class_indices[class_name] = int(index)
@@ -40,7 +42,8 @@ for f in files:
         modify_test = test_list3
 
     # open the file and read the contents
-    with open(f, 'r') as fd:
+    file_path = os.path.join(folder, f)
+    with open(file_path, 'r') as fd:
         raw_text = fd.read()
     lines = raw_text.split('\n')
     lines.remove('')
@@ -61,9 +64,9 @@ for f in files:
 
         # now determine which list to include the video in
         if training_video:
-            modify_train.append([file_name, class_index])
+            modify_train.append([class_name + "/" + file_name, str(class_index)])
         elif testing_video:
-            modify_test.append([file_name, class_index])
+            modify_test.append([class_name + "/" + file_name, str(class_index)])
 
 # write the training and testing files
 with open("trainlist01.txt", 'w') as fd:
