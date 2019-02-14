@@ -9,4 +9,6 @@
 *.xlsx
 *.nb.html
 **/.ipynb_checkpoints
-*.txt
+ucf101/**/*.txt
+c3d-tensorflow/visual_logs/*
+c3d-tensorflow/list/*.txt
