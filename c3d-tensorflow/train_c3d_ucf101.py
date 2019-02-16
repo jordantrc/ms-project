@@ -227,7 +227,7 @@ def run_training():
 
       # Save a checkpoint and evaluate the model periodically.
       if (step) % 10 == 0 or (step + 1) == FLAGS.max_steps:
-        saver.save(sess, os.path.join(model_save_dir, 'c3d_ucf_model'), global_step=step)
+        saver.save(sess, os.path.join(model_save_dir, 'c3d_hmdb_model'), global_step=step)
         print('Training Data Eval:')
         summary, acc = sess.run(
                         [merged, accuracy],
