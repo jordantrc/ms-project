@@ -13,6 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 
+# modified by Jordan Chadwick
+# jordanc@wildcats.unh.edu
+
 """Functions for downloading and reading MNIST data."""
 from __future__ import absolute_import
 from __future__ import division
@@ -26,24 +29,48 @@ import random
 import numpy as np
 import cv2
 import time
+import sys
 
+#def get_frames_data(filename, num_frames_per_clip=16):
 def get_frames_data(filename, num_frames_per_clip=16):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
   ret_arr = []
   s_index = 0
+  pad_size = 0
   for parent, dirnames, filenames in os.walk(filename):
-    if(len(filenames)<num_frames_per_clip):
-      return [], s_index
     filenames = sorted(filenames)
-    s_index = random.randint(0, len(filenames) - num_frames_per_clip)
-    for i in range(s_index, s_index + num_frames_per_clip):
-      image_name = str(filename) + '/' + str(filenames[i])
-      img = Image.open(image_name)
-      img_data = np.array(img)
-      ret_arr.append(img_data)
+    if(len(filenames) < num_frames_per_clip):
+        #return ret_arr, s_index
+        s_index = 0
+        sample = Image.open(str(filename) + "/" + str(filenames[0]))
+        height, width = sample.size
+        blank_image = np.zeros([width, height, 3], dtype=int) 
+        e_index = len(filenames)
+        pad_size = num_frames_per_clip - len(filenames)
+    elif len(filenames) == num_frames_per_clip:
+        s_index = 0
+        e_index = len(filenames)
+    else:
+        # s_index calc also changed to have 50% overlap on clips 
+        s_index = random.randint(0, len(filenames) - num_frames_per_clip)
+        # s_index = random.randrange(0, len(filenames) - num_frames_per_clip, int(num_frames_per_clip / 8))
+        e_index = s_index + num_frames_per_clip
+
+    for i in range(s_index, e_index):
+        image_name = str(filename) + '/' + str(filenames[i])
+        img = Image.open(image_name)
+        img_data = np.array(img)
+        ret_arr.append(img_data)
+
+    for i in range(pad_size):
+        ret_arr.append(blank_image)
+
+    assert len(ret_arr) == num_frames_per_clip, "ret_arr length (%s) != num_frames_per_clip" % len(ret_arr)
+
   return ret_arr, s_index
 
+#def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
 def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
   lines = open(filename,'r')
   read_dirnames = []
@@ -59,7 +86,7 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
   if shuffle:
     video_indices = range(len(lines))
     random.seed(time.time())
-    random.shuffle(list(video_indices))
+    random.shuffle(video_indices)
   else:
     # Process videos sequentially
     video_indices = range(start_pos, len(lines))
@@ -77,6 +104,7 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
         img = Image.fromarray(tmp_data[j].astype(np.uint8))
+        #print("img height = %s, width = %s" % (img.height, img.width))
         if(img.width>img.height):
           scale = float(crop_size)/float(img.height)
           img = np.array(cv2.resize(np.array(img),(int(img.width * scale + 1), crop_size))).astype(np.float32)
@@ -85,6 +113,7 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
           img = np.array(cv2.resize(np.array(img),(crop_size, int(img.height * scale + 1)))).astype(np.float32)
         crop_x = int((img.shape[0] - crop_size)/2)
         crop_y = int((img.shape[1] - crop_size)/2)
+        #print("img shape = %s, crop_x = %s, crop_y = %s" % (str(img.shape), crop_x, crop_y))
         #img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:] - np_mean[j]
         img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:]
         img_datas.append(img)
