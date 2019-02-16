@@ -17,10 +17,10 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/train-75.list'
-TEST_LIST = 'train-test-splits/test.list'
-IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d_75/'
-NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d_75/npy/'
+TRAIN_LIST = 'train-test-splits/train-madison.list'
+TEST_LIST = 'train-test-splits/test-madison.list'
+IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_madison/'
+NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_madison/npy/'
 TRAIN_EPOCHS = 10
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
