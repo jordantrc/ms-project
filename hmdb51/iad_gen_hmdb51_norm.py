@@ -15,10 +15,10 @@ import tensorflow as tf
 import c3d_model
 from thresholding_3d import thresholding
 
-MODEL = '/home/jordanc/ms-project/c3d-tensorflow/models/c3d_ucf_model-9999'
+MODEL = '/home/jordanc/ms-project/c3d-tensorflow/models/c3d_hmdb_model-9999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/hmdb51/hmdb51'
-TRAIN_LIST = 'train-test-splits/trainlist01-fixed.txt'
-TEST_LIST = 'train-test-splits/testlist01-fixed.txt'
+TRAIN_LIST = 'train-test-splits/trainlist-random.txt'
+TEST_LIST = 'train-test-splits/testlist-random.txt'
 IAD_DIRECTORY = '/home/jordanc/datasets/hmdb51/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/hmdb51/iad_global_norm/npy/'
 TRAIN_EPOCHS = 10
