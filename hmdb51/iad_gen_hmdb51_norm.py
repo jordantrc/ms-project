@@ -259,7 +259,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
       num_samples = len(sample_files) / 5
       for i in range(num_samples):
         s_index = i * 5
-        sequence = int(sample_files[s_index].split("_")[4])
+        sequence = int(sample_files[s_index].split("_")[-2])
         sample_layer_files = sample_files[s_index:s_index + 5]
         assert len(sample_layer_files) == 5
         
