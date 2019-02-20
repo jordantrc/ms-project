@@ -72,7 +72,7 @@ LAYER_GEOMETRY_32 = {
                     '4': (512, 8, 1),
                     '5': (512, 4, 1)
                     }
-LAYER_GEOMETRY = LAYER_GEOMETRY_32
+LAYER_GEOMETRY = LAYER_GEOMETRY_16
 
 #-------------General helper functions----------------#
 def get_class_list(file):
