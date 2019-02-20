@@ -551,7 +551,7 @@ def iad_nn(run_string):
 
     # get the list of filenames
     print("loading train file list from %s" % TRAIN_FILE_LIST)
-    filenames_train = list_to_filenames(TRAIN_FILE_LIST, balance_classes=True)
+    filenames_train = list_to_filenames(TRAIN_FILE_LIST, balance_classes=False)
     filenames_test = list_to_filenames(TEST_FILE_LIST)
     print("%s training files, %s testing files" % (len(filenames_train), len(filenames_test)))
 
