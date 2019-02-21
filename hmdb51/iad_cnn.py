@@ -563,6 +563,7 @@ def iad_nn(run_string):
     # ensure filenames list is evenly divisable by batch size
     pad_filenames = len(filenames_train) % BATCH_SIZE
     filenames_train.extend(filenames_train[0:pad_filenames])
+    print("train_filenames length = %s, batch remainder = %s" % (len(filenames_train), len(filenames_train) % BATCH_SIZE))
 
     # create the TensorFlow sessions
     config = tf.ConfigProto(allow_soft_placement=True)
