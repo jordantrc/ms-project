@@ -561,7 +561,7 @@ def iad_nn(run_string):
         filenames_train = random.sample(filenames_train, int(TRAINING_DATA_SAMPLE * len(filenames_train)))
 
     # ensure filenames list is evenly divisable by batch size
-    pad_filenames = len(filenames_train) % BATCH_SIZE
+    pad_filenames = BATCH_SIZE - (len(filenames_train) % BATCH_SIZE)
     filenames_train.extend(filenames_train[0:pad_filenames])
     print("train_filenames length after padding = %s" % (len(filenames_train)))
 
