@@ -543,6 +543,7 @@ def iad_nn(run_string):
     '''main function'''
     if LOAD_MODEL is None:
         training = True
+        print("TRAINING")
     else:
         training = False
 
@@ -596,6 +597,7 @@ def iad_nn(run_string):
     dataset = dataset.map(_parse_function)
     dataset = dataset.batch(BATCH_SIZE)
     if training:
+        print("training dataset settings")
         dataset = dataset.shuffle(200)
         dataset = dataset.repeat(EPOCHS)
     else:
