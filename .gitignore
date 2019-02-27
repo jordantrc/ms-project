@@ -12,3 +12,7 @@
 ucf101/**/*.txt
 c3d-tensorflow/visual_logs/*
 c3d-tensorflow/list/*.txt
+ucf101/C3D-tensorflow-master/sports1m_finetuning_ucf101.model
+ucf101/C3D-tensorflow-master/models/*
+ucf101/C3D-tensorflow-master/saved_models/*
+ucf101/C3D-tensorflow-master/visual_logs/*
