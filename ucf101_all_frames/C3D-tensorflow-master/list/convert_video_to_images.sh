@@ -2,9 +2,9 @@
 
 # convert the avi video to images
 #   Usage (sudo for the remove priviledge):
-#       sudo ./convert_video_to_images.sh path/to/video fps
+#       sudo ./convert_video_to_images.sh path/to/video
 #   Example Usage:
-#       sudo ./convert_video_to_images.sh ~/document/videofile/ 5
+#       sudo ./convert_video_to_images.sh ~/document/videofile/
 #   Example Output:
 #       ~/document/videofile/walk/video1.avi 
 #       #=>
@@ -22,7 +22,7 @@ do
         if [[ ! -d "${file[@]%.avi}" ]]; then
             mkdir -p "${file[@]%.avi}"
         fi
-        ffmpeg -i "$file" -vf fps=$2 "${file[@]%.avi}"/%05d.jpg
+        ffmpeg -i "$file" -vf "${file[@]%.avi}"/%05d.jpg
         #rm "$file"
     done
 done
