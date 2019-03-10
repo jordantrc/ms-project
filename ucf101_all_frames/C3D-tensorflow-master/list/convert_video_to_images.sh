@@ -22,7 +22,7 @@ do
         if [[ ! -d "${file[@]%.avi}" ]]; then
             mkdir -p "${file[@]%.avi}"
         fi
-        ffmpeg -i "$file" -vf "${file[@]%.avi}"/%05d.jpg
+        ffmpeg -i "$file" "${file[@]%.avi}"/%05d.jpg
         #rm "$file"
     done
 done
