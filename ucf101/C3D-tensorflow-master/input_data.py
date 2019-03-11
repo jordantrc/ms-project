@@ -61,7 +61,7 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False):
         image_name = str(filename) + '/' + str(filenames[i])
         img = Image.open(image_name)
         if flip:
-          img = img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+          img = img.transpose(Image.FLIP_LEFT_RIGHT)
         img_data = np.array(img)
         ret_arr.append(img_data)
 
