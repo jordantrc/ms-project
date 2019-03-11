@@ -32,7 +32,7 @@ import time
 import sys
 
 #def get_frames_data(filename, num_frames_per_clip=16):
-def get_frames_data(filename, num_frames_per_clip=16, flip):
+def get_frames_data(filename, num_frames_per_clip=16, flip=False):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
   ret_arr = []
