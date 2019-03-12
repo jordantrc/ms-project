@@ -15,39 +15,21 @@ import tensorflow as tf
 import c3d_model
 from thresholding_3d import thresholding
 
-MODEL = '/home/jordanc/C3D-tensorflow-master/models/c3d_ucf_model-4999'
-IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101/UCF-101/'
-TRAIN_LIST = 'train-test-splits/train-25.list'
-TEST_LIST = 'train-test-splits/test.list'
-IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d_25/'
-NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101/iad_global_norm_32_16c3d_25/npy/'
-TRAIN_EPOCHS = 10
+MODEL = '/home/jordanc/ms-project/ucf101/C3D-tensorflow-master/models/c3d_ucf_model-4999'
+IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/UCF-101/'
+TRAIN_LIST = 'train-test-splits/trainlist01.txt'
+TEST_LIST = 'train-test-splits/testlist01.txt'
+IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/'
+NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/npy/'
+TRAIN_EPOCHS = 1
 NUM_CLASSES = 101
 # Images are cropped to (CROP_SIZE, CROP_SIZE)
 CROP_SIZE = 112
 CHANNELS = 3
 # Number of frames per video clip
-NUM_FRAMES_PER_CLIP = 32
 COMPRESSION = {"type": "max", "value": 1, "num_channels": 1}
 THRESHOLDING = "norm"
 
-# 16 frame layer dimensions
-LAYER_DIMENSIONS_16 = [
-                    (64, 16, 1),
-                    (128, 16, 1),
-                    (256, 8, 1),
-                    (512, 4, 1),
-                    (512, 2, 1)
-                    ]
-# 32 frame layer dimensions
-LAYER_DIMENSIONS_32 = [
-                    (64, 32, 1),
-                    (128, 32, 1),
-                    (256, 16, 1),
-                    (512, 8, 1),
-                    (512, 4, 1)
-                    ]
-LAYER_DIMENSIONS = LAYER_DIMENSIONS_32
 
 # tensorflow flags
 flags = tf.app.flags
@@ -61,13 +43,14 @@ def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
-def make_sequence_example(img_raw, label, example_id, num_channels):
+def make_sequence_example(img_raw, label, example_id, sample_length, num_channels):
     """creates the tfrecord example"""
     assert len(img_raw) == 5
     features = dict()
     features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
     features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
     features['num_channels'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[num_channels]))
+    features['num_frames'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[sample_length]))
 
     for i, img in enumerate(img_raw):
         layer = i + 1
@@ -141,7 +124,7 @@ def get_file_sequence(directory, sample, extension):
   return new_index
 
 
-def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compression_method, thresholding_approach, sample_index_dict):
+def get_min_maxes(directory, layers, sample_names, sample_lengths, labels, mins, maxes, compression_method, thresholding_approach, sample_index_dict):
   '''returns new minimums and maximum values determined from the activation layers'''
   num_layers = 5
   assert len(layers) % num_layers == 0, "layers length [%s] invalid" % len(layers)
@@ -160,7 +143,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
     thresholded_data = []
     for i, l in enumerate(sample_layers):
         layer_data = np.squeeze(l, axis=0)
-        data_ratio = float(layer_data.shape[0] / 32.0)  # num columns / 16
+        data_ratio = float(layer_data.shape[0] / sample_lengths[i])  # num columns / 16
         #print("layer_data shape = %s, ratio = %s" % (str(layer_data.shape), data_ratio))
         data = thresholding(layer_data, data_ratio, compression_method, thresholding_approach)
         #if i == 0:
@@ -186,7 +169,7 @@ def get_min_maxes(directory, layers, sample_names, labels, mins, maxes, compress
 
       # save the layer data
       # sample_sequence_layer.npy
-      npy_filename = "%s_%02d_%s.npy" % (s, new_index, j + 1)
+      npy_filename = "%s_%02d_%s_%s.npy" % (s, new_index, j + 1, sample_lengths[i])
       npy_path = os.path.join(NPY_DIRECTORY, npy_filename)
       np.save(npy_path, l)
       print("write npy to %s" % (npy_path))
@@ -260,6 +243,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
       for i in range(num_samples):
         s_index = i * 5
         sequence = int(sample_files[s_index].split("_")[4])
+        sample_length = int(sample_files[s_index].split("_")[5])
         sample_layer_files = sample_files[s_index:s_index + 5]
         assert len(sample_layer_files) == 5
         
@@ -276,7 +260,7 @@ def threshold_data(list_file, training=False, mins=None, maxes=None):
 
         # create tfrecord and write to file
         assert len(thresholded_data) == 5
-        ex = make_sequence_example(thresholded_data, label, sample_name + "_" + str(sequence), 1)
+        ex = make_sequence_example(thresholded_data, label, sample_name + "_" + str(sequence), sample_length, 1)
         tfrecord_path = os.path.join(IAD_DIRECTORY, "%s_%02d.tfrecord" % (sample_name, sequence))
         print("write tfrecord to: %s" % tfrecord_path)
         writer = tf.python_io.TFRecordWriter(tfrecord_path)
@@ -441,26 +425,26 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 
 
-def layer_array(layer, value):
-  a = np.empty((LAYER_DIMENSIONS[layer][0]))
+def layer_array(features, value):
+  a = np.empty((features))
   a[:] = value
   return a
 
 
-def generate_iads(list_file, training=False):
+def generate_iads(list_file, max_frames, training=False):
     max_vals = [
-                layer_array(0, np.NINF),
-                layer_array(1, np.NINF),
-                layer_array(2, np.NINF),
-                layer_array(3, np.NINF),
-                layer_array(4, np.NINF)
-               ]
+                  layer_array(64, np.NINF),
+                  layer_array(128, np.NINF),
+                  layer_array(256, np.NINF),
+                  layer_array(512, np.NINF),
+                  layer_array(512, np.NINF)
+                ]
     min_vals = [
-                layer_array(0, np.Inf),
-                layer_array(1, np.Inf),
-                layer_array(2, np.Inf),
-                layer_array(3, np.Inf),
-                layer_array(4, np.Inf)
+                  layer_array(64, np.Inf),
+                  layer_array(128, np.Inf),
+                  layer_array(256, np.Inf),
+                  layer_array(512, np.Inf),
+                  layer_array(512, np.Inf)
                 ]
 
     num_videos = len(list(open(list_file, 'r')))
@@ -540,7 +524,7 @@ def generate_iads(list_file, training=False):
           # Fill a feed dictionary with the actual set of images and labels
           # for this particular training step.
           start_time = time.time()
-          test_images, test_labels, next_start_pos, _, valid_len, sample_names = \
+          test_images, test_labels, next_start_pos, _, valid_len, sample_names, sample_lengths = \
                   c3d_model.read_clip_and_label(
                           IMAGE_DIRECTORY,
                           list_file,
@@ -566,7 +550,7 @@ def generate_iads(list_file, training=False):
           #  print("layer %s = type = %s, shape %s" % (i, type(l), l.shape))
           valid_files_processed += valid_len
           # add to min/max values, store the temporary activation result
-          min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, test_labels, min_vals, max_vals, COMPRESSION, "none", sample_index_dict)
+          min_vals, max_vals = get_min_maxes(IAD_DIRECTORY, layers_out, sample_names, sample_lengths, test_labels, min_vals, max_vals, COMPRESSION, "none", sample_index_dict)
           #convert_to_IAD_input(IAD_DIRECTORY, layers_out, sample_names, test_labels, COMPRESSION, THRESHOLDING)
           end_time = time.time()
           print("[%s:%s:%s/%s - %.3fs]" % (list_file, e, valid_files_processed, num_videos, end_time - start_time))
@@ -578,10 +562,32 @@ def generate_iads(list_file, training=False):
     return min_vals, max_vals
 
 
+def list_max_frames(list_file):
+  '''returns the maximum number of frames from all samples included
+  in the list file'''
+
+  max_frames = -1
+  with open(list_file, 'r') as fd:
+    raw_text = fd.read()
+    lines = raw_text.splitlines()
+
+  for l in lines:
+    sample_dir, _ = l.split()
+    # list the directory
+    dir_list = os.listdir(sample_dir)
+    num_files = len(dir_list)
+    if num_files > max_frames:
+      max_frames = num_files
+
+  return max_frames 
+
+
 def main():
 
   # determine the maximum number of frames in a single video
-  max_frames
+  max_frames_train = list_max_frames(TRAIN_LIST)
+  max_frames_test = list_max_frames(TEST_LIST)
+  max_frames = max(max_frames_train, max_frames_test)
 
   # generate training data, obtain max values first
   mins, maxes = generate_iads(TRAIN_LIST, training=True)

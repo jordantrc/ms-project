@@ -463,7 +463,7 @@ def get_frames_data_32(filename, num_frames_per_clip=32):
   return ret_arr, s_index
 
 
-def get_frames_data(filename, num_frames_per_clip=16):
+def get_frames_data(filename):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
   ret_arr = []
@@ -471,40 +471,22 @@ def get_frames_data(filename, num_frames_per_clip=16):
   for parent, dirnames, filenames in os.walk(filename):
     filenames = sorted(filenames)
     print("length filenames = %s" % len(filenames))
-    if(len(filenames) < num_frames_per_clip):
-      # oversample
-      i = 0
-      while len(ret_arr) != num_frames_per_clip:
-        image_name = str(filename) + '/' + str(filenames[i])
-        img = Image.open(image_name)
-        img_data = np.array(img)
-        ret_arr.append(img_data)
-        i += 1
-        if i == len(filenames):
-          i = 0
-      return ret_arr, s_index
-
-    elif len(filenames) == num_frames_per_clip:
-      s_index = 0
     
-    else:
-      s_index = random.randrange(0, len(filenames) - num_frames_per_clip, int(num_frames_per_clip / 2))
-    
-    for i in range(s_index, s_index + num_frames_per_clip):
+    for i in range(len(filenames)):
       image_name = str(filename) + '/' + str(filenames[i])
       img = Image.open(image_name)
       img_data = np.array(img)
       ret_arr.append(img_data)
 
-    assert len(ret_arr) == num_frames_per_clip
-  return ret_arr, s_index
+  return ret_arr
 
-def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frames_per_clip=32, crop_size=112, shuffle=False):
+def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size=112, shuffle=False):
   lines = open(filename,'r')
   read_dirnames = []
   data = []
   label = []
   sample_names = []
+  sample_lengths = []
   batch_index = 0
   next_batch_start = -1
   lines = list(lines)
@@ -531,7 +513,8 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
     tmp_label = int(line[1])
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
-    tmp_data, _ = get_frames_data_32(dirname, num_frames_per_clip)
+    tmp_data = get_frames_data(dirname)
+    num_frames = len(tmp_data)
     img_datas = [];
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
@@ -549,6 +532,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
         img_datas.append(img)
       data.append(img_datas)
       sample_names.append(sample_name)
+      sample_lengths.append(num_frames)
       label.append(int(tmp_label))
       batch_index = batch_index + 1
       read_dirnames.append(dirname)
@@ -570,4 +554,4 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, num_frame
     sys.exit(1)
   np_arr_label = np.array(label).astype(np.int64)
 
-  return np_arr_data, np_arr_label, next_batch_start, read_dirnames, valid_len, sample_names
+  return np_arr_data, np_arr_label, next_batch_start, read_dirnames, valid_len, sample_names, sample_lengths
