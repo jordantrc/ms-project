@@ -463,7 +463,7 @@ def get_frames_data_32(filename, num_frames_per_clip=32):
   return ret_arr, s_index
 
 
-def get_frames_data(filename):
+def get_frames_data(filename, max_frames):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
   ret_arr = []
@@ -471,6 +471,10 @@ def get_frames_data(filename):
   for parent, dirnames, filenames in os.walk(filename):
     filenames = sorted(filenames)
     print("length filenames = %s" % len(filenames))
+    
+    # if max frames is set
+    if max_frames > 0:
+      filenames = filenames[:max_frames]
     
     for i in range(len(filenames)):
       image_name = str(filename) + '/' + str(filenames[i])
@@ -480,7 +484,7 @@ def get_frames_data(filename):
 
   return ret_arr
 
-def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size=112, shuffle=False):
+def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size=112, shuffle=False, max_frames=-1):
   lines = open(filename,'r')
   read_dirnames = []
   data = []
@@ -513,7 +517,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size
     tmp_label = int(line[1])
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
-    tmp_data = get_frames_data(dirname)
+    tmp_data = get_frames_data(dirname, max_frames)
     num_frames = len(tmp_data)
     print("num_frames = %s" % num_frames)
     img_datas = [];

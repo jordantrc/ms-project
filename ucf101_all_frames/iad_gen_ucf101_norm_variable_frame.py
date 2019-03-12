@@ -17,7 +17,7 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/ms-project/ucf101/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/UCF-101/'
-TRAIN_LIST = 'train-test-splits/trainlist01.txt'
+TRAIN_LIST = 'train-test-splits/trainlist01-long.txt'
 TEST_LIST = 'train-test-splits/testlist01.txt'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/npy/'
@@ -30,6 +30,8 @@ CHANNELS = 3
 COMPRESSION = {"type": "max", "value": 1, "num_channels": 1}
 THRESHOLDING = "norm"
 
+# max number of frames we can load due to memory limitations
+SYSTEM_MAX_FRAMES = 1000
 
 # tensorflow flags
 flags = tf.app.flags
@@ -530,7 +532,8 @@ def generate_iads(list_file, max_frames, training=False):
                           IMAGE_DIRECTORY,
                           list_file,
                           FLAGS.batch_size * gpu_num,
-                          start_pos=next_start_pos
+                          start_pos=next_start_pos,
+                          max_frames=max_frames
                           )
           predict_score, layers_out = sess.run([norm_score, layers],
                   feed_dict={images_placeholder: test_images}
@@ -589,6 +592,7 @@ def main():
   max_frames_train = list_max_frames(TRAIN_LIST)
   max_frames_test = list_max_frames(TEST_LIST)
   max_frames = max(max_frames_train, max_frames_test)
+  max_frames = min(max_frames, SYSTEM_MAX_FRAMES)
 
   # generate training data, obtain max values first
   mins, maxes = generate_iads(TRAIN_LIST, max_frames, training=True)
