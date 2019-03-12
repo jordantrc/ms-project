@@ -14,10 +14,10 @@ sess = tf.Session()
 
 for example in tf.python_io.tf_record_iterator(file_name):
     features = dict()
-    features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
-    features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
-    features['num_channels'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[num_channels]))
-    features['num_frames'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[sample_length]))
+    features['example_id'] = tf.FixedLenFeature((), tf.string)
+    features['label'] = tf.FixedLenFeature((), tf.int64)
+    features['num_channels'] = tf.FixedLenFeature((), tf.int64)
+    features['num_frames'] = tf.FixedLenFeature((), tf.int64)
 
     for i in range(1, 6):
         # features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
