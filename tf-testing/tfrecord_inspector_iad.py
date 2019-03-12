@@ -12,22 +12,12 @@ assert os.path.isfile(file_name)
 
 sess = tf.Session()
 
-LAYER_PAD = {'1': [[0, 0], [0, 0], [24, 24], [0, 0]],
-             '2': [[0, 0], [0, 0], [56, 56], [0, 0]],
-             '3': [[0, 0], [0, 0], [124, 124], [0, 0]],
-             '4': [[0, 0], [0, 0], [254, 254], [0, 0]],
-             '5': [[0, 0], [0, 0], [255, 255], [0, 0]]
-             }
-LAYER_GEOMETRY = {'1': (64, 16, 1),
-                  '2': (128, 16, 1),
-                  '3': (256, 8, 1),
-                  '4': (512, 4, 1),
-                  '5': (512, 2, 1)
-                  }
-
 for example in tf.python_io.tf_record_iterator(file_name):
     features = dict()
-    features['label'] = tf.FixedLenFeature((), tf.int64)
+    features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
+    features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
+    features['num_channels'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[num_channels]))
+    features['num_frames'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[sample_length]))
 
     for i in range(1, 6):
         # features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
@@ -36,20 +26,20 @@ for example in tf.python_io.tf_record_iterator(file_name):
     parsed_features = tf.parse_single_example(example, features)
 
     with sess.as_default():
+        example_id = parsed_features['example_id']
+        label = parsed_features['label']
+        num_channels = parsed_features['num_channels']
+        num_frames = parsed_features['num_frames']
+
+        print("PARSED FEATURES:")
+        print("example_id = %s" % example_id)
+        print("label = %s" % label)
+        print("num_channels = %s" % num_channels)
+        print("num_frames = %s" % num_frames)
+
         # decode the image data
         for i in range(1, 5):
-            img_geom = tuple([1]) + LAYER_GEOMETRY[str(i)]
-            print("img_geom = %s" % str(img_geom))
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
-            print(img.eval())
+            print("Image = %s" % str(img.eval()))
             img = tf.reshape(img, img_geom, "parse_reshape")
-
-            # pad the image to make it square and then resize
-            padding = tf.constant(LAYER_PAD[str(i)])
-            img = tf.pad(img, padding, 'CONSTANT')
-            img = tf.image.resize_bilinear(img, (64, 64))
-            img = tf.squeeze(img, 0)
-            img = img.eval()
-            cv2.imwrite("img%d.jpg" % (i), img)
-
