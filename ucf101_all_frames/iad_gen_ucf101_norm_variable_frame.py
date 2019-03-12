@@ -33,7 +33,7 @@ THRESHOLDING = "norm"
 
 # tensorflow flags
 flags = tf.app.flags
-gpu_num = 2
+gpu_num = 1
 flags.DEFINE_integer('batch_size', 1, 'Batch size.')
 FLAGS = flags.FLAGS
 
