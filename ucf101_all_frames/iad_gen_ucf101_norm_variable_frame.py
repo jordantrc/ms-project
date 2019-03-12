@@ -590,11 +590,11 @@ def main():
   max_frames = max(max_frames_train, max_frames_test)
 
   # generate training data, obtain max values first
-  mins, maxes = generate_iads(TRAIN_LIST, training=True)
+  mins, maxes = generate_iads(TRAIN_LIST, max_frames, training=True)
   threshold_data(TRAIN_LIST, training=True, mins=mins, maxes=maxes)
 
   tf.reset_default_graph()
-  generate_iads(TEST_LIST)
+  generate_iads(TEST_LIST, max_frames)
   threshold_data(TEST_LIST, mins=mins, maxes=maxes)
 
   # save the mins and maxes
