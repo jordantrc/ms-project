@@ -547,8 +547,9 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size
       label.append(int(tmp_label))
 
   try:
-    # print("len data = %s" % (len(data)))
-    np_arr_data = np.array(data).astype(np.float32)
+    # print("len data = %s" % (len(data))
+    #np_arr_data = np.array(data).astype(np.float32)
+    np_arr_data = data
   except ValueError as e:
     print("type = %s, len = %s, shape = %s" % (type(data), len(data), str(data[0][0].shape)))
     print(e)
