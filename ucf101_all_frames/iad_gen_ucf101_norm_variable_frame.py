@@ -141,7 +141,7 @@ def get_min_maxes(directory, layers, sample_names, sample_lengths, labels, mins,
     assert len(sample_layers) == num_layers, "sample_layers has invalid length - %s" % len(sample_layers)
 
     thresholded_data = []
-    for i, l in enumerate(sample_layers):
+    for j, l in enumerate(sample_layers):
         layer_data = np.squeeze(l, axis=0)
         print("layer_data shape = %s" % str(layer_data.shape))
         data_ratio = float(layer_data.shape[0] / sample_lengths[i])  # num columns / 16
