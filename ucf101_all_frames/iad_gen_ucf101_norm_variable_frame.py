@@ -388,7 +388,7 @@ def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
   return logits, conv_layers
 
 
-def placeholder_inputs(batch_size):
+def placeholder_inputs(batch_size, max_frames):
   """Generate placeholder variables to represent the input tensors.
   These placeholders are used as inputs by the rest of the model building
   code and will be fed from the downloaded data in the .run() loop, below.
@@ -402,7 +402,7 @@ def placeholder_inputs(batch_size):
   # image and label tensors, except the first dimension is now batch_size
   # rather than the full size of the train or test data sets.
   images_placeholder = tf.placeholder(tf.float32, shape=(batch_size,
-                                                         NUM_FRAMES_PER_CLIP,
+                                                         max_frames,
                                                          CROP_SIZE,
                                                          CROP_SIZE,
                                                          CHANNELS))
@@ -451,7 +451,7 @@ def generate_iads(list_file, max_frames, training=False):
     sample_index_dict = {}
 
     # Get the sets of images and labels for training, validation, and
-    images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size * gpu_num)
+    images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size * gpu_num, max_frames)
     with tf.variable_scope('var_name') as var_scope:
         weights = {
                 'wc1': _variable_with_weight_decay('wc1', [3, 3, 3, 3, 64], 0.04, 0.00),
