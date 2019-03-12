@@ -41,5 +41,4 @@ for example in tf.python_io.tf_record_iterator(file_name):
         for i in range(1, 5):
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
-            print("Image = %s" % str(img.eval()))
-            img = tf.reshape(img, img_geom, "parse_reshape")
+            print("Image = %s, shape = %s" % str(img.eval(), img.shape))
