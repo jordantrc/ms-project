@@ -530,6 +530,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size
         crop_y = int((img.shape[1] - crop_size)/2)
         #img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:] - np_mean[j]
         img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:]
+        img = img.astype(np.float32)
         img_datas.append(img)
       data.append(img_datas)
       sample_names.append(sample_name)
@@ -549,7 +550,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size
   try:
     # print("len data = %s" % (len(data))
     #np_arr_data = np.array(data).astype(np.float32)
-    np_arr_data = data
+    np_arr_data = np.array(data)
   except ValueError as e:
     print("type = %s, len = %s, shape = %s" % (type(data), len(data), str(data[0][0].shape)))
     print(e)
