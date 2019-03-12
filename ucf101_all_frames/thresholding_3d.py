@@ -220,7 +220,7 @@ def thresholding(activation_map, data_ratio, compression_method={"type":"max", "
 
 	# asserts to make sure input is correctly formed
 	assert len(activation_map.shape) == 4, "input to 'feature_to_event' must be 4D matrix, input has "+str(len(activation_map.shape))+" dimensions"
-	assert data_ratio > 0.0 and data_ratio <= 1.0, "Data ratio parmater must be a float 0 < x <= 1, is :" + str(data_ratio)
+	#assert data_ratio > 0.0 and data_ratio <= 1.0, "Data ratio parmater must be a float 0 < x <= 1, is :" + str(data_ratio)
 	assert thresholding_method in THRESHOLDING_OPTIONS, "Thresh_method must be in "+str(THRESHOLDING_OPTIONS)+", is: "+ str(thresholding_method)
 
 	num_events = activation_map.shape[-1]
