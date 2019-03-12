@@ -32,10 +32,10 @@ for example in tf.python_io.tf_record_iterator(file_name):
         num_frames = parsed_features['num_frames']
 
         print("PARSED FEATURES:")
-        print("example_id = %s" % example_id)
-        print("label = %s" % label)
-        print("num_channels = %s" % num_channels)
-        print("num_frames = %s" % num_frames)
+        print("example_id = %s" % example_id.eval())
+        print("label = %s" % label.eval())
+        print("num_channels = %s" % num_channels.eval())
+        print("num_frames = %s" % num_frames.eval())
 
         # decode the image data
         for i in range(1, 5):
