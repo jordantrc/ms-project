@@ -17,8 +17,8 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/ms-project/ucf101/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/UCF-101/'
-TRAIN_LIST = 'train-test-splits/trainlist01.txt'
-TEST_LIST = 'train-test-splits/testlist01.txt'
+TRAIN_LIST = 'train-test-splits/trainlist01-long.txt'
+TEST_LIST = 'train-test-splits/testlist01-test.txt'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/npy/'
 TRAIN_EPOCHS = 1
@@ -48,6 +48,7 @@ def _bytes_feature(value):
 def make_sequence_example(img_raw, label, example_id, sample_length, num_channels):
     """creates the tfrecord example"""
     assert len(img_raw) == 5
+    print("sample_length = %s" % sample_length)
     features = dict()
     features['example_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[example_id]))
     features['label'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
