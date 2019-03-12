@@ -38,7 +38,7 @@ for example in tf.python_io.tf_record_iterator(file_name):
         print("num_frames = %s" % num_frames.eval())
 
         # decode the image data
-        for i in range(1, 5):
+        for i in range(1, 6):
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
             print("Image = %s, shape = %s" % (str(img.eval()), img.shape))
