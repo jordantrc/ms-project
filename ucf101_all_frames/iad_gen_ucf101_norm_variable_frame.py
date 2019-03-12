@@ -17,8 +17,8 @@ from thresholding_3d import thresholding
 
 MODEL = '/home/jordanc/ms-project/ucf101/C3D-tensorflow-master/models/c3d_ucf_model-4999'
 IMAGE_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/UCF-101/'
-TRAIN_LIST = 'train-test-splits/trainlist01-long.txt'
-TEST_LIST = 'train-test-splits/testlist01-test.txt'
+TRAIN_LIST = 'train-test-splits/trainlist01.txt'
+TEST_LIST = 'train-test-splits/testlist01.txt'
 IAD_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/'
 NPY_DIRECTORY = '/home/jordanc/datasets/UCF-101_all/iad_global_norm/npy/'
 TRAIN_EPOCHS = 1
