@@ -402,7 +402,7 @@ def placeholder_inputs(batch_size, max_frames):
   # image and label tensors, except the first dimension is now batch_size
   # rather than the full size of the train or test data sets.
   images_placeholder = tf.placeholder(tf.float32, shape=(batch_size,
-                                                         max_frames,
+                                                         None,
                                                          CROP_SIZE,
                                                          CROP_SIZE,
                                                          CHANNELS))
