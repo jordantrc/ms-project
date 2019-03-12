@@ -515,6 +515,7 @@ def read_clip_and_label(directory, filename, batch_size, start_pos=-1, crop_size
       print("Loading a video clip from {}...".format(dirname))
     tmp_data = get_frames_data(dirname)
     num_frames = len(tmp_data)
+    print("num_frames = %s" % num_frames)
     img_datas = [];
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
