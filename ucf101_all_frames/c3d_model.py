@@ -473,7 +473,7 @@ def get_frames_data(filename, max_frames):
     print("length filenames = %s" % len(filenames))
     
     # if max frames is set
-    if max_frames > 0:
+    if max_frames > 0 and len(filenames) > max_frames:
       filenames = filenames[:max_frames]
     
     for i in range(len(filenames)):
