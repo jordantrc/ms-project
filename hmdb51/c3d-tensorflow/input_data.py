@@ -44,7 +44,7 @@ def get_frames_data(filename, num_frames_per_clip=16, frames_per_second=30, flip
     # assuming 30 frames per second for each video, determine the ratio
     # of the frames_per_second argument and this value, and use that ratio
     # to skip frames
-    frame_ratio = min(1, 30 // frames_per_second)
+    frame_ratio = max(1, 30 // frames_per_second)
     filenames = filenames[::frame_ratio]
 
     if(len(filenames) < num_frames_per_clip):
