@@ -35,6 +35,8 @@ FLAGS = flags.FLAGS
 MOVING_AVERAGE_DECAY = 0.9999
 model_save_dir = './models'
 
+FRAMES_PER_SECOND = 10
+
 def placeholder_inputs(batch_size):
   """Generate placeholder variables to represent the input tensors.
 
@@ -217,7 +219,8 @@ def run_training():
                       num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                       crop_size=c3d_model.CROP_SIZE,
                       shuffle=True,
-                      flip_with_probability=0.5
+                      flip_with_probability=0.5,
+                      frames_per_second=FRAMES_PER_SECOND
                       )
       sess.run(train_op, feed_dict={
                       images_placeholder: train_images,
@@ -243,7 +246,8 @@ def run_training():
                         batch_size=FLAGS.batch_size * gpu_num,
                         num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                         crop_size=c3d_model.CROP_SIZE,
-                        shuffle=True
+                        shuffle=True,
+                        frames_per_second=FRAMES_PER_SECOND
                         )
         summary, acc = sess.run(
                         [merged, accuracy],

@@ -33,6 +33,8 @@ gpu_num = 2
 flags.DEFINE_integer('batch_size', 10 , 'Batch size.')
 FLAGS = flags.FLAGS
 
+FRAMES_PER_SECOND = 10
+
 def placeholder_inputs(batch_size):
   """Generate placeholder variables to represent the input tensors.
   These placeholders are used as inputs by the rest of the model building
@@ -131,7 +133,8 @@ def run_test():
             input_data.read_clip_and_label(
                     test_list_file,
                     FLAGS.batch_size * gpu_num,
-                    start_pos=next_start_pos
+                    start_pos=next_start_pos,
+                    frames_per_second=FRAMES_PER_SECOND
                     )
     predict_score = norm_score.eval(
             session=sess,

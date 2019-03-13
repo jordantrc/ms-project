@@ -32,7 +32,7 @@ import time
 import sys
 
 #def get_frames_data(filename, num_frames_per_clip=16):
-def get_frames_data(filename, num_frames_per_clip=16, flip=False):
+def get_frames_data(filename, num_frames_per_clip=16, frames_per_second=30, flip=False):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
   ret_arr = []
@@ -40,6 +40,13 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False):
   pad_size = 0
   for parent, dirnames, filenames in os.walk(filename):
     filenames = sorted(filenames)
+
+    # assuming 30 frames per second for each video, determine the ratio
+    # of the frames_per_second argument and this value, and use that ratio
+    # to skip frames
+    frame_ratio = 30 // frames_per_second
+    filenames = filenames[::frame_ratio]
+
     if(len(filenames) < num_frames_per_clip):
         #return ret_arr, s_index
         s_index = 0
@@ -73,7 +80,14 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False):
   return ret_arr, s_index
 
 #def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
-def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False, flip_with_probability=0.0):
+def read_clip_and_label(filename, 
+                        batch_size, 
+                        start_pos=-1, 
+                        num_frames_per_clip=16, 
+                        crop_size=112, 
+                        shuffle=False, 
+                        flip_with_probability=0.0, 
+                        frames_per_second=30):
   lines = open(filename,'r')
   read_dirnames = []
   data = []
@@ -107,7 +121,7 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
     tmp_label = line[1]
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
-    tmp_data, _ = get_frames_data(dirname, num_frames_per_clip, flip)
+    tmp_data, _ = get_frames_data(dirname, num_frames_per_clip, frames_per_second, flip)
     img_datas = [];
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
