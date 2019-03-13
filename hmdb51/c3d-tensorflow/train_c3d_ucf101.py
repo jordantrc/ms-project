@@ -216,7 +216,8 @@ def run_training():
                       batch_size=FLAGS.batch_size * gpu_num,
                       num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                       crop_size=c3d_model.CROP_SIZE,
-                      shuffle=True
+                      shuffle=True,
+                      flip_with_probability=0.5
                       )
       sess.run(train_op, feed_dict={
                       images_placeholder: train_images,

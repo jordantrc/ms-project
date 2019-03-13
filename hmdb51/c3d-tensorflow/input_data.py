@@ -32,7 +32,7 @@ import time
 import sys
 
 #def get_frames_data(filename, num_frames_per_clip=16):
-def get_frames_data(filename, num_frames_per_clip=16):
+def get_frames_data(filename, num_frames_per_clip=16, flip=False):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
   ret_arr = []
@@ -60,6 +60,8 @@ def get_frames_data(filename, num_frames_per_clip=16):
     for i in range(s_index, e_index):
         image_name = str(filename) + '/' + str(filenames[i])
         img = Image.open(image_name)
+        if flip:
+          img = img.transpose(Image.FLIP_LEFT_RIGHT)
         img_data = np.array(img)
         ret_arr.append(img_data)
 
@@ -71,13 +73,19 @@ def get_frames_data(filename, num_frames_per_clip=16):
   return ret_arr, s_index
 
 #def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
-def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
+def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False, flip_with_probability=0.0):
   lines = open(filename,'r')
   read_dirnames = []
   data = []
   label = []
   batch_index = 0
   next_batch_start = -1
+  if flip_with_probability != 0.0:
+    flip = random.random()
+    if flip < flip_with_probability:
+      flip = True
+    else:
+      flip = False
   lines = list(lines)
   #np_mean = np.load('crop_mean.npy').reshape([num_frames_per_clip, crop_size, crop_size, 3])
   # Forcing shuffle, if start_pos is not specified
@@ -99,7 +107,7 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
     tmp_label = line[1]
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
-    tmp_data, _ = get_frames_data(dirname, num_frames_per_clip)
+    tmp_data, _ = get_frames_data(dirname, num_frames_per_clip, flip)
     img_datas = [];
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
