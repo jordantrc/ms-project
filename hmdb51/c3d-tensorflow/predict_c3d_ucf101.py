@@ -33,7 +33,7 @@ gpu_num = 2
 flags.DEFINE_integer('batch_size', 10 , 'Batch size.')
 FLAGS = flags.FLAGS
 
-FRAMES_PER_SECOND = 10
+FRAMES_PER_SECOND = 5
 
 def placeholder_inputs(batch_size):
   """Generate placeholder variables to represent the input tensors.
