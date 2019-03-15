@@ -35,7 +35,7 @@ FLAGS = flags.FLAGS
 MOVING_AVERAGE_DECAY = 0.9999
 model_save_dir = './models'
 
-FRAMES_PER_SECOND = 5
+FRAMES_PER_SECOND = 2
 
 def placeholder_inputs(batch_size):
   """Generate placeholder variables to represent the input tensors.
