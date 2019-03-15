@@ -34,7 +34,7 @@ flags.DEFINE_integer('batch_size', 10 , 'Batch size.')
 FLAGS = flags.FLAGS
 
 FRAMES_PER_SECOND = 5
-PAD_SHORT_CLIPS = False
+PAD_SHORT_CLIPS = True
 
 def placeholder_inputs(batch_size):
   """Generate placeholder variables to represent the input tensors.
