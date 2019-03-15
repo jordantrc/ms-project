@@ -219,6 +219,7 @@ def run_training():
                       num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                       crop_size=c3d_model.CROP_SIZE,
                       shuffle=True,
+                      pad_short_clips=False,
                       frames_per_second=FRAMES_PER_SECOND
                       )
       sess.run(train_op, feed_dict={
@@ -246,6 +247,7 @@ def run_training():
                         num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                         crop_size=c3d_model.CROP_SIZE,
                         shuffle=True,
+                        pad_short_clips=False,
                         frames_per_second=FRAMES_PER_SECOND
                         )
         summary, acc = sess.run(
