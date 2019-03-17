@@ -86,8 +86,8 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
     flip = random.random()
     if flip < flip_with_probability:
       flip = True
-    else:
-      flip = False
+  else:
+    flip = False
   #np_mean = np.load('crop_mean.npy').reshape([num_frames_per_clip, crop_size, crop_size, 3])
   # Forcing shuffle, if start_pos is not specified
   if start_pos < 0:
