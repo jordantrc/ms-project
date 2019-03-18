@@ -29,13 +29,16 @@ import numpy as np
 flags = tf.app.flags
 gpu_num = 2
 #flags.DEFINE_float('learning_rate', 0.0, 'Initial learning rate.')
-flags.DEFINE_integer('max_steps', 5000, 'Number of steps to run trainer.')
+flags.DEFINE_integer('max_steps', 25000, 'Number of steps to run trainer.')
 flags.DEFINE_integer('batch_size', 10, 'Batch size.')
 FLAGS = flags.FLAGS
 MOVING_AVERAGE_DECAY = 0.9999
 model_save_dir = './models'
 
 PAD_SHORT_CLIPS = False
+LEARNING_RATE_STABLE = 1e-5
+LEARNING_RATE_FINETUNE = 1e-4
+
 
 def placeholder_inputs(batch_size):
   """Generate placeholder variables to represent the input tensors.
@@ -131,8 +134,8 @@ def run_training():
     tower_grads1 = []
     tower_grads2 = []
     logits = []
-    opt_stable = tf.train.AdamOptimizer(1e-4)
-    opt_finetuning = tf.train.AdamOptimizer(1e-3)
+    opt_stable = tf.train.AdamOptimizer(LEARNING_RATE_STABLE)
+    opt_finetuning = tf.train.AdamOptimizer(LEARNING_RATE_FINETUNE)
     with tf.variable_scope('var_name') as var_scope:
       weights = {
               'wc1': _variable_with_weight_decay('wc1', [3, 3, 3, 3, 64], 0.0005),
