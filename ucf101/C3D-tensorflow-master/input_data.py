@@ -32,7 +32,7 @@ import time
 import sys
 
 #def get_frames_data(filename, num_frames_per_clip=16):
-def get_frames_data(filename, num_frames_per_clip=16, flip=False):
+def get_frames_data(filename, num_frames_per_clip=16, flip=False, pad_short_clips=False):
   ''' Given a directory containing extracted frames, return a video clip of
   (num_frames_per_clip) consecutive frames as a list of np arrays '''
   ret_arr = []
@@ -40,7 +40,7 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False):
   pad_size = 0
   for parent, dirnames, filenames in os.walk(filename):
     filenames = sorted(filenames)
-    if(len(filenames) < num_frames_per_clip):
+    if(len(filenames) < num_frames_per_clip) and pad_short_clips:
         #return ret_arr, s_index
         s_index = 0
         sample = Image.open(str(filename) + "/" + str(filenames[0]))
@@ -48,6 +48,8 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False):
         blank_image = np.zeros([width, height, 3], dtype=int) 
         e_index = len(filenames)
         pad_size = num_frames_per_clip - len(filenames)
+    elif len(filenames) < num_frames_per_clip and not pad_short_clips:
+        return ret_arr, s_index
     elif len(filenames) == num_frames_per_clip:
         s_index = 0
         e_index = len(filenames)
@@ -73,7 +75,14 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False):
   return ret_arr, s_index
 
 #def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False):
-def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=16, crop_size=112, shuffle=False, flip_with_probability=0.0):
+def read_clip_and_label(filename, 
+                        batch_size, 
+                        start_pos=-1, 
+                        num_frames_per_clip=16, 
+                        crop_size=112, 
+                        shuffle=False, 
+                        flip_with_probability=0.0,
+                        pad_short_clips=False):
   lines = open(filename,'r')
   read_dirnames = []
   data = []
@@ -109,7 +118,7 @@ def read_clip_and_label(filename, batch_size, start_pos=-1, num_frames_per_clip=
     sample_name = os.path.basename(dirname)
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
-    tmp_data, _ = get_frames_data(dirname, num_frames_per_clip, flip)
+    tmp_data, _ = get_frames_data(dirname, num_frames_per_clip, flip, pad_short_clips)
     img_datas = [];
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
