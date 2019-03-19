@@ -55,8 +55,8 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False, pad_short_clip
         e_index = len(filenames)
     else:
         # s_index calc also changed to have 50% overlap on clips 
-        s_index = random.randint(0, len(filenames) - num_frames_per_clip)
-        # s_index = random.randrange(0, len(filenames) - num_frames_per_clip, int(num_frames_per_clip / 8))
+        # s_index = random.randint(0, len(filenames) - num_frames_per_clip)
+        s_index = random.randrange(0, len(filenames) - num_frames_per_clip, int(num_frames_per_clip / 8))
         e_index = s_index + num_frames_per_clip
 
     for i in range(s_index, e_index):

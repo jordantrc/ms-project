@@ -44,7 +44,7 @@ def conv3d(name, l_input, w, b):
 def max_pool(name, l_input, k):
   return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME', name=name)
 
-def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
+def inference_c3d(_X, _dropout, batch_size, _weights, _biases, sports1m_model):
 
   # Convolution Layer
   conv1 = conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
@@ -78,7 +78,8 @@ def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
   pool5 = max_pool('pool5', conv5, k=2)
 
   # Fully connected layer
-  pool5 = tf.transpose(pool5, perm=[0,1,4,2,3])
+  if sports1m_model:
+    pool5 = tf.transpose(pool5, perm=[0,1,4,2,3])
   dense1 = tf.reshape(pool5, [batch_size, _weights['wd1'].get_shape().as_list()[0]]) # Reshape conv3 output to fit dense layer input
   dense1 = tf.matmul(dense1, _weights['wd1']) + _biases['bd1']
 

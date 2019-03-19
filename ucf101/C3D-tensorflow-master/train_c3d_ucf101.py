@@ -174,7 +174,8 @@ def run_training():
                         0.5,
                         FLAGS.batch_size,
                         weights,
-                        biases
+                        biases,
+                        use_pretrained_model
                         )
         loss_name_scope = ('gpud_%d_loss' % gpu_index)
         loss = tower_loss(

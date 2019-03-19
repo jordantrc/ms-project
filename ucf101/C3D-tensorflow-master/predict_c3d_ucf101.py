@@ -68,8 +68,8 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 
 def run_test():
-  model_name = "./sports1m_finetuning_ucf101.model"
-  # model_name = "models/c3d_ucf_model-4999"
+  # model_name = "./sports1m_finetuning_ucf101.model"
+  model_name = "models/c3d_ucf_model-19999"
   test_list_file = 'list/testlist01.txt'
   num_test_videos = len(list(open(test_list_file,'r')))
   print("Number of test videos={}".format(num_test_videos))
@@ -130,7 +130,8 @@ def run_test():
             input_data.read_clip_and_label(
                     test_list_file,
                     FLAGS.batch_size * gpu_num,
-                    start_pos=next_start_pos
+                    start_pos=next_start_pos,
+                    pad_short_clips=True
                     )
     predict_score = norm_score.eval(
             session=sess,
