@@ -20,9 +20,9 @@ def main():
         lines = raw_text.splitlines()
 
     # parse the contents of the file
-    total_predictions = 0
-    correct_clip_1 = 0
-    correct_clip_5 = 0
+    total_predictions = 0.
+    correct_clip_1 = 0.
+    correct_clip_5 = 0.
     video_predictions = {}
 
     for l in lines:
@@ -51,8 +51,8 @@ def main():
                 correct_clip_5 += 1
     
     # calculate video accuracy
-    video_total = 0
-    video_correct = 0
+    video_total = 0.
+    video_correct = 0.
     for k in video_predictions:
         video_total += video_predictions[k][0]
         video_correct += video_predictions[k][1]
