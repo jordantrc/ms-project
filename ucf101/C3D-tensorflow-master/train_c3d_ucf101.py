@@ -36,8 +36,8 @@ MOVING_AVERAGE_DECAY = 0.9999
 model_save_dir = './models'
 
 PAD_SHORT_CLIPS = False
-LEARNING_RATE_STABLE = 1e-5
-LEARNING_RATE_FINETUNE = 1e-4
+LEARNING_RATE_STABLE = 1e-4
+LEARNING_RATE_FINETUNE = 1e-3
 
 
 def placeholder_inputs(batch_size):
