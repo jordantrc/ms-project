@@ -218,7 +218,7 @@ def run_training():
     test_writer = tf.summary.FileWriter('./visual_logs/test', sess.graph)
     for step in xrange(FLAGS.max_steps):
       start_time = time.time()
-      train_images, train_labels, _, _, _, _ = input_data.read_clip_and_label(
+      train_images, train_labels, _, _, _, valid_len = input_data.read_clip_and_label(
                       # filename='list/trainlist01.txt',
                       filename='../../ucf101_all_frames/train-test-splits/trainlist01.txt',
                       batch_size=FLAGS.batch_size * gpu_num,
@@ -233,7 +233,7 @@ def run_training():
                       labels_placeholder: train_labels
                       })
       duration = time.time() - start_time
-      print('Step %d: %.3f sec' % (step, duration))
+      print('Step %d: %.3f sec, valid_len = %s' % (step, duration, valid_len))
 
       # Save a checkpoint and evaluate the model periodically.
       if (step) % 10 == 0 or (step + 1) == FLAGS.max_steps:
