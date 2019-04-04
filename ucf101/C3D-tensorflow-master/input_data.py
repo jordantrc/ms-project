@@ -49,6 +49,7 @@ def get_frames_data(filename, num_frames_per_clip=16, flip=False, pad_short_clip
         e_index = len(filenames)
         pad_size = num_frames_per_clip - len(filenames)
     elif len(filenames) < num_frames_per_clip and not pad_short_clips:
+        print("discarding sample %s" % filename)
         return ret_arr, s_index
     elif len(filenames) == num_frames_per_clip:
         s_index = 0
@@ -102,8 +103,7 @@ def read_clip_and_label(filename,
   if start_pos < 0:
     shuffle = True
   if shuffle:
-    video_indices = range(len(lines))
-    random.seed(time.time())
+    video_indices = list(range(len(lines)))
     random.shuffle(video_indices)
   else:
     # Process videos sequentially
@@ -119,7 +119,7 @@ def read_clip_and_label(filename,
     if not shuffle:
       print("Loading a video clip from {}...".format(dirname))
     tmp_data, _ = get_frames_data(dirname, num_frames_per_clip, flip, pad_short_clips)
-    img_datas = [];
+    img_datas = []
     if(len(tmp_data)!=0):
       for j in xrange(len(tmp_data)):
         img = Image.fromarray(tmp_data[j].astype(np.uint8))

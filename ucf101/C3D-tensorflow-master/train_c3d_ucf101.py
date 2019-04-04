@@ -27,17 +27,17 @@ import numpy as np
 
 # Basic model parameters as external flags.
 flags = tf.app.flags
-gpu_num = 2
+gpu_num = 1
 #flags.DEFINE_float('learning_rate', 0.0, 'Initial learning rate.')
-flags.DEFINE_integer('max_steps', 20000, 'Number of steps to run trainer.')
+flags.DEFINE_integer('max_steps', 5000, 'Number of steps to run trainer.')
 flags.DEFINE_integer('batch_size', 10, 'Batch size.')
 FLAGS = flags.FLAGS
 MOVING_AVERAGE_DECAY = 0.9999
 model_save_dir = './models'
 
 PAD_SHORT_CLIPS = False
-LEARNING_RATE_STABLE = 1e-4
-LEARNING_RATE_FINETUNE = 1e-3
+LEARNING_RATE_STABLE = 1e-3
+LEARNING_RATE_FINETUNE = 1e-4
 
 
 def placeholder_inputs(batch_size):
@@ -168,7 +168,7 @@ def run_training():
       with tf.device('/gpu:%d' % gpu_index):
         
         varlist2 = [ weights['out'],biases['out'] ]
-        varlist1 = list( set(weights.values() + biases.values()) - set(varlist2) )
+        varlist1 = list( set(list(weights.values()) + list(biases.values())) - set(varlist2) )
         logit = c3d_model.inference_c3d(
                         images_placeholder[gpu_index * FLAGS.batch_size:(gpu_index + 1) * FLAGS.batch_size,:,:,:,:],
                         0.5,
@@ -201,7 +201,7 @@ def run_training():
     null_op = tf.no_op()
 
     # Create a saver for writing training checkpoints.
-    saver = tf.train.Saver(weights.values() + biases.values())
+    saver = tf.train.Saver(list(weights.values()) + list(biases.values()))
     init = tf.global_variables_initializer()
 
     # Create a session for running Ops on the Graph.
@@ -220,12 +220,12 @@ def run_training():
       start_time = time.time()
       train_images, train_labels, _, _, _, valid_len = input_data.read_clip_and_label(
                       # filename='list/trainlist01.txt',
-                      filename='../../ucf101_all_frames/train-test-splits/trainlist01.txt',
+                      filename='../../ucf101_all_frames/train-test-splits/trainlist01-hyperion.txt',
                       batch_size=FLAGS.batch_size * gpu_num,
                       num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                       crop_size=c3d_model.CROP_SIZE,
                       shuffle=True,
-                      flip_with_probability=0.0,
+                      flip_with_probability=0.5,
                       pad_short_clips=PAD_SHORT_CLIPS
                       )
       sess.run(train_op, feed_dict={
@@ -249,7 +249,7 @@ def run_training():
         print('Validation Data Eval:')
         val_images, val_labels, _, _, _, _ = input_data.read_clip_and_label(
                         #filename='list/testlist01.txt',
-                        filename='../../ucf101_all_frames/train-test-splits/testlist01.txt',
+                        filename='../../ucf101_all_frames/train-test-splits/testlist01-hyperion.txt',
                         batch_size=FLAGS.batch_size * gpu_num,
                         num_frames_per_clip=c3d_model.NUM_FRAMES_PER_CLIP,
                         crop_size=c3d_model.CROP_SIZE,

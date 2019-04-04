@@ -29,7 +29,7 @@ import numpy as np
 
 # Basic model parameters as external flags.
 flags = tf.app.flags
-gpu_num = 2
+gpu_num = 1
 flags.DEFINE_integer('batch_size', 10 , 'Batch size.')
 FLAGS = flags.FLAGS
 
@@ -71,7 +71,7 @@ def run_test():
   # model_name = "./sports1m_finetuning_ucf101.model"
   model_name = "models/c3d_ucf_model-4999"
   #test_list_file = 'list/testlist01.txt'
-  test_list_file = '../../ucf101_all_frames/train-test-splits/testlist01.txt'
+  test_list_file = '../../ucf101_all_frames/train-test-splits/testlist01-hyperion.txt'
   num_test_videos = len(list(open(test_list_file,'r')))
   print("Number of test videos={}".format(num_test_videos))
 
@@ -119,7 +119,7 @@ def run_test():
   # Create a saver for writing training checkpoints.
   saver.restore(sess, model_name)
   # And then after everything is built, start the training loop.
-  bufsize = 0
+  bufsize = 1
   write_file = open("predict_ret.txt", "w+", bufsize)
   next_start_pos = 0
   all_steps = int((num_test_videos - 1) / (FLAGS.batch_size * gpu_num) + 1)

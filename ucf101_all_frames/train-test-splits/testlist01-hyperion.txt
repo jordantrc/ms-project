@@ -3781,4 +3781,3 @@ D:\ms-project-data\UCF101\UCF-101\YoYo\v_YoYo_g07_c01 100
 D:\ms-project-data\UCF101\UCF-101\YoYo\v_YoYo_g07_c02 100
 D:\ms-project-data\UCF101\UCF-101\YoYo\v_YoYo_g07_c03 100
 D:\ms-project-data\UCF101\UCF-101\YoYo\v_YoYo_g07_c04 100
-D:\ms-project-data\UCF101\UCF-101\
