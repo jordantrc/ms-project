@@ -14,8 +14,8 @@ import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/test.list_32_16c3d_50_expanded'
-TRAIN_FILE_LIST = 'train-test-splits/train-50.list_32_16c3d_expanded'
+TEST_FILE_LIST = 'train-test-splits/iad_madison_hyperion_test_2classes'
+TRAIN_FILE_LIST = 'train-test-splits/iad_madison_hyperion_train_2classes'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -29,14 +29,14 @@ TRAINING_DATA_SAMPLE = 1.0
 # neural network variables
 # softmax, autoencode, 
 CLASSIFIER = 'softmax'
-WEIGHT_STDDEV = 0.15
-BIAS = 0.15
+WEIGHT_STDDEV = 0.1
+BIAS = 0.0
 LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-5
 BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
-SOFTMAX_HIDDEN_SIZE = 4096
+SOFTMAX_HIDDEN_SIZE = 1024
 
 # autoencoder hyper parameters
 #AUTOENCODER_LAYERS = [500, 200, 50, 10]
@@ -72,7 +72,14 @@ LAYER_GEOMETRY_32 = {
                     '4': (512, 8, 1),
                     '5': (512, 4, 1)
                     }
-LAYER_GEOMETRY = LAYER_GEOMETRY_32
+LAYER_GEOMETRY_FULL_FRAME = {
+                    '1': (64, 1000, 1),
+                    '2': (128, 1000, 1),
+                    '3': (256, 500, 1),
+                    '4': (256, 250, 1),
+                    '5': (256, 125, 1)
+                    }
+LAYER_GEOMETRY = LAYER_GEOMETRY_FULL_FRAME
 
 #-------------General helper functions----------------#
 def save_settings(run_name):
@@ -198,21 +205,40 @@ def _max_pool_kxk(x, k=2):
 
 
 def _parse_function(example):
-    img_geom = tuple([1]) + LAYER_GEOMETRY[str(LAYER)]
+    
+    layer_padding = {
+                    '1': 128000,
+                    '2': 256000,
+                    '3': 256000,
+                    '4': 128000,
+                    '5': 64000
+                    }
+    # img_geom = tuple([1]) + LAYER_GEOMETRY[str(LAYER)]
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
 
     for i in range(1, 6):
         # features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
         features['img/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.string)
+        features['num_rows/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+        features['num_columns/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
 
     parsed_features = tf.parse_single_example(example, features)
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
-    img = tf.reshape(img, img_geom, "parse_reshape")
+    #img_geom = (1,
+    #            parsed_features['num_rows/{:02d}'.format(LAYER)],
+    #            parsed_features['num_columns/{:02d}'.format(LAYER)],
+    #            1)
+    #print("rows = %s columns = %s" % (
+    #    parsed_features['num_rows/{:02d}'.format(LAYER)].eval(),
+    #    parsed_features['num_columns/{:02d}'.format(LAYER)].eval()))
+    #img = tf.reshape(img, img_geom, "parse_reshape")
+    padding = [[0, layer_padding[str(LAYER)] - tf.shape(img)[0]]]
+    img = tf.pad(img, padding, 'CONSTANT', constant_values=0.0)
+    img = tf.expand_dims(img, 0)
 
-    # determine padding
     if FIRST_CNN_WIDTH != -1:
         layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2])
 
@@ -223,12 +249,12 @@ def _parse_function(example):
         print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
-    img = tf.squeeze(img, 0)
+    #img = tf.squeeze(img, 0)
     if NORMALIZE_IMAGE:
         img = tf.image.per_image_standardization(img)
 
     label = tf.cast(parsed_features['label'], tf.int64)
-    label = tf.one_hot(label, depth=NUM_CLASSES)
+    label = tf.one_hot(label, depth=NUM_CLASSES, dtype=tf.int32)
 
     return img, label
 
@@ -295,15 +321,18 @@ def get_variables_mctnet(model_name, num_channels=1):
 
 def get_variables_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
-    num_features = geom[0] * geom[1] * num_channels
+    num_features = geom[0] * geom[1] * num_channels * 2
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
+                #'W_0': _weight_variable_scaling('W_0', [num_features, NUM_CLASSES]),
                 'W_0': _weight_variable('W_0', [num_features, NUM_CLASSES]),
+                #'W_0': _weight_variable('W_0', [num_features, SOFTMAX_HIDDEN_SIZE]),
                 #'out': _weight_variable('out', [SOFTMAX_HIDDEN_SIZE, NUM_CLASSES])
                 }
         biases = {
                 'b_0': _bias_variable('b_0', [NUM_CLASSES]),
+                #'b_0': _bias_variable('b_0', [SOFTMAX_HIDDEN_SIZE]),
                 #'out': _bias_variable('out', [NUM_CLASSES])
         }
     return weights, biases
@@ -535,7 +564,7 @@ def iad_nn(run_string):
 
     # get the list of filenames
     print("loading train file list from %s" % TRAIN_FILE_LIST)
-    filenames_train = list_to_filenames(TRAIN_FILE_LIST, balance_classes=True)
+    filenames_train = list_to_filenames(TRAIN_FILE_LIST, balance_classes=False)
     filenames_test = list_to_filenames(TEST_FILE_LIST)
     print("%s training files, %s testing files" % (len(filenames_train), len(filenames_test)))
 
@@ -578,7 +607,7 @@ def iad_nn(run_string):
     # training or evaluation dataset
     dataset = tf.data.TFRecordDataset(input_filenames)
     dataset = dataset.map(_parse_function)
-    dataset = dataset.batch(BATCH_SIZE)
+    dataset = dataset.batch(BATCH_SIZE, drop_remainder=True)
     if training:
         dataset = dataset.shuffle(200)
         dataset = dataset.repeat(EPOCHS)
@@ -595,8 +624,9 @@ def iad_nn(run_string):
         if CLASSIFIER == 'softmax':
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
-            x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
-            x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
+            print("LAYER = %s, geom = %s" % (LAYER, geom))
+            x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1] * 2])
+            x_test = tf.reshape(x_test, [1, geom[0] * geom[1] * 2])
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
@@ -612,6 +642,7 @@ def iad_nn(run_string):
         elif CLASSIFIER == 'autoencode':
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
+
             x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
             x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
 
@@ -635,6 +666,7 @@ def iad_nn(run_string):
 
         # loss and optimizer
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+        #loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
         train_op = optimizer.minimize(loss)
 
@@ -684,9 +716,17 @@ def iad_nn(run_string):
         # loop until out of data
         while True:
             try:
-                train_result = sess.run([train_op, accuracy])
+                train_result = sess.run([train_op, accuracy, x, y_true, y_pred, logits, weights])
+                if step == 0 or step == 1:
+                    print("\tweights (shape = %s) = %s" % (train_result[6]['W_0'].shape, train_result[6]['W_0']))
+
                 if step != 0 and step % 100 == 0:
-                    print("step %s, accuracy = %s" % (step, train_result[1]))
+                    print("step %s, accuracy = %.03f" % (step, train_result[1]))
+                    print("\tx (shape = %s) = %s" % (train_result[2].shape, train_result[2]))
+                    print("\ty_true (shape = %s) = %s" % (train_result[3].shape, train_result[3]))
+                    print("\ty_pred (shape = %s) = %s" % (train_result[4].shape, train_result[4]))
+                    print("\tlogits (shape = %s) = %s" % (train_result[5].shape, train_result[5]))
+                    print("\tweights (shape = %s) = %s" % (train_result[6]['W_0'].shape, train_result[6]['W_0']))
                     # save the current model every 1000 steps
                     if step % 1000 == 0:
                         save_model(sess, saver, step)
@@ -818,7 +858,7 @@ if __name__ == "__main__":
             # training run
             BATCH_SIZE = 10
             LOAD_MODEL = None
-            EPOCHS = 5
+            EPOCHS = 20
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             iad_nn(run_string)
