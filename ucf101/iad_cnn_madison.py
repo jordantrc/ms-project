@@ -611,7 +611,8 @@ def iad_nn(run_string):
     # training or evaluation dataset
     dataset = tf.data.TFRecordDataset(input_filenames)
     dataset = dataset.map(_parse_function)
-    dataset = dataset.batch(BATCH_SIZE, drop_remainder=True)
+    #dataset = dataset.batch(BATCH_SIZE, drop_remainder=True)
+    dataset = dataset.batch(BATCH_SIZE)
     if training:
         dataset = dataset.shuffle(200)
         dataset = dataset.repeat(EPOCHS)
