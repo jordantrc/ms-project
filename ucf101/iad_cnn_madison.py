@@ -224,13 +224,13 @@ def _parse_function(example):
         features['num_columns/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
 
     parsed_features = tf.parse_single_example(example, features)
+    num_rows = parsed_features['num_rows/{:02d}'.format(LAYER)]
+    num_columns = parsed_features['num_columns/{:02d}'.format(LAYER)]
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
     padding = [[0, layer_padding[str(LAYER)] - num_columns]]
     img = tf.pad(img, padding, 'CONSTANT', constant_values=0.0)
-    num_rows = parsed_features['num_rows/{:02d}'.format(LAYER)]
-    num_columns = parsed_features['num_columns/{:02d}'.format(LAYER)]
     #print("rows = %s columns = %s" % (
     #    parsed_features['num_rows/{:02d}'.format(LAYER)].eval(),
     #    parsed_features['num_columns/{:02d}'.format(LAYER)].eval()))
