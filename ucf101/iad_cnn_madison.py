@@ -213,7 +213,7 @@ def _parse_function(example):
                     '4': 128000,
                     '5': 64000
                     }
-    # img_geom = tuple([1]) + LAYER_GEOMETRY[str(LAYER)]
+    img_geom = tuple([1]) + LAYER_GEOMETRY[str(LAYER)]
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
 
@@ -227,19 +227,16 @@ def _parse_function(example):
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
+    padding = [[0, layer_padding[str(LAYER)] - num_columns]]
+    img = tf.pad(img, padding, 'CONSTANT', constant_values=0.0)
     num_rows = parsed_features['num_rows/{:02d}'.format(LAYER)]
     num_columns = parsed_features['num_columns/{:02d}'.format(LAYER)]
-    img_geom = (num_rows, num_columns, 1)
-    img_geom = tf.constant(img_geom)
     #print("rows = %s columns = %s" % (
     #    parsed_features['num_rows/{:02d}'.format(LAYER)].eval(),
     #    parsed_features['num_columns/{:02d}'.format(LAYER)].eval()))
     img = tf.reshape(img, img_geom, "parse_reshape")
-    print("1 img shape = %s" % img.get_shape())
+    print("img shape = %s" % img.get_shape())
     #img = tf.expand_dims(img, 0)
-    padding = [[0, 0], [0, layer_padding[str(LAYER)] - num_columns], [0, 0]]
-    img = tf.pad(img, padding, 'CONSTANT', constant_values=0.0)
-    print("2 img shape = %s" % img.get_shape())
     #img = tf.expand_dims(img, 0)
     #print("3 img shape = %s" % img.get_shape())
 
