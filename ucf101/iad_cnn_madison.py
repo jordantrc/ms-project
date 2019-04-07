@@ -229,7 +229,7 @@ def _parse_function(example):
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
-    padding = [0, layer_padding[str(LAYER)] - num_columns * num_rows]
+    padding = tf.constant([[0, layer_padding[str(LAYER)] - num_columns * num_rows]])
     img = tf.pad(img, padding, 'CONSTANT', constant_values=0.0)
     #print("rows = %s columns = %s" % (
     #    parsed_features['num_rows/{:02d}'.format(LAYER)].eval(),
