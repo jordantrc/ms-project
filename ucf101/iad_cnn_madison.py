@@ -213,7 +213,8 @@ def _parse_function(example):
                     '4': 128000,
                     '5': 64000
                     }
-    img_geom = tuple([1]) + LAYER_GEOMETRY[str(LAYER)]
+    #img_geom = tuple([1]) + LAYER_GEOMETRY[str(LAYER)]
+    img_geom = LAYER_GEOMETRY[str(LAYER)]
     features = dict()
     features['label'] = tf.FixedLenFeature((), tf.int64)
 
