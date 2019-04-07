@@ -230,6 +230,7 @@ def _parse_function(example):
     num_rows = parsed_features['num_rows/{:02d}'.format(LAYER)]
     num_columns = parsed_features['num_columns/{:02d}'.format(LAYER)]
     img_geom = (num_rows, num_columns, 1)
+    img_geom = tf.constant(img_geom)
     #print("rows = %s columns = %s" % (
     #    parsed_features['num_rows/{:02d}'.format(LAYER)].eval(),
     #    parsed_features['num_columns/{:02d}'.format(LAYER)].eval()))
