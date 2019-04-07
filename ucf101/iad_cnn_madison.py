@@ -28,7 +28,7 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 # softmax, autoencode, 
-CLASSIFIER = 'lenet'
+CLASSIFIER = 'softmax'
 WEIGHT_STDDEV = 0.1
 BIAS = 0.0
 LEAKY_RELU_ALPHA = 0.04
@@ -54,8 +54,8 @@ SOFTMAX_HIDDEN_SIZE = 1024
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 #FIRST_CNN_WIDTH = 16  # mctnet
-FIRST_CNN_WIDTH = 32  # lenet
-#FIRST_CNN_WIDTH = -1  # softmax
+#FIRST_CNN_WIDTH = 32  # lenet
+FIRST_CNN_WIDTH = -1  # softmax
 # 16 frame layer dimensions
 LAYER_GEOMETRY_16 = {
                     '1': (64, 16, 1),
