@@ -631,8 +631,8 @@ def iad_nn(run_string):
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
             print("LAYER = %s, geom = %s" % (LAYER, geom))
-            x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
-            x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
+            x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1] * 2])
+            x_test = tf.reshape(x_test, [1, geom[0] * geom[1] * 2])
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
