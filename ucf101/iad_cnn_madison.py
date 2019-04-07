@@ -28,7 +28,7 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 # softmax, autoencode, 
-CLASSIFIER = 'softmax'
+CLASSIFIER = 'lenet'
 WEIGHT_STDDEV = 0.1
 BIAS = 0.0
 LEAKY_RELU_ALPHA = 0.04
@@ -54,8 +54,8 @@ SOFTMAX_HIDDEN_SIZE = 1024
 # layer 4 - 512 features x 4 time slices
 # layer 5 - 512 features x 2 time slices
 #FIRST_CNN_WIDTH = 16  # mctnet
-#FIRST_CNN_WIDTH = 32  # lenet
-FIRST_CNN_WIDTH = -1  # softmax
+FIRST_CNN_WIDTH = 32  # lenet
+#FIRST_CNN_WIDTH = -1  # softmax
 # 16 frame layer dimensions
 LAYER_GEOMETRY_16 = {
                     '1': (64, 16, 1),
@@ -227,26 +227,29 @@ def _parse_function(example):
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
-    #img_geom = (1,
-    #            parsed_features['num_rows/{:02d}'.format(LAYER)],
-    #            parsed_features['num_columns/{:02d}'.format(LAYER)],
-    #            1)
+    num_rows = parsed_features['num_rows/{:02d}'.format(LAYER)]
+    num_columns = parsed_features['num_columns/{:02d}'.format(LAYER)]
+    img_geom = (num_rows, num_columns, 1)
     #print("rows = %s columns = %s" % (
     #    parsed_features['num_rows/{:02d}'.format(LAYER)].eval(),
     #    parsed_features['num_columns/{:02d}'.format(LAYER)].eval()))
-    #img = tf.reshape(img, img_geom, "parse_reshape")
-    padding = [[0, layer_padding[str(LAYER)] - tf.shape(img)[0]]]
+    img = tf.reshape(img, img_geom, "parse_reshape")
+    print("1 img shape = %s" % img.get_shape())
+    #img = tf.expand_dims(img, 0)
+    padding = [[0, 0], [0, layer_padding[str(LAYER)] - num_columns], [0, 0]]
     img = tf.pad(img, padding, 'CONSTANT', constant_values=0.0)
-    img = tf.expand_dims(img, 0)
+    print("2 img shape = %s" % img.get_shape())
+    #img = tf.expand_dims(img, 0)
+    #print("3 img shape = %s" % img.get_shape())
 
-    if FIRST_CNN_WIDTH != -1:
-        layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2])
+    #if FIRST_CNN_WIDTH != -1:
+    #    layer_dim3_pad = (FIRST_CNN_WIDTH - img_geom[2])
 
         # pad the image
-        pad_shape = [[0, 0], [0, 0], [0, layer_dim3_pad], [0, 0]]
-        padding = tf.constant(pad_shape)
-        img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
-        print("img shape = %s" % img.get_shape())
+    #    pad_shape = [[0, 0], [0, 0], [0, layer_dim3_pad], [0, 0]]
+    #    padding = tf.constant(pad_shape)
+    #    img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
+    #    print("img shape = %s" % img.get_shape())
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
     #img = tf.squeeze(img, 0)
@@ -431,9 +434,12 @@ def cnn_mctnet(x, batch_size, weights, biases, dropout):
     #pool4 = _max_pool_kxk(conv4, 2)
 
     # one fully connected layer
-    conv4_shape = conv4.get_shape().as_list()
-    flatten_size = conv4_shape[1] * conv4_shape[2] * conv4_shape[3]
-    conv4_flat = tf.reshape(conv4, (-1, flatten_size))
+    #conv4_shape = conv4.get_shape().as_list()
+    #print("conv4_shape = %s" % conv4.get_shape())
+    #flatten_size = conv4_shape[1] * conv4_shape[2] * conv4_shape[3]
+    #conv4_flat = tf.reshape(conv4, (-1, flatten_size))
+    conv4_flat = tf.layers.flatten(conv4)
+    flatten_size = conv4_flat.get_shape().as_list()[1]
 
     w_fc1 = _weight_variable('W_fc1', [flatten_size, NUM_CLASSES])
     b_fc1 = _bias_variable('b_fc1', [NUM_CLASSES])
@@ -467,7 +473,7 @@ def cnn_lenet(x, batch_size, weights, biases, dropout):
     print("pool2 shape = %s" % pool2_shape)
 
     # fully connected layer
-    pool2_flat_size = pool2_shape[1] * pool2_shape[2] * pool2_shape[3]
+    #pool2_flat_size = pool2_shape[1] * pool2_shape[2] * pool2_shape[3]
 
     # flatten pool2
     #pool2_flat = tf.reshape(pool2, [-1, pool2_flat_size])
