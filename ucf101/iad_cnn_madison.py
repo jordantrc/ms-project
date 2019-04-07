@@ -207,7 +207,7 @@ def _max_pool_kxk(x, k=2):
 def _parse_function(example):
     
     layer_padding = {
-                    '1': 128000,
+                    '1': 64000,
                     '2': 256000,
                     '3': 256000,
                     '4': 128000,
