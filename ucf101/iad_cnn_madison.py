@@ -323,7 +323,7 @@ def get_variables_mctnet(model_name, num_channels=1):
 
 def get_variables_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
-    num_features = geom[0] * geom[1] * num_channels * 2
+    num_features = geom[0] * geom[1] * num_channels
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
