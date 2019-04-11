@@ -6,9 +6,10 @@ import cv2
 import os
 import sys
 import tensorflow as tf
+import numpy as np
 
 file_name = sys.argv[1]
-assert os.path.isfile(file_name)
+assert os.path.isfile(file_name), "%s is not a file" % file_name
 
 sess = tf.Session()
 
@@ -43,7 +44,23 @@ for example in tf.python_io.tf_record_iterator(file_name):
             # decode the image, get label
             img = tf.decode_raw(parsed_features['img/{:02d}'.format(i)], tf.float32)
             img_shape = tf.shape(img)
-            print("Image = %s, shape = %s" % (str(img.eval()), img_shape.eval()))
+            nans_orig = tf.is_nan(img)
+            img = tf.where(tf.is_nan(img), tf.zeros_like(img), img)
+            img = tf.clip_by_value(img, 0.0, 1.0)
+            nans_fixed = tf.is_nan(img)
+            img_np = img.eval()
+            #img_np = np.nan_to_num(img_np)
+            print("Layer %s, img shape = %s\n\tmax = %s\n\tmin = %s\n\tmean = %s\n\tnans_count = [%s/%s]\n\timg = %s" % 
+                (
+                    i,
+                    str(img_shape.eval()), 
+                    img_np.max(), 
+                    img_np.min(), 
+                    img_np.mean(),
+                    np.sum(nans_orig.eval()),
+                    np.sum(nans_fixed.eval()),
+                    img_np[0:10]
+                ))
             num_rows = parsed_features['num_rows/{:02d}'.format(i)]
             num_columns = parsed_features['num_columns/{:02d}'.format(i)]
             print("num_columns = %s, num_rows = %s" % (num_columns.eval(), num_rows.eval()))

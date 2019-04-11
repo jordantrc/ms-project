@@ -9,13 +9,14 @@ import os
 import random
 import sys
 import tensorflow as tf
+import numpy as np
 
 import analysis
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/iad_madison_test'
-TRAIN_FILE_LIST = 'train-test-splits/iad_madison_train'
+TEST_FILE_LIST = 'train-test-splits/iad_madison_hyperion_test'
+TRAIN_FILE_LIST = 'train-test-splits/iad_madison_hyperion_train'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -29,11 +30,11 @@ TRAINING_DATA_SAMPLE = 1.0
 # neural network variables
 # softmax, autoencode, 
 CLASSIFIER = 'softmax'
-WEIGHT_STDDEV = 0.1
-BIAS = 0.0
+WEIGHT_STDDEV = 0.01
+BIAS = 0.01
 LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 1024
@@ -61,8 +62,8 @@ LAYER_GEOMETRY_16 = {
                     '1': (64, 16, 1),
                     '2': (128, 16, 1),
                     '3': (256, 8, 1),
-                    '4': (512, 4, 1),
-                    '5': (512, 2, 1)
+                    '4': (256, 4, 1),
+                    '5': (256, 2, 1)
                     }
 # 32 frame layer dimensions
 LAYER_GEOMETRY_32 = {
@@ -79,7 +80,7 @@ LAYER_GEOMETRY_FULL_FRAME = {
                     '4': (256, 250, 1),
                     '5': (256, 125, 1)
                     }
-LAYER_GEOMETRY = LAYER_GEOMETRY_FULL_FRAME
+LAYER_GEOMETRY = LAYER_GEOMETRY_16
 
 #-------------General helper functions----------------#
 def save_settings(run_name):
@@ -230,12 +231,15 @@ def _parse_function(example):
 
     # decode the image, get label
     img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
+    img = tf.where(tf.is_nan(img), tf.zeros_like(img), img)
+    img = tf.clip_by_value(img, 0.0, 1.0)
+
     padding = [[0, layer_padding[str(LAYER)] - tf.shape(img)[0]]]
-    img = tf.pad(img, padding, 'CONSTANT', constant_values=0.0)
+    img = tf.pad(img, padding, 'CONSTANT', constant_values=-1.0)
     #print("rows = %s columns = %s" % (
     #    parsed_features['num_rows/{:02d}'.format(LAYER)].eval(),
     #    parsed_features['num_columns/{:02d}'.format(LAYER)].eval()))
-    img = tf.reshape(img, img_geom, "parse_reshape")
+    img = tf.reshape(img, (img_geom[0], img_geom[1] * 2, 1), "parse_reshape")
     print("img shape = %s" % img.get_shape())
     #img = tf.expand_dims(img, 0)
     #img = tf.expand_dims(img, 0)
@@ -252,6 +256,99 @@ def _parse_function(example):
     #img = tf.image.resize_bilinear(img, (IMAGE_HEIGHT, IMAGE_WIDTH))
     #print("img shape = %s" % img.get_shape())
     #img = tf.squeeze(img, 0)
+    if NORMALIZE_IMAGE:
+        img = tf.image.per_image_standardization(img)
+
+    label = tf.cast(parsed_features['label'], tf.int64)
+    label = tf.one_hot(label, depth=NUM_CLASSES, dtype=tf.int32)
+
+    return img, label
+
+
+def _parse_function_slice(example):
+    '''parse function which returns slices'''
+    img_geom = LAYER_GEOMETRY[str(LAYER)]
+    features = dict()
+    features['label'] = tf.FixedLenFeature((), tf.int64)
+
+    for i in range(1, 6):
+        # features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+        features['img/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.string)
+        features['num_rows/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+        features['num_columns/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+
+    parsed_features = tf.parse_single_example(example, features)
+    num_rows = parsed_features['num_rows/{:02d}'.format(LAYER)]
+    num_columns = parsed_features['num_columns/{:02d}'.format(LAYER)]
+
+    # decode the image, get label
+    img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
+    img = tf.where(tf.is_nan(img), tf.zeros_like(img), img)
+    img = tf.clip_by_value(img, 0.0, 1.0)
+    #img = tf.subtract(img, 0.5)
+
+    img = tf.reshape(img, (num_rows, num_columns * 2, 1), "parse_reshape")
+    print("img shape = %s" % img.get_shape())
+    
+    # random slice of the image
+    #img = tf.random_crop(img, [img_geom[0], img_geom[1], 1])
+    #column_offsets = list(range(num_columns))[::img_geom[1]]
+    column_offsets = tf.range(0, num_columns - img_geom[1], delta=img_geom[1] / 4)
+    start_column = tf.cast(tf.random_shuffle(column_offsets)[0], dtype=tf.int32)
+    img = tf.slice(img, [0, start_column, 0], [img_geom[0], img_geom[1], img_geom[2]])
+
+    # get a random slice of the image, use column offsets
+    #column_offsets = list(range(num_columns))[::img_geom[1]]
+    #start_column = random.choice(column_offsets)
+    #img = tf.slice(img, [0, start_column, 0], [img_geom[0], img_geom[1], img_geom[2]])
+
+    if NORMALIZE_IMAGE:
+        img = tf.image.per_image_standardization(img)
+
+    label = tf.cast(parsed_features['label'], tf.int64)
+    label = tf.one_hot(label, depth=NUM_CLASSES, dtype=tf.int32)
+
+    return img, label
+
+
+def _parse_function_slice_test(example):
+    '''parse function which returns slices'''
+    img_geom = LAYER_GEOMETRY[str(LAYER)]
+    features = dict()
+    features['label'] = tf.FixedLenFeature((), tf.int64)
+
+    for i in range(1, 6):
+        # features['length/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+        features['img/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.string)
+        features['num_rows/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+        features['num_columns/{:02d}'.format(i)] = tf.FixedLenFeature((), tf.int64)
+
+    parsed_features = tf.parse_single_example(example, features)
+    num_rows = parsed_features['num_rows/{:02d}'.format(LAYER)]
+    num_columns = parsed_features['num_columns/{:02d}'.format(LAYER)]
+
+    # decode the image, get label
+    img = tf.decode_raw(parsed_features['img/{:02d}'.format(LAYER)], tf.float32)
+    img = tf.where(tf.is_nan(img), tf.zeros_like(img), img)
+    img = tf.clip_by_value(img, 0.0, 1.0)
+    #img = tf.subtract(img, 0.5)
+
+    img = tf.reshape(img, (num_rows, num_columns, 1), "parse_reshape_test")
+    print("img shape = %s" % img.get_shape())
+    
+    # random slice of the image
+    #img = tf.random_crop(img, [img_geom[0], img_geom[1], 1])
+    #column_offsets = list(range(num_columns))[::img_geom[1]]
+    column_offsets = tf.range(0, num_columns - img_geom[1], delta=img_geom[1])
+    #start_column = tf.cast(tf.random_shuffle(column_offsets)[0], dtype=tf.int32)
+    start_column = 0
+    img = tf.slice(img, [0, start_column, 0], [img_geom[0], img_geom[1], img_geom[2]])
+
+    # get a random slice of the image, use column offsets
+    #column_offsets = list(range(num_columns))[::img_geom[1]]
+    #start_column = random.choice(column_offsets)
+    #img = tf.slice(img, [0, start_column, 0], [img_geom[0], img_geom[1], img_geom[2]])
+
     if NORMALIZE_IMAGE:
         img = tf.image.per_image_standardization(img)
 
@@ -323,7 +420,7 @@ def get_variables_mctnet(model_name, num_channels=1):
 
 def get_variables_softmax(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
-    num_features = geom[0] * geom[1] * num_channels * 2
+    num_features = geom[0] * geom[1] * num_channels
 
     with tf.variable_scope(model_name) as var_scope:
         weights = {
@@ -557,7 +654,7 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     return model, []
 
 
-def iad_nn(run_string):
+def iad_nn(run_string, parse_function_train, parse_function_test):
     '''main function'''
     if LOAD_MODEL is None:
         training = True
@@ -566,6 +663,7 @@ def iad_nn(run_string):
 
     # get the list of classes
     class_list = get_class_list(CLASS_INDEX_FILE)
+    img_geom = LAYER_GEOMETRY[str(LAYER)]
 
     # get the list of filenames
     print("loading train file list from %s" % TRAIN_FILE_LIST)
@@ -601,26 +699,33 @@ def iad_nn(run_string):
 
     # testing dataset
     dataset_test = tf.data.TFRecordDataset(input_filenames_test)
-    dataset_test = dataset_test.map(_parse_function)
+    dataset_test = dataset_test.map(parse_function_test)
     dataset_test = dataset_test.batch(1)
     dataset_test = dataset_test.shuffle(500)
     dataset_test = dataset_test.repeat(1000000)
     dataset_test_iterator = dataset_test.make_initializable_iterator()
     x_test, y_test_true = dataset_test_iterator.get_next()
+
     y_test_true_class = tf.argmax(y_test_true, axis=1)
 
     # training or evaluation dataset
     dataset = tf.data.TFRecordDataset(input_filenames)
-    dataset = dataset.map(_parse_function)
-    #dataset = dataset.batch(BATCH_SIZE, drop_remainder=True)
-    dataset = dataset.batch(BATCH_SIZE)
+    dataset = dataset.map(parse_function_train)
+    
+    if tf.__version__ == '1.11.0':
+        dataset = dataset.batch(BATCH_SIZE, drop_remainder=True)
+    else:
+        dataset = dataset.batch(BATCH_SIZE)
+    
     if training:
         dataset = dataset.shuffle(200)
         dataset = dataset.repeat(EPOCHS)
     else:
         dataset = dataset.repeat(1)
+    
     dataset_iterator = dataset.make_initializable_iterator()
     x, y_true = dataset_iterator.get_next()
+
     y_true_class = tf.argmax(y_true, axis=1)
     print("x shape = %s" % x.get_shape().as_list())
     print("y_true shape = %s" % y_true.get_shape().as_list())
@@ -628,11 +733,10 @@ def iad_nn(run_string):
     # get neural network response
     if CLASSIFIER in ['softmax', 'autoencode', 'lenet', 'mctnet']:
         if CLASSIFIER == 'softmax':
-            geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
-            print("LAYER = %s, geom = %s" % (LAYER, geom))
-            x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1] * 2])
-            x_test = tf.reshape(x_test, [1, geom[0] * geom[1] * 2])
+            print("LAYER = %s, geom = %s" % (LAYER, img_geom))
+            x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
+            x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
@@ -649,8 +753,8 @@ def iad_nn(run_string):
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
 
-            x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
-            x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
+            x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
+            x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             x_autoencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
             x_test_autoencode, _ = autoencode(x_test, 1, weights, biases)
@@ -686,8 +790,8 @@ def iad_nn(run_string):
         W = tf.Variable(tf.zeros([geom[0] * geom[1], NUM_CLASSES]))
         b = tf.Variable(tf.zeros([NUM_CLASSES]))
 
-        x = tf.reshape(x, [BATCH_SIZE, geom[0] * geom[1]])
-        x_test = tf.reshape(x_test, [1, geom[0] * geom[1]])
+        x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
+        x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
         y_pred = tf.nn.softmax(tf.matmul(x, W) + b)
         y_pred_class = tf.argmax(y_pred, axis=1)
@@ -722,17 +826,14 @@ def iad_nn(run_string):
         # loop until out of data
         while True:
             try:
-                train_result = sess.run([train_op, accuracy, x, y_true, y_pred, logits, weights])
-                if step == 0 or step == 1:
-                    print("\tweights (shape = %s) = %s" % (train_result[6]['W_0'].shape, train_result[6]['W_0']))
-
+                train_result = sess.run([train_op, accuracy, x, y_true, y_pred, logits, weights, loss])
                 if step != 0 and step % 100 == 0:
-                    print("step %s, accuracy = %.03f" % (step, train_result[1]))
-                    print("\tx (shape = %s) = %s" % (train_result[2].shape, train_result[2]))
-                    print("\ty_true (shape = %s) = %s" % (train_result[3].shape, train_result[3]))
-                    print("\ty_pred (shape = %s) = %s" % (train_result[4].shape, train_result[4]))
-                    print("\tlogits (shape = %s) = %s" % (train_result[5].shape, train_result[5]))
-                    print("\tweights (shape = %s) = %s" % (train_result[6]['W_0'].shape, train_result[6]['W_0']))
+                    print("step %s, accuracy = %.03f, loss = %.03f" % (step, train_result[1], train_result[7]))
+                    #print("\tx shape = %s, max = %s, min = %s, mean = %s" % (train_result[2].shape, train_result[2].max(), train_result[2].min(), train_result[2].mean()))
+                    #print("\ty_true (shape = %s) = %s" % (train_result[3].shape, train_result[3]))
+                    #print("\ty_pred (shape = %s) = %s" % (train_result[4].shape, train_result[4]))
+                    #print("\tlogits (shape = %s) = %s" % (train_result[5].shape, train_result[5]))
+                    #print("\tweights (shape = %s) = %s" % (train_result[6]['W_0'].shape, train_result[6]['W_0']))
                     # save the current model every 1000 steps
                     if step % 1000 == 0:
                         save_model(sess, saver, step)
@@ -855,6 +956,7 @@ if __name__ == "__main__":
 
         trial_count = 1
         for layer in [1, 2, 3, 4, 5]:
+        #for layer in [5]:
             LAYER = layer
 
             print("##############################")
@@ -862,23 +964,27 @@ if __name__ == "__main__":
             print("##############################")
 
             # training run
+            parse_function_train = _parse_function_slice
+            parse_function_test = _parse_function_slice_test
             BATCH_SIZE = 10
             LOAD_MODEL = None
-            EPOCHS = 20
+            EPOCHS = 40
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
-            iad_nn(run_string)
+            iad_nn(run_string, parse_function_train, parse_function_test)
 
             # reset the graph
             tf.reset_default_graph()
 
             # testing run
+            parse_function_train = _parse_function_slice_test
+            parse_function_test = _parse_function_slice_test
             BATCH_SIZE = 1
             LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
             EPOCHS = 1
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
-            layer_accuracy = iad_nn(run_string)
+            layer_accuracy = iad_nn(run_string, parse_function_train, parse_function_test)
             accuracies.append([hyper_value, layer, layer_accuracy])
             print("Accuracies after %s trials:" % (trial_count))
             for a in accuracies:
