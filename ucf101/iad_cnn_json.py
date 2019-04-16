@@ -703,17 +703,17 @@ def iad_nn(run_string, json_input_train, json_input_test):
     #input_filenames = tf.placeholder(tf.string, shape=[None])
     #input_filenames_test = tf.placeholder(tf.string, shape=[None])
     x = tf.placeholder(tf.float32, shape=(
-                                            BATCH_SIZE,
+                                            None,
                                             LAYER_GEOMETRY[str(LAYER)][0],
                                             LAYER_GEOMETRY[str(LAYER)][1]
                                             ))
     y_true = tf.placeholder(tf.int64, shape=(BATCH_SIZE))
-    x_test = tf.placeholder(tf.float32, shape=(
-                                            1,
-                                            LAYER_GEOMETRY[str(LAYER)][0],
-                                            LAYER_GEOMETRY[str(LAYER)][1]
-                                            ))
-    y_test_true = tf.placeholder(tf.int64, shape=(1))
+    #x_test = tf.placeholder(tf.float32, shape=(
+    #                                        1,
+    #                                        LAYER_GEOMETRY[str(LAYER)][0],
+    #                                        LAYER_GEOMETRY[str(LAYER)][1]
+    #                                        ))
+    #y_test_true = tf.placeholder(tf.int64, shape=(1))
 
     # testing dataset
     #dataset_test = tf.data.TFRecordDataset(input_filenames_test)
@@ -724,8 +724,8 @@ def iad_nn(run_string, json_input_train, json_input_test):
     #dataset_test_iterator = dataset_test.make_initializable_iterator()
     #x_test, y_test_true = dataset_test_iterator.get_next()
 
-    y_test_true_one_hot = tf.one_hot(y_test_true, depth=NUM_CLASSES, dtype=tf.int32)
-    y_test_true_class = tf.argmax(y_test_true_one_hot, axis=1)
+    #y_test_true_one_hot = tf.one_hot(y_test_true, depth=NUM_CLASSES, dtype=tf.int32)
+    #y_test_true_class = tf.argmax(y_test_true_one_hot, axis=1)
 
     # training or evaluation dataset
     #dataset = tf.data.TFRecordDataset(input_filenames)
@@ -758,7 +758,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
             x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
-            logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
+            #logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
 
         elif CLASSIFIER == 'lenet':
             logits, conv_layers = cnn_lenet(x, BATCH_SIZE, weights, biases, DROPOUT)
@@ -788,10 +788,10 @@ def iad_nn(run_string, json_input_train, json_input_test):
         y_pred_class = tf.argmax(y_pred, axis=1)
 
         # testing/validation
-        y_pred_test = tf.nn.softmax(logits_test)
-        y_pred_test_class = tf.argmax(y_pred_test, axis=1)
-        correct_pred_test = tf.equal(y_pred_test_class, y_test_true_class)
-        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
+        #y_pred_test = tf.nn.softmax(logits_test)
+        #y_pred_test_class = tf.argmax(y_pred_test, axis=1)
+        #correct_pred_test = tf.equal(y_pred_test_class, y_test_true_class)
+        #accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
         # loss and optimizer
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true_one_hot))
@@ -881,7 +881,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
                         input_x, input_y, _ = json_input_test.get_batch()
                         input_x = input_x.reshape((1, img_geom[0] * img_geom[1]))
                         input_y = input_y.reshape((1))
-                        test_result = sess.run([accuracy_test], feed_dict={x_test: input_x, y_test_true: input_y})
+                        test_result = sess.run([accuracy], feed_dict={x: input_x, y_true: input_y})
                         test_accuracy += test_result[0]
                     print("mini-batch validation accuracy = %.03f" % (test_accuracy / mini_batch_size))
 
@@ -919,7 +919,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
             input_x, input_y, sample_name = json_input_test.get_batch()
             input_x = input_x.reshape((1, img_geom[0] * img_geom[1]))
             input_y = input_y.reshape((1))
-            test_result = sess.run([accuracy, y_pred_class, y_true_class], feed_dict={x_test: input_x, y_test_true: input_y})
+            test_result = sess.run([accuracy, y_pred_class, y_true_class], feed_dict={x: input_x, y_true: input_y})
             
             # add result to the clip and video accuracy structures
             sample_name = sample_name[0]
