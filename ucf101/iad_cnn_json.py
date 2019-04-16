@@ -893,6 +893,8 @@ def iad_nn(run_string, json_input_train, json_input_test):
             #    save_model(sess, saver, 'final')
             #    break
         final_accuracy = -1.0
+        sess.close()
+        return None, None
     
     else:
         num_steps = json_input_test.num_files
@@ -901,6 +903,8 @@ def iad_nn(run_string, json_input_train, json_input_test):
         saver.restore(sess, LOAD_MODEL)
 
         cumulative_accuracy = 0.0
+        predictions = []
+        true_classes = []
 
         # clip/video accuracy
         # ['sample_name': [accuracy@1, accuracy@1]]
@@ -929,8 +933,8 @@ def iad_nn(run_string, json_input_train, json_input_test):
                 video_accuracy[video_name] = [test_result[0]]
 
             cumulative_accuracy += test_result[0]
-            #predictions.append(test_result[1])
-            #true_classes.append(test_result[2])
+            predictions.append(test_result[1])
+            true_classes.append(test_result[2])
             if step % 100 == 0:
                 print("step %s, accuracy = %s, cumulative accuracy = %s" %
                       (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
@@ -951,8 +955,9 @@ def iad_nn(run_string, json_input_train, json_input_test):
         print("per-class accuracy:")
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
-    sess.close()
-    return final_accuracy
+        sess.close()
+        return clip_accuracy, video_accuracy
+
 
 def random_layer_list(min_layers, max_layers, min_hidden_size, max_hidden_size):
     layers = []
@@ -1033,7 +1038,7 @@ if __name__ == "__main__":
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
-            iad_nn(run_string, train_json, test_json)
+            _, _ = iad_nn(run_string, train_json, test_json)
 
             # reset the graph
             tf.reset_default_graph()
@@ -1047,11 +1052,13 @@ if __name__ == "__main__":
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
             
-            layer_accuracy = iad_nn(run_string, train_json, test_json)
-            accuracies.append([hyper_value, layer, layer_accuracy])
-            print("Accuracies after %s trials:" % (trial_count))
-            for a in accuracies:
-                print(a)
+            clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
+            print("clip accuracy = %s" % (clip_accuracy))
+            print("video accuracy = %s" % (video_accuracy))
+            #accuracies.append([hyper_value, layer, layer_accuracy])
+            #print("Accuracies after %s trials:" % (trial_count))
+            #for a in accuracies:
+            #    print(a)
             trial_count += 1
 
             # reset the graph before moving to the next layer
