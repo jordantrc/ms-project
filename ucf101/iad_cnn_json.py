@@ -10,14 +10,15 @@ import random
 import sys
 import tensorflow as tf
 import numpy as np
+import time
 
 import analysis
-from iad_input import IADInput
+from batch_json_reader import BatchJsonRead
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/iad_madison_hyperion_test_2classes'
-TRAIN_FILE_LIST = 'train-test-splits/iad_madison_hyperion_train_2classes'
+TEST_FILE_LIST = 'train-test-splits/ucf101test-hyperion.list'
+TRAIN_FILE_LIST = 'train-test-splits/ucf101train-hyperion.list'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -39,6 +40,9 @@ LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 1024
+BATCH_SIZE_TRAIN = 30
+BATCH_SIZE_TEST = 1
+JSON_READ_THREADS = 10
 
 # autoencoder hyper parameters
 #AUTOENCODER_LAYERS = [500, 200, 50, 10]
@@ -60,11 +64,11 @@ SOFTMAX_HIDDEN_SIZE = 1024
 FIRST_CNN_WIDTH = -1  # softmax
 # 16 frame layer dimensions
 LAYER_GEOMETRY_16 = {
-                    '1': (64, 16, 1),
-                    '2': (128, 16, 1),
-                    '3': (256, 8, 1),
-                    '4': (256, 4, 1),
-                    '5': (256, 2, 1)
+                    '0': (64, 16, 1),
+                    '1': (128, 16, 1),
+                    '2': (256, 8, 1),
+                    '3': (256, 4, 1),
+                    '4': (256, 2, 1)
                     }
 # 32 frame layer dimensions
 LAYER_GEOMETRY_32 = {
@@ -656,7 +660,7 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
 
 
 #def iad_nn(run_string, parse_function_train, parse_function_test):
-def iad_nn(run_string, iad_input):
+def iad_nn(run_string, json_input_train, json_input_test):
     '''main function'''
     if LOAD_MODEL is None:
         training = True
@@ -702,16 +706,14 @@ def iad_nn(run_string, iad_input):
                                             BATCH_SIZE,
                                             LAYER_GEOMETRY[str(LAYER)][0],
                                             LAYER_GEOMETRY[str(LAYER)][1],
-                                            LAYER_GEOMETRY[str(LAYER)][2]
                                             ))
-    y_true = tf.placeholder(tf.int64, shape=(BATCH_SIZE, NUM_CLASSES))
+    y_true = tf.placeholder(tf.int64, shape=(BATCH_SIZE))
     x_test = tf.placeholder(tf.float32, shape=(
                                             1,
                                             LAYER_GEOMETRY[str(LAYER)][0],
                                             LAYER_GEOMETRY[str(LAYER)][1],
-                                            LAYER_GEOMETRY[str(LAYER)][2]
                                             ))
-    y_test_true = tf.placeholder(tf.int64, shape=(1, NUM_CLASSES))
+    y_test_true = tf.placeholder(tf.int64, shape=(1))
 
     # testing dataset
     #dataset_test = tf.data.TFRecordDataset(input_filenames_test)
@@ -722,7 +724,8 @@ def iad_nn(run_string, iad_input):
     #dataset_test_iterator = dataset_test.make_initializable_iterator()
     #x_test, y_test_true = dataset_test_iterator.get_next()
 
-    y_test_true_class = tf.argmax(y_test_true, axis=1)
+    y_test_true_one_hot = tf.one_hot(y_test_true, depth=NUM_CLASSES, dtype=tf.int32)
+    y_test_true_class = tf.argmax(y_test_true_one_hot, axis=1)
 
     # training or evaluation dataset
     #dataset = tf.data.TFRecordDataset(input_filenames)
@@ -741,8 +744,8 @@ def iad_nn(run_string, iad_input):
     
     #dataset_iterator = dataset.make_initializable_iterator()
     #x, y_true = dataset_iterator.get_next()
-
-    y_true_class = tf.argmax(y_true, axis=1)
+    y_true_one_hot = tf.one_hot(y_true, depth=NUM_CLASSES, dtype=tf.int32)
+    y_true_class = tf.argmax(y_true_one_hot, axis=1)
     print("x shape = %s" % x.get_shape().as_list())
     print("y_true shape = %s" % y_true.get_shape().as_list())
 
@@ -791,7 +794,7 @@ def iad_nn(run_string, iad_input):
         accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
         # loss and optimizer
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true_one_hot))
         #loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
         train_op = optimizer.minimize(loss)
@@ -840,14 +843,24 @@ def iad_nn(run_string, iad_input):
         #    })
 
         # loop until out of data
+        start = time.time()
         while True:
             #try:
-            input_x, input_y = iad_input.get_train_sample(BATCH_SIZE)
-            if input_x is None:
-                break
+            input_x, input_y = json_input_train.get_batch()
+            input_x = input_x.reshape((BATCH_SIZE, img_geom[0] * img_geom[1]))
+            #input_y = tf.one_hot(input_y, depth=NUM_CLASSES, dtype=tf.int32)
+            input_y = input_y.reshape((BATCH_SIZE))
             train_result = sess.run([train_op, accuracy, y_pred, logits, weights, loss], feed_dict={x: input_x, y_true: input_y})
+
             if step != 0 and step % 100 == 0:
-                print("step %s, accuracy = %.03f, loss = %.03f" % (step, train_result[1], train_result[5]))
+                end = time.time()
+                run_time = end - start
+                start = time.time()
+
+                # calculate discard rate
+                discard_rate = json_input_train.discards / (step * BATCH_SIZE_TRAIN)
+
+                print("step %s, accuracy = %.03f, loss = %.03f, discards = %.03f, time = %.03fs" % (step, train_result[1], train_result[5], discard_rate, run_time))
                 #print("\tx shape = %s, max = %s, min = %s, mean = %s" % (train_result[2].shape, train_result[2].max(), train_result[2].min(), train_result[2].mean()))
                 #print("\ty_true (shape = %s) = %s" % (train_result[3].shape, train_result[3]))
                 #print("\ty_pred (shape = %s) = %s" % (train_result[4].shape, train_result[4]))
@@ -864,8 +877,10 @@ def iad_nn(run_string, iad_input):
                         mini_batch_size = 50
                     test_accuracy = 0.0
                     for i in range(mini_batch_size):
-                        input_x_test, input_y_test = iad_input.get_test_sample_random(1)
-                        test_result = sess.run([accuracy_test], feed_dict={x_test: input_x_test, y_test_true: input_y_test})
+                        input_x, input_y = json_input_test.get_batch()
+                        input_x = input_x.reshape((1, img_geom[0] * img_geom[1]))
+                        input_y = input_y.reshape((1))
+                        test_result = sess.run([accuracy_test], feed_dict={x_test: input_x, y_test_true: input_y})
                         test_accuracy += test_result[0]
                     print("mini-batch validation accuracy = %.03f" % (test_accuracy / mini_batch_size))
 
@@ -975,28 +990,29 @@ if __name__ == "__main__":
             hyper_value = AUTOENCODER_LAYERS
 
         trial_count = 1
-        for layer in [1, 2, 3, 4, 5]:
+        for layer in [0, 1, 2, 3, 4]:
         #for layer in [5]:
             LAYER = layer
+
 
             print("##############################")
             print("%s %s - LAYER %s" % (hyper_name, h, LAYER))
             print("##############################")
 
+            # setup JSON input objects
+            train_json = BatchJsonRead(TRAIN_FILE_LIST, BATCH_SIZE_TRAIN, LAYER, shuffle=True, read_threads=JSON_READ_THREADS)
+            test_json = BatchJsonRead(TEST_FILE_LIST, BATCH_SIZE_TEST, LAYER, shuffle=False)
+
             # training run
             #parse_function_train = _parse_function_slice
             #parse_function_test = _parse_function_slice_test
-            BATCH_SIZE = 10
+            BATCH_SIZE = BATCH_SIZE_TRAIN
             LOAD_MODEL = None
-            EPOCHS = 2
+            EPOCHS = 1
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
-
-            # create input object
-            iad_input = IADInput(TRAIN_FILE_LIST, TEST_FILE_LIST, LAYER_GEOMETRY, NUM_CLASSES, LAYER, EPOCHS)
-
             #iad_nn(run_string, parse_function_train, parse_function_test)
-            iad_nn(run_string, iad_input)
+            iad_nn(run_string, train_json, test_json)
 
             # reset the graph
             tf.reset_default_graph()
@@ -1009,8 +1025,8 @@ if __name__ == "__main__":
             EPOCHS = 1
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
-            #layer_accuracy = iad_nn(run_string, parse_function_train, parse_function_test)
-            layer_accuracy = iad_nn(run_string, iad_input)
+            
+            layer_accuracy = iad_nn(run_string, train_json, test_json)
             accuracies.append([hyper_value, layer, layer_accuracy])
             print("Accuracies after %s trials:" % (trial_count))
             for a in accuracies:
