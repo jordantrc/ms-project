@@ -17,8 +17,8 @@ from batch_json_reader import BatchJsonRead
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/ucf101test-hyperion.list'
-TRAIN_FILE_LIST = 'train-test-splits/ucf101train-hyperion.list'
+TEST_FILE_LIST = 'train-test-splits/ucf101test-c01.list'
+TRAIN_FILE_LIST = 'train-test-splits/ucf101train-c01-test.list'
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -705,13 +705,13 @@ def iad_nn(run_string, json_input_train, json_input_test):
     x = tf.placeholder(tf.float32, shape=(
                                             BATCH_SIZE,
                                             LAYER_GEOMETRY[str(LAYER)][0],
-                                            LAYER_GEOMETRY[str(LAYER)][1],
+                                            LAYER_GEOMETRY[str(LAYER)][1]
                                             ))
     y_true = tf.placeholder(tf.int64, shape=(BATCH_SIZE))
     x_test = tf.placeholder(tf.float32, shape=(
                                             1,
                                             LAYER_GEOMETRY[str(LAYER)][0],
-                                            LAYER_GEOMETRY[str(LAYER)][1],
+                                            LAYER_GEOMETRY[str(LAYER)][1]
                                             ))
     y_test_true = tf.placeholder(tf.int64, shape=(1))
 
@@ -832,7 +832,8 @@ def iad_nn(run_string, json_input_train, json_input_test):
 
     # start the training/testing steps
     if training:
-        print("begin training")
+        num_steps = int((json_input_train.num_files * EPOCHS) / BATCH_SIZE)
+        print("begin training, steps = %s" % num_steps)
         step = 0
         #sess.run([
         #    dataset_iterator.initializer, 
@@ -844,9 +845,9 @@ def iad_nn(run_string, json_input_train, json_input_test):
 
         # loop until out of data
         start = time.time()
-        while True:
+        while step <= num_steps:
             #try:
-            input_x, input_y = json_input_train.get_batch()
+            input_x, input_y, _ = json_input_train.get_batch()
             input_x = input_x.reshape((BATCH_SIZE, img_geom[0] * img_geom[1]))
             #input_y = tf.one_hot(input_y, depth=NUM_CLASSES, dtype=tf.int32)
             input_y = input_y.reshape((BATCH_SIZE))
@@ -877,7 +878,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
                         mini_batch_size = 50
                     test_accuracy = 0.0
                     for i in range(mini_batch_size):
-                        input_x, input_y = json_input_test.get_batch()
+                        input_x, input_y, _ = json_input_test.get_batch()
                         input_x = input_x.reshape((1, img_geom[0] * img_geom[1]))
                         input_y = input_y.reshape((1))
                         test_result = sess.run([accuracy_test], feed_dict={x_test: input_x, y_test_true: input_y})
@@ -892,28 +893,48 @@ def iad_nn(run_string, json_input_train, json_input_test):
             #    save_model(sess, saver, 'final')
             #    break
         final_accuracy = -1.0
+    
     else:
-        print("begin testing")
+        num_steps = json_input_test.num_files
+        print("begin testing, steps = %s" % num_steps)
         step = 0
         saver.restore(sess, LOAD_MODEL)
-        sess.run(dataset_iterator.initializer, feed_dict={input_filenames: filenames_test})
 
         cumulative_accuracy = 0.0
-        predictions = []
-        true_classes = []
+
+        # clip/video accuracy
+        # ['sample_name': [accuracy@1, accuracy@1]]
+        # ['video_name': [accuracy@1, accuracy@1]]
+        clip_accuracy = {}
+        video_accuracy = {}
+
         # loop until out of data
-        while True:
-            try:
-                test_result = sess.run([accuracy, y_pred_class, y_true_class])
-                cumulative_accuracy += test_result[0]
-                predictions.append(test_result[1])
-                true_classes.append(test_result[2])
-                if step % 100 == 0:
-                    print("step %s, accuracy = %s, cumulative accuracy = %s" %
-                          (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
-                step += 1
-            except tf.errors.OutOfRangeError:
-                break
+        while step <= num_steps:
+            input_x, input_y, sample_name = json_input_test.get_batch()
+            input_x = input_x.reshape((1, img_geom[0] * img_geom[1]))
+            input_y = input_y.reshape((1))
+            test_result = sess.run([accuracy, y_pred_class, y_true_class], feed_dict={x_test: input_x, y_test_true: input_y})
+            
+            # add result to the clip and video accuracy structures
+            sample_name = sample_name[0]
+            video_name = '_'.join(sample_name.split('_')[0:3])
+            if sample_name in clip_accuracy.keys():
+                clip_accuracy[sample_name].append(test_result[0])
+            else:
+                clip_accuracy[sample_name] = [test_result[0]]
+
+            if video_name in video_accuracy.keys():
+                video_accuracy[video_name].append(test_result[0])
+            else:
+                video_accuracy[video_name] = [test_result[0]]
+
+            cumulative_accuracy += test_result[0]
+            #predictions.append(test_result[1])
+            #true_classes.append(test_result[2])
+            if step % 100 == 0:
+                print("step %s, accuracy = %s, cumulative accuracy = %s" %
+                      (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
+            step += 1
 
         # wrap up, provide test results
         final_accuracy = cumulative_accuracy / step / BATCH_SIZE
@@ -1011,7 +1032,7 @@ if __name__ == "__main__":
             EPOCHS = 1
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
-            #iad_nn(run_string, parse_function_train, parse_function_test)
+            # iad_nn(run_string, parse_function_train, parse_function_test)
             iad_nn(run_string, train_json, test_json)
 
             # reset the graph

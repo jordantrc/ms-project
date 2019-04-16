@@ -35,6 +35,7 @@ class BatchJsonRead():
         self.divisor = [1,1,2,4,8][c3d_depth]
         self.discards = 0
         self.read_threads = read_threads
+        self.num_files = len(self.files)
 
         print("BatchJsonRead initialization complete, found %s JSON files" % len(self.files))
 
@@ -42,16 +43,17 @@ class BatchJsonRead():
         '''calls the correct get_batch_* function based on the
         self.read_threads value'''
         if self.read_threads > 1:
-            batch_data, batch_label = self.get_batch_parallel()
+            batch_data, batch_label, sample_names = self.get_batch_parallel()
         else:
-            batch_data, batch_label = self.get_batch()
+            batch_data, batch_label, sample_names = self.get_batch()
 
-        return batch_data, batch_label
+        return batch_data, batch_label, sample_names
 
     def get_batch_parallel(self):
         '''gets the data batch using multiple threads'''
         batch_data = [None] * self.batch_size
         batch_label = [None] * self.batch_size
+        sample_names = [None] * self.batch_size
 
         while True:
             num_empty_slots = batch_data.count(None)
@@ -67,6 +69,7 @@ class BatchJsonRead():
             threads = [None] * num_threads_to_dispatch
             thread_data = [None] * num_threads_to_dispatch
             thread_label = [None] * num_threads_to_dispatch
+            thread_name = [None] * num_threads_to_dispatch
             selected_files = []
             selected_positions = []
 
@@ -100,11 +103,12 @@ class BatchJsonRead():
                     first_empty_slot = batch_data.index(None)
                     batch_data[first_empty_slot] = d
                     batch_label[first_empty_slot] = thread_label[i]
+                    sample_names[first_empty_slot] = os.path.basename(selected_files[i])
 
         batch_data = np.array(batch_data)
         batch_label = np.array(batch_label)
 
-        return batch_data, batch_label
+        return batch_data, batch_label, sample_names
 
     def thread_reader(self, filename, start_pos, thread_data, thread_label, tid):
         '''thread-safe JSON file reader'''
@@ -124,6 +128,7 @@ class BatchJsonRead():
     def get_batch(self):
         batch_data = []
         batch_label = []
+        sample_names = []
 
         while True:
             if(self.shuffle):
@@ -143,6 +148,7 @@ class BatchJsonRead():
                 # add the sample if the temporal shape is correct, otherwise, discard
                 batch_data.append(data)
                 batch_label.append(label)
+                sample_names.append(os.path.basename(filename))
                 #print("len(batch_data) = %s, batch_size = %s" % (len(batch_data), self.batch_size))
                 if len(batch_data) == self.batch_size:
                     break
@@ -153,7 +159,7 @@ class BatchJsonRead():
         batch_data = np.array(batch_data)
         batch_label = np.array(batch_label)
 
-        return batch_data, batch_label
+        return batch_data, batch_label, sample_names
 
 if __name__ == '__main__':
     convert_files_to_batchable_format('train-test-splits/c3d_ucf101_train_split1.txt', 
