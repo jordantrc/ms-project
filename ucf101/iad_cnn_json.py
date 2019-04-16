@@ -755,33 +755,33 @@ def iad_nn(run_string, json_input_train, json_input_test):
             # layer 1
             print("LAYER = %s, geom = %s" % (LAYER, img_geom))
             x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
-            x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
+            #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             #logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
 
         elif CLASSIFIER == 'lenet':
             logits, conv_layers = cnn_lenet(x, BATCH_SIZE, weights, biases, DROPOUT)
-            logits_test, conv_layers = cnn_lenet(x_test, 1, weights, biases, DROPOUT)
+            #logits_test, conv_layers = cnn_lenet(x_test, 1, weights, biases, DROPOUT)
 
         elif CLASSIFIER == 'mctnet':
             logits, conv_layers = cnn_mctnet(x, BATCH_SIZE, weights, biases, DROPOUT)
-            logits_test, conv_layers = cnn_mctnet(x_test, 1, weights, biases, DROPOUT)
+            #logits_test, conv_layers = cnn_mctnet(x_test, 1, weights, biases, DROPOUT)
 
         elif CLASSIFIER == 'autoencode':
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
 
             x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
-            x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
+            #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             x_autoencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
-            x_test_autoencode, _ = autoencode(x_test, 1, weights, biases)
+            #x_test_autoencode, _ = autoencode(x_test, 1, weights, biases)
 
             # softmax regression with output
             # final 
             logits = tf.matmul(x_autoencode, weights['W_out']) + biases['b_out']
-            logits_test = tf.matmul(x_test_autoencode, weights['W_out']) + biases['b_out']
+            #logits_test = tf.matmul(x_test_autoencode, weights['W_out']) + biases['b_out']
 
         print("logits shape = %s" % logits.get_shape().as_list())
         y_pred = tf.nn.softmax(logits)
@@ -810,7 +810,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
         b = tf.Variable(tf.zeros([NUM_CLASSES]))
 
         x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
-        x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
+        #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
         y_pred = tf.nn.softmax(tf.matmul(x, W) + b)
         y_pred_class = tf.argmax(y_pred, axis=1)
@@ -820,10 +820,10 @@ def iad_nn(run_string, json_input_train, json_input_test):
         accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
         # validation/testing
-        y_pred_test = tf.nn.softmax(tf.matmul(x, W) + b)
-        y_pred_test_class = tf.argmax(y_pred_test, axis=1)
-        correct_pred_test = tf.equal(tf.argmax(y_pred_test, 1), y_test_true_class)
-        accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
+        #y_pred_test = tf.nn.softmax(tf.matmul(x, W) + b)
+        #y_pred_test_class = tf.argmax(y_pred_test, axis=1)
+        #correct_pred_test = tf.equal(tf.argmax(y_pred_test, 1), y_test_true_class)
+        #accuracy_test = tf.reduce_mean(tf.cast(correct_pred_test, tf.float32))
 
     # initializer
     init_op = tf.global_variables_initializer()
