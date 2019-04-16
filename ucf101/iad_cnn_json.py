@@ -892,8 +892,10 @@ def iad_nn(run_string, json_input_train, json_input_test):
             #    print("data exhausted, saving final model")
             #    save_model(sess, saver, 'final')
             #    break
+        save_model(sess, saver, 'final')
         final_accuracy = -1.0
         sess.close()
+        print("end training")
         return None, None
     
     else:
