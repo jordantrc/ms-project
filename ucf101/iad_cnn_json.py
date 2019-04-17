@@ -747,7 +747,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
     y_true_one_hot = tf.one_hot(y_true, depth=NUM_CLASSES, dtype=tf.int32)
     y_true_class = tf.argmax(y_true_one_hot, axis=1)
     print("x shape = %s" % x.get_shape().as_list())
-    print("y_true shape = %s" % y_true.get_shape().as_list())
+    #print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
     if CLASSIFIER in ['softmax', 'autoencode', 'lenet', 'mctnet']:
