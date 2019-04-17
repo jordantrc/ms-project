@@ -1018,8 +1018,8 @@ if __name__ == "__main__":
             hyper_value = AUTOENCODER_LAYERS
 
         trial_count = 1
-        for layer in [0, 1, 2, 3, 4]:
-        #for layer in [5]:
+        #for layer in [0, 1, 2, 3, 4]:
+        for layer in [5]:
             LAYER = layer
 
 
@@ -1056,7 +1056,8 @@ if __name__ == "__main__":
             
             clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
 
-            with open('runs/' + run_name + "_results.txt", 'w') as fd:
+            file_name = "%s_%s_results.txt" % (run_name, LAYER)
+            with open('runs/' + file_name, 'w') as fd:
                 fd.write("##############################\n")
                 fd.write("%s %s - LAYER %s\n" % (hyper_name, h, LAYER))
                 fd.write("##############################\n")
