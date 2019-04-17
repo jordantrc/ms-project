@@ -17,7 +17,7 @@ from batch_json_reader import BatchJsonRead
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/ucf101test-c01.list'
+TEST_FILE_LIST = 'train-test-splits/ucf101test-c01-test.list'
 TRAIN_FILE_LIST = 'train-test-splits/ucf101train-c01-test.list'
 MODEL_SAVE_DIR = 'iad_models/'
 
