@@ -772,7 +772,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
 
-            x = tf.reshape(x, [None, img_geom[0] * img_geom[1]])
+            x = tf.reshape(x, [-1, img_geom[0] * img_geom[1]])
             #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             x_autoencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
@@ -1036,7 +1036,7 @@ if __name__ == "__main__":
             #parse_function_test = _parse_function_slice_test
             BATCH_SIZE = BATCH_SIZE_TRAIN
             LOAD_MODEL = None
-            EPOCHS = 1
+            EPOCHS = 10
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
