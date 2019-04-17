@@ -1055,8 +1055,36 @@ if __name__ == "__main__":
             save_settings(run_string)
             
             clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
-            print("clip accuracy = %s" % (clip_accuracy))
-            print("video accuracy = %s" % (video_accuracy))
+
+            # per-clip accuracy
+            print("Per-clip accuracy:")
+            num_tests = 0
+            num_correct = 0
+            for k in sorted(clip_accuracy.keys()):
+                clip_tests = len(clip_accuracy[k])
+                clip_correct = clip_accuracy[k].count(1.0)
+                print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
+
+                num_tests += clip_tests
+                num_correct += clip_correct
+            print("random clip accuracy = %s" % float(num_correct / num_tests))
+
+
+
+            print("Per-video accuracy:")
+            num_tests = 0
+            num_correct = 0
+            for k in sorted(video_accuracy.keys()):
+                video_tests = len(video_accuracy[k])
+                video_correct = video_accuracy[k].count(1.0)
+                print("video %s = %.03f" % (k, float(video_correct / video_tests)))
+
+                num_tests += video_tests
+                num_correct += video_correct
+            print("random video accuracy = %s" % float(num_correct / num_tests))
+
+            #print("clip accuracy = %s" % (clip_accuracy))
+            #print("video accuracy = %s" % (video_accuracy))
             #accuracies.append([hyper_value, layer, layer_accuracy])
             #print("Accuracies after %s trials:" % (trial_count))
             #for a in accuracies:
