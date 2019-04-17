@@ -707,7 +707,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
                                             LAYER_GEOMETRY[str(LAYER)][0],
                                             LAYER_GEOMETRY[str(LAYER)][1]
                                             ))
-    y_true = tf.placeholder(tf.int64, shape=(BATCH_SIZE))
+    y_true = tf.placeholder(tf.int64, shape=(None))
     #x_test = tf.placeholder(tf.float32, shape=(
     #                                        1,
     #                                        LAYER_GEOMETRY[str(LAYER)][0],
@@ -754,7 +754,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
         if CLASSIFIER == 'softmax':
             # layer 1
             print("LAYER = %s, geom = %s" % (LAYER, img_geom))
-            x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
+            x = tf.reshape(x, [None, img_geom[0] * img_geom[1]])
             #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
@@ -772,7 +772,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
             geom = LAYER_GEOMETRY[str(LAYER)]
             # layer 1
 
-            x = tf.reshape(x, [BATCH_SIZE, img_geom[0] * img_geom[1]])
+            x = tf.reshape(x, [None, img_geom[0] * img_geom[1]])
             #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             x_autoencode, conv_layers = autoencode(x, BATCH_SIZE, weights, biases)
@@ -1056,32 +1056,39 @@ if __name__ == "__main__":
             
             clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
 
-            # per-clip accuracy
-            print("Per-clip accuracy:")
-            num_tests = 0
-            num_correct = 0
-            for k in sorted(clip_accuracy.keys()):
-                clip_tests = len(clip_accuracy[k])
-                clip_correct = clip_accuracy[k].count(1.0)
-                print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
+            with open(run_name + "_results.txt", 'w') as fd:
+                # per-clip accuracy
+                print("Per-clip accuracy:")
+                fd.write("Per-clip accuracy:\n")
+                num_tests = 0
+                num_correct = 0
+                for k in sorted(clip_accuracy.keys()):
+                    clip_tests = len(clip_accuracy[k])
+                    clip_correct = clip_accuracy[k].count(1.0)
+                    print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
+                    fd.write("clip %s = %.03f\n" % (k, float(clip_correct / clip_tests)))
 
-                num_tests += clip_tests
-                num_correct += clip_correct
-            print("random clip accuracy = %s" % float(num_correct / num_tests))
+                    num_tests += clip_tests
+                    num_correct += clip_correct
+                print("random clip accuracy = %s" % float(num_correct / num_tests))
+                fd.write("random clip accuracy = %s\n" % float(num_correct / num_tests))
 
 
 
-            print("Per-video accuracy:")
-            num_tests = 0
-            num_correct = 0
-            for k in sorted(video_accuracy.keys()):
-                video_tests = len(video_accuracy[k])
-                video_correct = video_accuracy[k].count(1.0)
-                print("video %s = %.03f" % (k, float(video_correct / video_tests)))
+                print("Per-video accuracy:")
+                fd.write("Per-video accuracy:\n")
+                num_tests = 0
+                num_correct = 0
+                for k in sorted(video_accuracy.keys()):
+                    video_tests = len(video_accuracy[k])
+                    video_correct = video_accuracy[k].count(1.0)
+                    print("video %s = %.03f" % (k, float(video_correct / video_tests)))
+                    fd.write("video %s = %.03f\n" % (k, float(video_correct / video_tests)))
 
-                num_tests += video_tests
-                num_correct += video_correct
-            print("random video accuracy = %s" % float(num_correct / num_tests))
+                    num_tests += video_tests
+                    num_correct += video_correct
+                print("random video accuracy = %s" % float(num_correct / num_tests))
+                fd.write("random video accuracy = %s\n" % float(num_correct / num_tests))
 
             #print("clip accuracy = %s" % (clip_accuracy))
             #print("video accuracy = %s" % (video_accuracy))
