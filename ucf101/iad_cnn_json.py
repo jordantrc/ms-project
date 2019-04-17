@@ -1057,6 +1057,9 @@ if __name__ == "__main__":
             clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
 
             with open('runs/' + run_name + "_results.txt", 'w') as fd:
+                fd.write("##############################\n")
+                fd.write("%s %s - LAYER %s\n" % (hyper_name, h, LAYER))
+                fd.write("##############################\n")
                 # per-clip accuracy
                 print("Per-clip accuracy:")
                 fd.write("Per-clip accuracy:\n")
