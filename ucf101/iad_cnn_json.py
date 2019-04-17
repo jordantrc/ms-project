@@ -1019,7 +1019,7 @@ if __name__ == "__main__":
 
         trial_count = 1
         #for layer in [0, 1, 2, 3, 4]:
-        for layer in [5]:
+        for layer in [4]:
             LAYER = layer
 
 
