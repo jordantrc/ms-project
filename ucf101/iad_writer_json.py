@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-import json
+import simplejson as json
 
 def write_json_to_disk(filename, data, info_values):
     '''
