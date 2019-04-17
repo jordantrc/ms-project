@@ -1056,7 +1056,7 @@ if __name__ == "__main__":
             
             clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
 
-            with open(run_name + "_results.txt", 'w') as fd:
+            with open('runs/' + run_name + "_results.txt", 'w') as fd:
                 # per-clip accuracy
                 print("Per-clip accuracy:")
                 fd.write("Per-clip accuracy:\n")
