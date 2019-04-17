@@ -3,7 +3,9 @@ import random
 import numpy as np
 import os
 
-from threading import Thread
+import mutliprocessing
+import time
+from multiprocessing import Pool
 
 def convert_files_to_batchable_format(filename, directory, outfilename):
     all_files = os.listdir(directory)
@@ -22,6 +24,24 @@ def convert_files_to_batchable_format(filename, directory, outfilename):
     ofile = open(outfilename, 'w')
     ofile.write(txt)
     ofile.close
+
+
+def get_data(values):
+    filename, start_pos, c3d_depth = values[0], values[1], values[2]
+    data, label = iad_writer_json.read_json_file_specific_depth(filename, c3d_depth)
+        
+    divisor = [1,1,2,4,8][c3d_depth]
+    window_size = [16,16,8,4,2][c3d_depth]
+
+    mod_start = int(start_pos)/divisor
+
+    data = data[:, mod_start:mod_start + window_size]
+
+    if data.shape[1] == window_size:
+        return (data, label, os.path.basename(filename))
+    else:
+        return (None, None, None)
+
 
 class BatchJsonRead():
     def __init__(self, filename, batch_size, c3d_depth, shuffle, read_threads=0):
@@ -49,82 +69,46 @@ class BatchJsonRead():
 
         return batch_data, batch_label, sample_names
 
-    def get_batch_parallel(self):
-        '''gets the data batch using multiple threads'''
-        batch_data = [None] * self.batch_size
-        batch_label = [None] * self.batch_size
-        sample_names = [None] * self.batch_size
-
+    def get_patch_parallel(self):
+        '''parallel get_batch implementation'''
+        batch_data = []
+        batch_label = []
+        sample_names = []
+        
         while True:
-            num_empty_slots = batch_data.count(None)
-            if num_empty_slots == 0:
-                break
-
-            # dispatch threads
-            if num_empty_slots < self.read_threads:
-                num_threads_to_dispatch = num_empty_slots
+            if len(batch_data) < self.read_threads:
+                num_threads = self.read_threads - len(batch_data)
             else:
-                num_threads_to_dispatch = self.read_threads
-
-            threads = [None] * num_threads_to_dispatch
-            thread_data = [None] * num_threads_to_dispatch
-            thread_label = [None] * num_threads_to_dispatch
-            thread_name = [None] * num_threads_to_dispatch
-            selected_files = []
-            selected_positions = []
-
-            # pick the files to read
-            while len(selected_files) < num_threads_to_dispatch:
+                num_threads = self.read_threads
+            p = Pool(num_threads)
+            values = []
+            
+            for i in range(num_threads):
                 if self.shuffle:
                     filename, start_pos, _ = random.choice(self.files).split()
                 else:
                     filename, start_pos, _ = self.files[self.current_position].split()
+                    self.current_position = (self.current_position + 1) % len(self.files)
+                values.append((filename, start_pos, self.c3d_depth))
 
-                if filename not in selected_files:
-                    selected_files.append(filename)
-                    selected_positions.append(start_pos)
-                    if not self.shuffle:
-                        self.current_position = (self.current_position + 1) % len(self.files)
+            out = p.map(get_data, values)
 
-            # dispatch the threads
-            for i in range(num_threads_to_dispatch):
-                filename = selected_files[i]
-                start_pos = selected_positions[i]
+            for o in out:
+                if o[0] is not None:
+                    batch_data.append(o[0])
+                    batch_label.append(o[1])
+                    sample_names.append(o[2])
 
-                threads[i] = Thread(target=self.thread_reader, args=(filename, start_pos, thread_data, thread_label, i))
-                threads[i].start()
-
-            for i in range(len(threads)):
-                threads[i].join()
-
-            # add the non-None results to the batch_data, batch_label lists
-            for i, d in enumerate(thread_data):
-                if d is not None:
-                    first_empty_slot = batch_data.index(None)
-                    batch_data[first_empty_slot] = d
-                    batch_label[first_empty_slot] = thread_label[i]
-                    sample_names[first_empty_slot] = os.path.basename(selected_files[i])
+                    if len(batch_data) == self.batch_size:
+                        break
+                else:
+                    self.discards += 1
 
         batch_data = np.array(batch_data)
         batch_label = np.array(batch_label)
 
         return batch_data, batch_label, sample_names
-
-    def thread_reader(self, filename, start_pos, thread_data, thread_label, tid):
-        '''thread-safe JSON file reader'''
-        data, label = iad_writer_json.read_json_file_specific_depth(filename, self.c3d_depth)
-
-        mod_start = int(int(start_pos) / self.divisor)
-
-        data = data[:, mod_start:mod_start + self.window_size]
-        #print("data shape = %s" % str(data.shape))
-        #print("label = %s" % label)
-        if data.shape[1] == self.window_size:
-            thread_data[tid] = data
-            thread_label[tid] = label
-        print("thread %s done" % tid)
-
-    
+  
     def get_batch(self):
         batch_data = []
         batch_label = []
