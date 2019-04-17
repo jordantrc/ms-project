@@ -3,7 +3,7 @@ import random
 import numpy as np
 import os
 
-import mutliprocessing
+import multiprocessing
 import time
 from multiprocessing import Pool
 
