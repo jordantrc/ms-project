@@ -34,7 +34,7 @@ def confusion_matrix(predictions, labels, classes):
 
 def per_class_table(predictions, labels, classes, csv_file):
 	'''generates statistics on a per-class basis'''
-	csv_fd = open(csv_file, 'w', newline='')
+	csv_fd = open(csv_file, 'w')
 	csvwriter = csv.writer(csv_fd)
 	y_true = []
 	y_pred = []
