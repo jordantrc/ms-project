@@ -754,7 +754,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
         if CLASSIFIER == 'softmax':
             # layer 1
             print("LAYER = %s, geom = %s" % (LAYER, img_geom))
-            x = tf.reshape(x, [None, img_geom[0] * img_geom[1]])
+            x = tf.reshape(x, [-1, img_geom[0] * img_geom[1]])
             #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
