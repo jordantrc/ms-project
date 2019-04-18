@@ -1066,10 +1066,10 @@ if __name__ == "__main__":
                 num_tests = 0
                 num_correct = 0
                 for k in sorted(clip_accuracy.keys()):
-                    clip_tests = len(clip_accuracy[k])
-                    clip_correct = clip_accuracy[k].count(1.0)
+                    clip_tests = float(len(clip_accuracy[k]))
+                    clip_correct = float(clip_accuracy[k].count(1.0))
                     #print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
-                    fd.write("clip %s = %.03f\n" % (k, float(clip_correct / clip_tests)))
+                    fd.write("clip %s = %.03f\n" % (k, clip_correct / clip_tests))
 
                     num_tests += clip_tests
                     num_correct += clip_correct
