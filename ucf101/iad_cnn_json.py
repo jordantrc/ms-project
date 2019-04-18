@@ -944,17 +944,17 @@ def iad_nn(run_string, json_input_train, json_input_test):
 
         # wrap up, provide test results
         final_accuracy = cumulative_accuracy / step / BATCH_SIZE
-        results_fd = open("runs/" + run_string + ".txt", 'w')
         print("data exhausted, test results:")
         print("steps = %s, cumulative accuracy = %.04f" % (step, final_accuracy))
-        results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, final_accuracy))
+        with open("runs/" + run_string + ".txt", 'a+') as results_fd:
+            results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, final_accuracy))
         #for i, p in enumerate(predictions):
         #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
         cm = analysis.confusion_matrix(predictions, true_classes, class_list)
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, class_list, "runs/" + run_string + ".pdf")
-        print("per-class accuracy:")
+        #print("per-class accuracy:")
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
         sess.close()
@@ -1036,7 +1036,7 @@ if __name__ == "__main__":
             #parse_function_test = _parse_function_slice_test
             BATCH_SIZE = BATCH_SIZE_TRAIN
             LOAD_MODEL = None
-            EPOCHS = 10
+            EPOCHS = 4
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
@@ -1056,42 +1056,41 @@ if __name__ == "__main__":
             
             clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
 
-            file_name = "%s_%s_results.txt" % (run_name, LAYER)
-            with open('runs/' + file_name, 'w') as fd:
+            with open("runs/" + run_string + ".txt", 'a+') as fd:
                 fd.write("##############################\n")
                 fd.write("%s %s - LAYER %s\n" % (hyper_name, h, LAYER))
                 fd.write("##############################\n")
                 # per-clip accuracy
-                print("Per-clip accuracy:")
+                #print("Per-clip accuracy:")
                 fd.write("Per-clip accuracy:\n")
                 num_tests = 0
                 num_correct = 0
                 for k in sorted(clip_accuracy.keys()):
                     clip_tests = len(clip_accuracy[k])
                     clip_correct = clip_accuracy[k].count(1.0)
-                    print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
+                    #print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
                     fd.write("clip %s = %.03f\n" % (k, float(clip_correct / clip_tests)))
 
                     num_tests += clip_tests
                     num_correct += clip_correct
-                print("random clip accuracy = %s" % float(num_correct / num_tests))
+                #print("random clip accuracy = %s" % float(num_correct / num_tests))
                 fd.write("random clip accuracy = %s\n" % float(num_correct / num_tests))
 
 
 
-                print("Per-video accuracy:")
+                #print("Per-video accuracy:")
                 fd.write("Per-video accuracy:\n")
                 num_tests = 0
                 num_correct = 0
                 for k in sorted(video_accuracy.keys()):
                     video_tests = len(video_accuracy[k])
                     video_correct = video_accuracy[k].count(1.0)
-                    print("video %s = %.03f" % (k, float(video_correct / video_tests)))
+                    #print("video %s = %.03f" % (k, float(video_correct / video_tests)))
                     fd.write("video %s = %.03f\n" % (k, float(video_correct / video_tests)))
 
                     num_tests += video_tests
                     num_correct += video_correct
-                print("random video accuracy = %s" % float(num_correct / num_tests))
+                #print("random video accuracy = %s" % float(num_correct / num_tests))
                 fd.write("random video accuracy = %s\n" % float(num_correct / num_tests))
 
             #print("clip accuracy = %s" % (clip_accuracy))
