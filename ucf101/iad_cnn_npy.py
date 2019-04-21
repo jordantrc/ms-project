@@ -945,7 +945,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
         
         # wrap up, provide test results
         final_accuracy = cumulative_accuracy / step / BATCH_SIZE
-        results_fd = open("runs/" + run_string + ".txt", 'w')
+        results_fd = open("runs/" + run_string + ".txt", 'a+')
         print("data exhausted, test results:")
         print("steps = %s, cumulative accuracy = %.04f" % (step, final_accuracy))
         results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, final_accuracy))
@@ -1061,7 +1061,7 @@ if __name__ == "__main__":
             
             clip_accuracy, video_accuracy = iad_nn(run_string, train_npy, test_npy)
 
-            with open('runs/' + run_name + "_results.txt", 'w') as fd:
+            with open('runs/' + run_name + "_results.txt", 'a+') as fd:
                 fd.write("##############################\n")
                 fd.write("%s %s - LAYER %s\n" % (hyper_name, h, LAYER))
                 fd.write("##############################\n")
