@@ -797,6 +797,8 @@ def iad_nn(run_string, json_input_train, json_input_test):
         # loss and optimizer
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true_one_hot))
         #loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
+        regularizer = tf.nn.l2_loss(weights)
+        loss = tf.reduce_mean(loss + beta * regularizer)
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
         train_op = optimizer.minimize(loss)
 
