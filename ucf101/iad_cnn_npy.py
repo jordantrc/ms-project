@@ -1033,7 +1033,7 @@ if __name__ == "__main__":
             #train_npy = BatchReaderNumpy("/home/mbc2004/epic-kitchens/IAD-Generator/clean_code/ucf_npy/ucf_50/ucf_50_train_"+str(layer)+".npz", BATCH_SIZE_TRAIN, shuffle=True)
             #test_npy = BatchReaderNumpy("/home/mbc2004/epic-kitchens/IAD-Generator/clean_code/ucf_npy/ucf_50/ucf_50_test_"+str(layer)+".npz", BATCH_SIZE_TEST, shuffle=False)
             train_npy = BatchReaderNumpy("/home/jordanc/ucf_npy/ucf_100/ucf_100_train_%s.npz" % layer, BATCH_SIZE_TRAIN, shuffle=True)
-            test_npy = BatchReaderNumpy("/home/jordanc/ucf_npy/ucf_100/ucf_100_test_%s.npz" % layer, BATCH_SIZE_TRAIN, shuffle=False)
+            test_npy = BatchReaderNumpy("/home/jordanc/ucf_npy/ucf_100/ucf_100_test_%s.npz" % layer, 1, shuffle=False)
             print("files_read")
             # training run
             #parse_function_train = _parse_function_slice
