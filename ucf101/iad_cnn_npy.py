@@ -956,11 +956,12 @@ def iad_nn(run_string, json_input_train, json_input_test):
         print("per-class accuracy:")
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
-		with open("runs/" + run_string + ".txt", 'a') as results_fd:
-			results_fd.write("########################\nLAYER = %s\n" % LAYER)
-        	results_fd.write("steps = %s, cumulative accuracy = %.05f\n" % (step, final_accuracy))
-        	for i, p in enumerate(predictions):
-        		results_fd.write("[%s] true class = %s, predicted class = %s\n" % (i, true_classes[i], p))
+        results_fd = open("runs/" + run_string + ".txt", 'a') as results_fd:
+        results_fd.write("########################\nLAYER = %s\n" % LAYER)
+        results_fd.write("steps = %s, cumulative accuracy = %.05f\n" % (step, final_accuracy))
+        for i, p in enumerate(predictions):
+            results_fd.write("[%s] true class = %s, predicted class = %s\n" % (i, true_classes[i], p))
+        results_fd.close()
 
         sess.close()
         return clip_accuracy, video_accuracy
@@ -1102,7 +1103,7 @@ if __name__ == "__main__":
                     num_correct += video_correct
                 print("random video accuracy = %s" % float(num_correct / num_tests))
                 fd.write("random video accuracy = %s\n" % float(num_correct / num_tests))
-				'''
+                '''
             #print("clip accuracy = %s" % (clip_accuracy))
             #print("video accuracy = %s" % (video_accuracy))
             #accuracies.append([hyper_value, layer, layer_accuracy])
