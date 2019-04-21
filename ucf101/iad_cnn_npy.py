@@ -956,7 +956,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
         print("per-class accuracy:")
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
-        results_fd = open("runs/" + run_string + ".txt", 'a') as results_fd:
+        results_fd = open("runs/" + run_string + ".txt", 'a')
         results_fd.write("########################\nLAYER = %s\n" % LAYER)
         results_fd.write("steps = %s, cumulative accuracy = %.05f\n" % (step, final_accuracy))
         for i, p in enumerate(predictions):
