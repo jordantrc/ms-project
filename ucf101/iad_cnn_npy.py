@@ -38,7 +38,7 @@ BIAS = 0.01
 LEAKY_RELU_ALPHA = 0.04
 DROPOUT = 0.5
 LEARNING_RATE = 1e-3
-BETA = 0.01  # used for the L2 regularization loss function
+BETA = 0.001  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 1024
 BATCH_SIZE_TRAIN = 15
@@ -948,18 +948,19 @@ def iad_nn(run_string, json_input_train, json_input_test):
         
         # wrap up, provide test results
         final_accuracy = cumulative_accuracy / step / BATCH_SIZE
-        results_fd = open("runs/" + run_string + ".txt", 'a')
         print("data exhausted, test results:")
         print("steps = %s, cumulative accuracy = %.04f" % (step, final_accuracy))
-        results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, final_accuracy))
-        #for i, p in enumerate(predictions):
-        #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
-
         cm = analysis.confusion_matrix(predictions, true_classes, class_list)
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, class_list, "runs/" + run_string + ".pdf")
         print("per-class accuracy:")
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
+
+		with open("runs/" + run_string + ".txt", 'a') as results_fd:
+			results_fd.write("########################\nLAYER = %s\n" % LAYER)
+        	results_fd.write("steps = %s, cumulative accuracy = %.05f\n" % (step, final_accuracy))
+        	for i, p in enumerate(predictions):
+        		results_fd.write("[%s] true class = %s, predicted class = %s\n" % (i, true_classes[i], p))
 
         sess.close()
         return clip_accuracy, video_accuracy
