@@ -91,7 +91,7 @@ LAYER_GEOMETRY = LAYER_GEOMETRY_16
 #-------------General helper functions----------------#
 def save_settings(run_name):
     '''saves the parameters to a file'''
-    with open('runs/%s_parameters.txt' % run_name, 'w') as fd:
+    with open('runs/%s_parameters.txt' % run_name, 'a') as fd:
         fd.write("CLASSIFIER = %s\n" % CLASSIFIER)
         fd.write("BATCH_SIZE = %s\n" % BATCH_SIZE)
         fd.write("TRAIN_FILE_LIST = %s\n" % TRAIN_FILE_LIST)
@@ -109,6 +109,7 @@ def save_settings(run_name):
         fd.write("LAYER = %s\n" % LAYER)
         fd.write("NORMALIZE_IMAGE = %s\n" % NORMALIZE_IMAGE)
         fd.write("SOFTMAX_HIDDEN_SIZE = %s\n" % SOFTMAX_HIDDEN_SIZE)
+        fd.write("BETA = %s\n" % BETA)
 
 
 def list_to_filenames(list_file, balance_classes=False):
@@ -797,8 +798,8 @@ def iad_nn(run_string, json_input_train, json_input_test):
         # loss and optimizer
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_true_one_hot))
         #loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y_true))
-        regularizer = tf.nn.l2_loss(weights)
-        loss = tf.reduce_mean(loss + beta * regularizer)
+        regularizer = tf.nn.l2_loss(weights['W_0'])
+        loss = tf.reduce_mean(loss + BETA * regularizer)
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
         train_op = optimizer.minimize(loss)
 
