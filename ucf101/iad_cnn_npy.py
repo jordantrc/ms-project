@@ -13,12 +13,13 @@ import numpy as np
 import time
 
 import analysis
-from batch_json_reader import BatchJsonRead
+
+from npy_reader import BatchReaderNumpy
 from tfrecord_gen import CLASS_INDEX_FILE, get_class_list
 
 
-TEST_FILE_LIST = 'train-test-splits/ucf101test_75-hyperion.list'
-TRAIN_FILE_LIST = 'train-test-splits/ucf101train_75-hyperion.list'
+TEST_FILE_LIST = "~/epic-kitchens/IAD-Generator/clean_code/ucf_npy/ucf_50/ucf_50_train_0.npz"
+TRAIN_FILE_LIST = "~/epic-kitchens/IAD-Generator/clean_code/ucf_npy/ucf_50/ucf_50_test_0.npz"
 MODEL_SAVE_DIR = 'iad_models/'
 
 NUM_CLASSES = 101
@@ -40,7 +41,7 @@ LEARNING_RATE = 1e-3
 BETA = 0.01  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
 SOFTMAX_HIDDEN_SIZE = 1024
-BATCH_SIZE_TRAIN = 30
+BATCH_SIZE_TRAIN = 15
 BATCH_SIZE_TEST = 1
 JSON_READ_THREADS = 10
 
@@ -832,7 +833,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
 
     # start the training/testing steps
     if training:
-        num_steps = int((json_input_train.num_files * EPOCHS) / BATCH_SIZE)
+        num_steps = int((json_input_train.size() * EPOCHS) / BATCH_SIZE)
         print("begin training, steps = %s" % num_steps)
         step = 0
         #sess.run([
@@ -847,21 +848,21 @@ def iad_nn(run_string, json_input_train, json_input_test):
         start = time.time()
         while step <= num_steps:
             #try:
-            input_x, input_y, _ = json_input_train.get_batch()
+            input_x, input_y = json_input_train.get_batch()
             input_x = input_x.reshape((BATCH_SIZE, img_geom[0] * img_geom[1]))
             #input_y = tf.one_hot(input_y, depth=NUM_CLASSES, dtype=tf.int32)
             input_y = input_y.reshape((BATCH_SIZE))
             train_result = sess.run([train_op, accuracy, y_pred, logits, weights, loss], feed_dict={x: input_x, y_true: input_y})
 
-            if step != 0 and step % 100 == 0:
+            if step != 0 and step % 1 == 0:
                 end = time.time()
                 run_time = end - start
                 start = time.time()
 
                 # calculate discard rate
-                discard_rate = json_input_train.discards / (step * BATCH_SIZE_TRAIN)
+                
 
-                print("step %s, accuracy = %.03f, loss = %.03f, discards = %.03f, time = %.03fs" % (step, train_result[1], train_result[5], discard_rate, run_time))
+                print("step %s, accuracy = %.03f, loss = %.03f, time = %.03fs" % (step, train_result[1], train_result[5], run_time))
                 #print("\tx shape = %s, max = %s, min = %s, mean = %s" % (train_result[2].shape, train_result[2].max(), train_result[2].min(), train_result[2].mean()))
                 #print("\ty_true (shape = %s) = %s" % (train_result[3].shape, train_result[3]))
                 #print("\ty_pred (shape = %s) = %s" % (train_result[4].shape, train_result[4]))
@@ -878,7 +879,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
                         mini_batch_size = 50
                     test_accuracy = 0.0
                     for i in range(mini_batch_size):
-                        input_x, input_y, _ = json_input_test.get_batch()
+                        input_x, input_y = json_input_test.get_batch()
                         input_x = input_x.reshape((1, img_geom[0] * img_geom[1]))
                         input_y = input_y.reshape((1))
                         test_result = sess.run([accuracy], feed_dict={x: input_x, y_true: input_y})
@@ -899,7 +900,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
         return None, None
     
     else:
-        num_steps = json_input_test.num_files
+        num_steps = json_input_test.size()
         print("begin testing, steps = %s" % num_steps)
         step = 0
         saver.restore(sess, LOAD_MODEL)
@@ -913,14 +914,14 @@ def iad_nn(run_string, json_input_train, json_input_test):
         # ['video_name': [accuracy@1, accuracy@1]]
         clip_accuracy = {}
         video_accuracy = {}
-
+        
         # loop until out of data
         while step <= num_steps:
-            input_x, input_y, sample_name = json_input_test.get_batch()
+            input_x, input_y = json_input_test.get_batch()
             input_x = input_x.reshape((1, img_geom[0] * img_geom[1]))
             input_y = input_y.reshape((1))
             test_result = sess.run([accuracy, y_pred_class, y_true_class], feed_dict={x: input_x, y_true: input_y})
-            
+            '''
             # add result to the clip and video accuracy structures
             sample_name = sample_name[0]
             video_name = '_'.join(sample_name.split('_')[0:3])
@@ -933,7 +934,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
                 video_accuracy[video_name].append(test_result[0])
             else:
                 video_accuracy[video_name] = [test_result[0]]
-
+            '''
             cumulative_accuracy += test_result[0]
             predictions.append(test_result[1])
             true_classes.append(test_result[2])
@@ -941,20 +942,20 @@ def iad_nn(run_string, json_input_train, json_input_test):
                 print("step %s, accuracy = %s, cumulative accuracy = %s" %
                       (step, test_result[0], cumulative_accuracy / step / BATCH_SIZE))
             step += 1
-
+        
         # wrap up, provide test results
         final_accuracy = cumulative_accuracy / step / BATCH_SIZE
+        results_fd = open("runs/" + run_string + ".txt", 'w')
         print("data exhausted, test results:")
         print("steps = %s, cumulative accuracy = %.04f" % (step, final_accuracy))
-        with open("runs/" + run_string + ".txt", 'a+') as results_fd:
-            results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, final_accuracy))
+        results_fd.write("steps = %s, cumulative accuracy = %.04f\n" % (step, final_accuracy))
         #for i, p in enumerate(predictions):
         #    print("[%s] true class = %s, predicted class = %s" % (i, true_classes[i], p))
 
         cm = analysis.confusion_matrix(predictions, true_classes, class_list)
         print("confusion matrix = %s" % cm)
         analysis.plot_confusion_matrix(cm, class_list, "runs/" + run_string + ".pdf")
-        #print("per-class accuracy:")
+        print("per-class accuracy:")
         analysis.per_class_table(predictions, true_classes, class_list, "runs/" + run_string + '.csv')
 
         sess.close()
@@ -1018,8 +1019,8 @@ if __name__ == "__main__":
             hyper_value = AUTOENCODER_LAYERS
 
         trial_count = 1
-        for layer in [0, 1, 2, 3]:
-        #for layer in [4]:
+        for layer in [0, 1, 2, 3, 4]:
+        #for layer in [5]:
             LAYER = layer
 
 
@@ -1028,19 +1029,23 @@ if __name__ == "__main__":
             print("##############################")
 
             # setup JSON input objects
-            train_json = BatchJsonRead(TRAIN_FILE_LIST, BATCH_SIZE_TRAIN, LAYER, shuffle=True, read_threads=JSON_READ_THREADS)
-            test_json = BatchJsonRead(TEST_FILE_LIST, BATCH_SIZE_TEST, LAYER, shuffle=False)
-
+            print("reading_files")
+            #train_npy = BatchReaderNumpy("/home/mbc2004/epic-kitchens/IAD-Generator/clean_code/ucf_npy/ucf_50/ucf_50_train_"+str(layer)+".npz", BATCH_SIZE_TRAIN, shuffle=True)
+            #test_npy = BatchReaderNumpy("/home/mbc2004/epic-kitchens/IAD-Generator/clean_code/ucf_npy/ucf_50/ucf_50_test_"+str(layer)+".npz", BATCH_SIZE_TEST, shuffle=False)
+            train_npy = BatchReaderNumpy("/home/jordanc/ucf_npy/ucf_100/ucf_100_train_%s.npz" % layer, BATCH_SIZE_TRAIN, shuffle=True)
+            test_npy = BatchReaderNumpy("/home/jordanc/ucf_npy/ucf_100/ucf_100_test_%s.npz" % layer, BATCH_SIZE_TRAIN, shuffle=False)
+            print("files_read")
             # training run
             #parse_function_train = _parse_function_slice
             #parse_function_test = _parse_function_slice_test
             BATCH_SIZE = BATCH_SIZE_TRAIN
             LOAD_MODEL = None
-            EPOCHS = 5
+            EPOCHS = 4
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
+            print("RUN String:", run_string)
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
-            _, _ = iad_nn(run_string, train_json, test_json)
+            _, _ = iad_nn(run_string, train_npy, test_npy)
 
             # reset the graph
             tf.reset_default_graph()
@@ -1054,43 +1059,43 @@ if __name__ == "__main__":
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
             
-            clip_accuracy, video_accuracy = iad_nn(run_string, train_json, test_json)
+            clip_accuracy, video_accuracy = iad_nn(run_string, train_npy, test_npy)
 
-            with open("runs/" + run_string + ".txt", 'a+') as fd:
+            with open('runs/' + run_name + "_results.txt", 'w') as fd:
                 fd.write("##############################\n")
                 fd.write("%s %s - LAYER %s\n" % (hyper_name, h, LAYER))
                 fd.write("##############################\n")
                 # per-clip accuracy
-                #print("Per-clip accuracy:")
+                print("Per-clip accuracy:")
                 fd.write("Per-clip accuracy:\n")
                 num_tests = 0
                 num_correct = 0
                 for k in sorted(clip_accuracy.keys()):
-                    clip_tests = float(len(clip_accuracy[k]))
-                    clip_correct = float(clip_accuracy[k].count(1.0))
-                    #print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
-                    fd.write("clip %s = %.03f\n" % (k, clip_correct / clip_tests))
+                    clip_tests = len(clip_accuracy[k])
+                    clip_correct = clip_accuracy[k].count(1.0)
+                    print("clip %s = %.03f" % (k, float(clip_correct / clip_tests)))
+                    fd.write("clip %s = %.03f\n" % (k, float(clip_correct / clip_tests)))
 
                     num_tests += clip_tests
                     num_correct += clip_correct
-                #print("random clip accuracy = %s" % float(num_correct / num_tests))
+                print("random clip accuracy = %s" % float(num_correct / num_tests))
                 fd.write("random clip accuracy = %s\n" % float(num_correct / num_tests))
 
 
 
-                #print("Per-video accuracy:")
+                print("Per-video accuracy:")
                 fd.write("Per-video accuracy:\n")
                 num_tests = 0
                 num_correct = 0
                 for k in sorted(video_accuracy.keys()):
-                    video_tests = float(len(video_accuracy[k]))
-                    video_correct = float(video_accuracy[k].count(1.0))
-                    #print("video %s = %.03f" % (k, float(video_correct / video_tests)))
-                    fd.write("video %s = %.03f\n" % (k, video_correct / video_tests))
+                    video_tests = len(video_accuracy[k])
+                    video_correct = video_accuracy[k].count(1.0)
+                    print("video %s = %.03f" % (k, float(video_correct / video_tests)))
+                    fd.write("video %s = %.03f\n" % (k, float(video_correct / video_tests)))
 
                     num_tests += video_tests
                     num_correct += video_correct
-                #print("random video accuracy = %s" % float(num_correct / num_tests))
+                print("random video accuracy = %s" % float(num_correct / num_tests))
                 fd.write("random video accuracy = %s\n" % float(num_correct / num_tests))
 
             #print("clip accuracy = %s" % (clip_accuracy))

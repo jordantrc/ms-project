@@ -146,22 +146,22 @@ class BatchJsonRead():
         return batch_data, batch_label, sample_names
 
 if __name__ == '__main__':
-    convert_files_to_batchable_format('train-test-splits/c3d_ucf101_train_split1.txt', 
-                                      'D:/ms-project-data/UCF101/json_iads/generated_iads_train_100',
-                                      'train-test-splits/ucf101train-hyperion.list')
-    convert_files_to_batchable_format('train-test-splits/c3d_ucf101_test_split1.txt',
-                                      'D:/ms-project-data/UCF101/json_iads/generated_iads_test_100',
-                                      'train-test-splits/ucf101test-hyperion.list')
+    convert_files_to_batchable_format('train-test-splits/c3d_ucf101_train_split1.list', 
+                                      'D:/ms-project-data/UCF101/json_iads/generated_iads_train_75',
+                                      'train-test-splits/ucf101train_75-hyperion.list')
+    convert_files_to_batchable_format('train-test-splits/c3d_ucf101_test_split1.list',
+                                      'D:/ms-project-data/UCF101/json_iads/generated_iads_test_75',
+                                      'train-test-splits/ucf101test_75-hyperion.list')
 
     
-    reader = BatchJsonRead('train-test-splits/ucf101train-hyperion.list', 30, 0, True)
+    #reader = BatchJsonRead('train-test-splits/ucf101train-hyperion.list', 30, 0, True)
 
-    data, label = reader.get_batch()
-    for i in range(len(data)):
-        print(i, data[i].shape, label[i])
+    #data, label = reader.get_batch()
+    #for i in range(len(data)):
+    #    print(i, data[i].shape, label[i])
 
-    reader = BatchJsonRead('train-test-splits/ucf101test-hyperion.list', 30, 0, False)
+    #reader = BatchJsonRead('train-test-splits/ucf101test-hyperion.list', 30, 0, False)
 
-    data, label = reader.get_batch()
-    for i in range(len(data)):
-        print(i, data[i].shape, label[i])
+    #data, label = reader.get_batch()
+    #for i in range(len(data)):
+    #    print(i, data[i].shape, label[i])
