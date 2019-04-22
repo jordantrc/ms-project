@@ -964,7 +964,7 @@ def iad_nn(run_string, json_input_train, json_input_test):
         results_fd.close()
 
         sess.close()
-        return clip_accuracy, video_accuracy
+        return cumulative_accuracy
 
 
 def random_layer_list(min_layers, max_layers, min_hidden_size, max_hidden_size):
@@ -1050,7 +1050,7 @@ if __name__ == "__main__":
             print("RUN String:", run_string)
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
-            _, _ = iad_nn(run_string, train_npy, test_npy)
+            _ = iad_nn(run_string, train_npy, test_npy)
 
             # reset the graph
             tf.reset_default_graph()
@@ -1064,7 +1064,8 @@ if __name__ == "__main__":
             run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_test"
             save_settings(run_string)
             
-            clip_accuracy, video_accuracy = iad_nn(run_string, train_npy, test_npy)
+            run_accuracy = iad_nn(run_string, train_npy, test_npy)
+            accuracies.append(run_accuracy)
 
             with open('runs/' + run_name + "_results.txt", 'a') as fd:
                 fd.write("##############################\n")
@@ -1116,7 +1117,7 @@ if __name__ == "__main__":
             tf.reset_default_graph()
 
     # print accuracy information from all layers and hidden layer sizes
-    print("Final accuracy data:")
-    for a in accuracies:
-        print(a)
+    print("Final accuracy data: (layer/accuracy)")
+    for i, a in enumerate(accuracies):
+        print("%s = %.05f" % (layers[i], a))
 
