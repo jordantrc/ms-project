@@ -1068,6 +1068,9 @@ if __name__ == "__main__":
 
     trial_count = 1
     for fc in fc_layer_options:
+        fc_string = str(fc[0])
+        for l in fc[1:]:
+            fc_string += "-" + str(l)
         for layer in [0, 1, 2, 3, 4]:
         #for layer in [5]:
             LAYER = layer
@@ -1090,9 +1093,9 @@ if __name__ == "__main__":
             BATCH_SIZE = BATCH_SIZE_TRAIN
             LOAD_MODEL = None
             EPOCHS = 4
-            run_param = str(len(fc)) + "_" + str(fc[0]) + "_" + str(LAYER)
+            run_param = fc_string + "_" + str(LAYER)
             run_string = run_name + "_" + run_param + "_train"
-            print("RUN String:", run_string)
+            print("RUN String = %s" % run_string)
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
             _ = iad_nn(run_string, train_npy, test_npy)
