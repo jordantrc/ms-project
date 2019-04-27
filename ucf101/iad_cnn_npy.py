@@ -734,7 +734,7 @@ def iad_nn(run_string, json_input_train, json_input_test, layer_sizes=None):
     elif CLASSIFIER == 'autoencode':
         weights, biases = get_variables_autoencode('ucf101_iad')
     elif CLASSIFIER == 'fc-multi':
-        weights, biases = get_variables_multi_fc('ucf101_iad', layer_list)
+        weights, biases = get_variables_multi_fc('ucf101_iad', layer_sizes)
 
     print("Weights = %s" % weights)
     print("biases = %s" % biases)
