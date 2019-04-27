@@ -1062,6 +1062,8 @@ if __name__ == "__main__":
     for i in list(range(1, 4)):
         fc_layer_options.append(fc_layers(i))
 
+    print("fc_layer_options = %s" % fc_layer_options)
+
     accuracies = {}
 
     trial_count = 1
