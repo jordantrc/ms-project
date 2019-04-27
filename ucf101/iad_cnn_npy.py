@@ -1122,7 +1122,7 @@ if __name__ == "__main__":
 
             with open('runs/' + run_name + "_results.txt", 'a') as fd:
                 fd.write("##############################\n")
-                fc.write("%s - LAYER %s" % (fc_string, LAYER))
+                fd.write("%s - LAYER %s" % (fc_string, LAYER))
                 fd.write("##############################\n")
                 '''
                 # per-clip accuracy
