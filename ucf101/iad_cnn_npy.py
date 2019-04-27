@@ -448,6 +448,7 @@ def get_variables_softmax(model_name, num_channels=1):
 def get_variables_multi_fc(model_name, layer_sizes):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_features = geom[0] * geom[1]  # assumes single channel
+    print("get_variable_multi_fc called for %s" % layer_sizes)
 
     with tf.variable_scope(model_name) as var_scope:
         for i, l in enumerate(layer_sizes):
