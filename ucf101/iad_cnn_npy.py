@@ -450,6 +450,9 @@ def get_variables_multi_fc(model_name, layer_sizes):
     num_features = geom[0] * geom[1]  # assumes single channel
     print("get_variable_multi_fc called for %s" % layer_sizes)
 
+    weights = {}
+    biases = {}
+
     with tf.variable_scope(model_name) as var_scope:
         for i, l in enumerate(layer_sizes):
             weight_name = "W_%s" % i
@@ -650,11 +653,11 @@ def multi_fc_regression(x, batch_size, weights, biases, dropout, layer_sizes):
     for i, l in enumerate(layer_sizes):
         weight_name = 'W_%s' % i
         bias_name = 'b_%s' % i 
-        model = tf.matmul(x, weights[weight_name] + biases[bias_name])
+        model = tf.matmul(x, weights[weight_name]) + biases[bias_name]
 
     model = tf.nn.dropout(model, dropout)
 
-    model = tf.matmul(model, weights['out']) + biases['out']
+    model = tf.matmul(model, weights['W_out']) + biases['b_out']
 
     return model, []
 
