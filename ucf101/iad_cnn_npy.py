@@ -460,8 +460,8 @@ def get_variables_multi_fc(model_name, layer_sizes):
             weights[weight_name] = _weight_variable(weight_name, [num_features, l])
             biases[bias_name] = _bias_variable(bias_name, [l])
         # last layer
-        weights[weight_name] = _weight_variable('W_out', [layer_sizes[-1], NUM_CLASSES])
-        biases[bias_name] = _bias_variable('b_out', [NUM_CLASSES])
+        weights['W_out'] = _weight_variable('W_out', [layer_sizes[-1], NUM_CLASSES])
+        biases['b_out'] = _bias_variable('b_out', [NUM_CLASSES])
 
     return weights, biases
 
@@ -793,7 +793,7 @@ def iad_nn(run_string, json_input_train, json_input_test, layer_sizes=None):
     #print("y_true shape = %s" % y_true.get_shape().as_list())
 
     # get neural network response
-    if CLASSIFIER in ['softmax', 'autoencode', 'lenet', 'mctnet']:
+    if CLASSIFIER in ['fc-multi', 'softmax', 'autoencode', 'lenet', 'mctnet']:
         if CLASSIFIER == 'softmax':
             # layer 1
             print("LAYER = %s, geom = %s" % (LAYER, img_geom))
@@ -807,7 +807,6 @@ def iad_nn(run_string, json_input_train, json_input_test, layer_sizes=None):
 
             x = tf.reshape(x, [-1, img_geom[0] * img_geom[1]])
             #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
-
             logits, conv_layers = multi_fc_regression(x, BATCH_SIZE, weights, biases, DROPOUT, layer_sizes)
 
         elif CLASSIFIER == 'lenet':
