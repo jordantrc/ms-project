@@ -1060,7 +1060,9 @@ if __name__ == "__main__":
     # fully connected layer options
     fc_layer_options = []
     for i in list(range(1, 4)):
-        fc_layer_options.append(fc_layers(i))
+        opts = fc_layers(i)
+        for o in opts:
+            fc_layer_options.append(o)
 
     print("fc_layer_options = %s" % fc_layer_options)
 
