@@ -11,6 +11,7 @@ import sys
 import tensorflow as tf
 import numpy as np
 import time
+import itertools
 
 import analysis
 
@@ -1030,23 +1031,6 @@ def random_layer_list(min_layers, max_layers, min_hidden_size, max_hidden_size):
     return layers
 
 
-def fc_layers(num_layers):
-    start_layer_sizes = FC_LAYER_SIZES[0:len(FC_LAYER_SIZES) - num_layers]
-    layer_options = []
-
-    for s in start_layer_sizes:
-        option = [s]
-        while len(option) < num_layers:
-            last_layer = option[-1]
-            smaller_layers = [x for x in FC_LAYER_SIZES if x < last_layer]
-            if len(option) == num_layers - 1:
-                smaller_layers = smaller_layers[:-1]
-            option.append(random.choice(smaller_layers))
-        layer_options.append(option)
-
-    return layer_options
-
-
 if __name__ == "__main__":
 
     # get the run name
@@ -1067,9 +1051,9 @@ if __name__ == "__main__":
     # fully connected layer options
     fc_layer_options = []
     for i in list(range(1, 4)):
-        opts = fc_layers(i)
+        opts = itertools.combinations(FC_LAYER_SIZES, i)
         for o in opts:
-            fc_layer_options.append(o)
+            fc_layer_options.append(list(o))
 
     print("fc_layer_options = %s" % fc_layer_options)
 
