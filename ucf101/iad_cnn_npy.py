@@ -32,7 +32,7 @@ TRAINING_DATA_SAMPLE = 1.0
 
 # neural network variables
 # softmax, autoencode, 
-CLASSIFIER = 'softmax'
+CLASSIFIER = 'fc-multi'
 WEIGHT_STDDEV = 0.01
 BIAS = 0.01
 LEAKY_RELU_ALPHA = 0.04
@@ -44,6 +44,7 @@ SOFTMAX_HIDDEN_SIZE = 1024
 BATCH_SIZE_TRAIN = 15
 BATCH_SIZE_TEST = 1
 JSON_READ_THREADS = 10
+FC_LAYER_SIZES = [4096, 2048, 1024, 512, 256]
 
 # autoencoder hyper parameters
 #AUTOENCODER_LAYERS = [500, 200, 50, 10]
@@ -444,6 +445,23 @@ def get_variables_softmax(model_name, num_channels=1):
     return weights, biases
 
 
+def get_variables_multi_fc(model_name, layer_sizes):
+    geom = LAYER_GEOMETRY[str(LAYER)]
+    num_features = geom[0] * geom[1] * num_channels
+
+    with tf.variable_scope(model_name) as var_scope:
+        for i, l in enumerate(layer_sizes):
+            weight_name = "W_%s" % i
+            bias_name = "b_%s" % i
+            weights[weight_name] = _weight_variable(weight_name, [num_features, l])
+            biases[bias_name] = _bias_variable(bias_name, [l])
+        # last layer
+        weights[weight_name] = _weight_variable('W_out', [layer_sizes[-1], NUM_CLASSES])
+        biases[bias_name] = _bias_variable('b_out', [NUM_CLASSES])
+
+    return weights, biases
+
+
 def get_variables_autoencode(model_name, num_channels=1):
     geom = LAYER_GEOMETRY[str(LAYER)]
     num_features = geom[0] * geom[1] * num_channels
@@ -626,6 +644,20 @@ def softmax_regression(x, batch_size, weights, biases, dropout):
     return model, []
 
 
+def multi_fc_regression(x, batch_size, weights, biases, dropout, layer_sizes):
+    
+    for i, l in enumerate(layer_sizes):
+        weight_name = 'W_%s' % i
+        bias_name = 'b_%s' % i 
+        model = tf.matmul(x, weights[weight_name] + biases[bias_name])
+
+    model = tf.nn.dropout(model, dropout)
+
+    model = tf.matmul(model, weights['out']) + biases['out']
+
+    return model, []
+
+
 def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
     geom = LAYER_GEOMETRY[str(LAYER)]
     #x = tf.reshape(x, [batch_size, geom[0] * geom[1]])
@@ -662,7 +694,7 @@ def temporal_softmax_regression(x, batch_size, weights, biases, dropout):
 
 
 #def iad_nn(run_string, parse_function_train, parse_function_test):
-def iad_nn(run_string, json_input_train, json_input_test):
+def iad_nn(run_string, json_input_train, json_input_test, layer_sizes=None):
     '''main function'''
     if LOAD_MODEL is None:
         training = True
@@ -700,6 +732,11 @@ def iad_nn(run_string, json_input_train, json_input_test):
         weights, biases = get_variables_mctnet('ucf101_iad')
     elif CLASSIFIER == 'autoencode':
         weights, biases = get_variables_autoencode('ucf101_iad')
+    elif CLASSIFIER == 'fc-multi':
+        weights, biases = get_variables_multi_fc('ucf101_iad', layer_list)
+
+    print("Weights = %s" % weights)
+    print("biases = %s" % biases)
 
     # placeholders
     #input_filenames = tf.placeholder(tf.string, shape=[None])
@@ -761,6 +798,13 @@ def iad_nn(run_string, json_input_train, json_input_test):
 
             logits, conv_layers = softmax_regression(x, BATCH_SIZE, weights, biases, DROPOUT)
             #logits_test, _ = softmax_regression(x_test, 1, weights, biases, DROPOUT)
+
+        elif CLASSIFIER == 'fc-multi':
+
+            x = tf.reshape(x, [-1, img_geom[0] * img_geom[1]])
+            #x_test = tf.reshape(x_test, [1, img_geom[0] * img_geom[1]])
+
+            logits, conv_layers = multi_fc_regression(x, BATCH_SIZE, weights, biases, DROPOUT, layer_sizes)
 
         elif CLASSIFIER == 'lenet':
             logits, conv_layers = cnn_lenet(x, BATCH_SIZE, weights, biases, DROPOUT)
@@ -983,6 +1027,19 @@ def random_layer_list(min_layers, max_layers, min_hidden_size, max_hidden_size):
     return layers
 
 
+def fc_layers(num_layers):
+    start_layer_sizes = FC_LAYER_SIZES[0:len(FC_LAYER_SIZES) - num_layers]
+    layer_options = []
+
+    for s in start_layer_sizes:
+        option = [s]
+        for i in list(range(num_layers - 1)):
+            option.append(option[-1] / 2)
+        layer_options.append(option)
+
+    return layer_options
+
+
 if __name__ == "__main__":
 
     # get the run name
@@ -1000,37 +1057,22 @@ if __name__ == "__main__":
     # settings for softmax hidden layer size
     #hyper_settings = hyper_softmax_hidden_powers
     # settings for dropout
-    hyper_settings = layer_list
-    hyper_settings = hyper_dropout
-    hyper_settings = [""]
-    hyper_parameter = "none"
+    # fully connected layer options
+    fc_layer_options = []
+    for i in list(range(1, 4)):
+        fc_layer_options.append(fc_layers(i))
 
-    accuracies = []
+    accuracies = {}
 
-    for h in hyper_settings:
-        #SOFTMAX_HIDDEN_SIZE = int(math.pow(2, h))
-        #hyper_var = "SOFTMAX_HIDDEN_SIZE"
-        #hyper_value = SOFTMAX_HIDDEN_SIZE
-        if hyper_parameter == "dropout":
-            DROPOUT = h
-            hyper_name = "Dropout"
-            hyper_value = DROPOUT
-        elif hyper_parameter == "none":
-            hyper_name = ""
-            hyper_value = ""
-        elif hyper_parameter == "autoencoder_layers":
-            AUTOENCODER_LAYERS = h
-            hyper_name = "autoencoder_layers"
-            hyper_value = AUTOENCODER_LAYERS
-
-        trial_count = 1
+    trial_count = 1
+    for fc in fc_layer_options:
         for layer in [0, 1, 2, 3, 4]:
         #for layer in [5]:
             LAYER = layer
 
 
             print("##############################")
-            print("%s %s - LAYER %s" % (hyper_name, h, LAYER))
+            print("%s - LAYER %s" % (fc, LAYER))
             print("##############################")
 
             # setup JSON input objects
@@ -1046,7 +1088,8 @@ if __name__ == "__main__":
             BATCH_SIZE = BATCH_SIZE_TRAIN
             LOAD_MODEL = None
             EPOCHS = 4
-            run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_train"
+            run_param = str(len(fc)) + "_" + str(fc[0]) + "_" + str(LAYER)
+            run_string = run_name + "_" + run_param + "_train"
             print("RUN String:", run_string)
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
@@ -1061,15 +1104,15 @@ if __name__ == "__main__":
             BATCH_SIZE = 1
             LOAD_MODEL = 'iad_models/iad_model_layer_%s_step_final.ckpt' % LAYER
             EPOCHS = 1
-            run_string = run_name + "_" + str(hyper_value) + "_" + str(LAYER) + "_test"
+            run_string = run_name + "_" + run_param + "_test"
             save_settings(run_string)
             
             run_accuracy = iad_nn(run_string, train_npy, test_npy)
-            accuracies.append(run_accuracy)
+            accuracies[run_param] = run_accuracy
 
             with open('runs/' + run_name + "_results.txt", 'a') as fd:
                 fd.write("##############################\n")
-                fd.write("%s %s - LAYER %s\n" % (hyper_name, h, LAYER))
+                fc.write("%s - LAYER %s" % (fc, LAYER))
                 fd.write("##############################\n")
                 '''
                 # per-clip accuracy
@@ -1118,6 +1161,7 @@ if __name__ == "__main__":
 
     # print accuracy information from all layers and hidden layer sizes
     print("Final accuracy data: (layer/accuracy)")
-    for i, a in enumerate(accuracies):
-        print("%s = %.05f" % (layers[i], a))
+    for k in sorted(accuracies.keys()):
+        a = accuracies[k]
+        print("%s = %.05f" % (k, a))
 
