@@ -1101,7 +1101,7 @@ if __name__ == "__main__":
             print("RUN String = %s" % run_string)
             save_settings(run_string)
             # iad_nn(run_string, parse_function_train, parse_function_test)
-            _ = iad_nn(run_string, train_npy, test_npy)
+            _ = iad_nn(run_string, train_npy, test_npy, fc)
 
             # reset the graph
             tf.reset_default_graph()
@@ -1115,7 +1115,7 @@ if __name__ == "__main__":
             run_string = run_name + "_" + run_param + "_test"
             save_settings(run_string)
             
-            run_accuracy = iad_nn(run_string, train_npy, test_npy)
+            run_accuracy = iad_nn(run_string, train_npy, test_npy, fc)
             accuracies[run_param] = run_accuracy
 
             with open('runs/' + run_name + "_results.txt", 'a') as fd:
