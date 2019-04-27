@@ -1011,7 +1011,7 @@ def iad_nn(run_string, json_input_train, json_input_test, layer_sizes=None):
         results_fd.close()
 
         sess.close()
-        return cumulative_accuracy
+        return final_accuracy
 
 
 def random_layer_list(min_layers, max_layers, min_hidden_size, max_hidden_size):
@@ -1036,8 +1036,12 @@ def fc_layers(num_layers):
 
     for s in start_layer_sizes:
         option = [s]
-        for i in list(range(num_layers - 1)):
-            option.append(option[-1] / 2)
+        while len(option) < num_layers:
+            last_layer = option[-1]
+            smaller_layers = [x for x in FC_LAYER_SIZES if x < last_layer]
+            if len(option) == num_layers - 1:
+                smaller_layers = smaller_layers[:-1]
+            option.append(random.choice(smaller_layers))
         layer_options.append(option)
 
     return layer_options
@@ -1122,7 +1126,7 @@ if __name__ == "__main__":
 
             with open('runs/' + run_name + "_results.txt", 'a') as fd:
                 fd.write("##############################\n")
-                fd.write("%s - LAYER %s" % (fc_string, LAYER))
+                fd.write("%s - LAYER %s\n" % (fc_string, LAYER))
                 fd.write("##############################\n")
                 '''
                 # per-clip accuracy
@@ -1169,9 +1173,9 @@ if __name__ == "__main__":
             # reset the graph before moving to the next layer
             tf.reset_default_graph()
 
-    # print accuracy information from all layers and hidden layer sizes
-    print("Final accuracy data: (layer/accuracy)")
-    for k in sorted(accuracies.keys()):
-        a = accuracies[k]
-        print("%s = %.05f" % (k, a))
+        # print accuracy information from all layers and hidden layer sizes
+        print("Final accuracy data:")
+        for k in sorted(accuracies.keys()):
+            a = accuracies[k]
+            print("%s = %.05f" % (k, a))
 
