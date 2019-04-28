@@ -37,7 +37,7 @@ CLASSIFIER = 'fc-multi'
 WEIGHT_STDDEV = 0.01
 BIAS = 0.01
 LEAKY_RELU_ALPHA = 0.04
-DROPOUT = 0.5
+DROPOUT = 0.8
 LEARNING_RATE = 1e-3
 BETA = 0.001  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
@@ -1050,7 +1050,7 @@ if __name__ == "__main__":
     # settings for dropout
     # fully connected layer options
     fc_layer_options = []
-    for i in list(range(1, 4)):
+    for i in [2]:
         opts = itertools.combinations(FC_LAYER_SIZES, i)
         for o in opts:
             fc_layer_options.append(list(o))
@@ -1064,8 +1064,8 @@ if __name__ == "__main__":
         fc_string = str(fc[0])
         for l in fc[1:]:
             fc_string += "-" + str(l)
-        for layer in [0, 1, 2, 3, 4]:
-        #for layer in [5]:
+        #for layer in [0, 1, 2, 3, 4]:
+        for layer in [4]:
             LAYER = layer
 
 
