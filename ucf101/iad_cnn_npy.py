@@ -37,7 +37,7 @@ CLASSIFIER = 'fc-multi'
 WEIGHT_STDDEV = 0.01
 BIAS = 0.01
 LEAKY_RELU_ALPHA = 0.04
-DROPOUT = 0.8
+DROPOUT = 1.0
 LEARNING_RATE = 1e-3
 BETA = 0.001  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
@@ -1049,11 +1049,11 @@ if __name__ == "__main__":
     #hyper_settings = hyper_softmax_hidden_powers
     # settings for dropout
     # fully connected layer options
-    fc_layer_options = []
-    for i in [3]:
-        opts = itertools.combinations(FC_LAYER_SIZES, i)
-        for o in opts:
-            fc_layer_options.append(list(o))
+    fc_layer_options = [[4096, 512, 256]]
+    #for i in [3]:
+    #    opts = itertools.combinations(FC_LAYER_SIZES, i)
+    #    for o in opts:
+    #        fc_layer_options.append(list(o))
 
     print("fc_layer_options = %s" % fc_layer_options)
 
