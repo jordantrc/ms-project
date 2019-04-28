@@ -1050,7 +1050,7 @@ if __name__ == "__main__":
     # settings for dropout
     # fully connected layer options
     fc_layer_options = []
-    for i in [2]:
+    for i in [3]:
         opts = itertools.combinations(FC_LAYER_SIZES, i)
         for o in opts:
             fc_layer_options.append(list(o))
