@@ -37,7 +37,7 @@ CLASSIFIER = 'fc-multi'
 WEIGHT_STDDEV = 0.01
 BIAS = 0.01
 LEAKY_RELU_ALPHA = 0.04
-DROPOUT = 0.9
+DROPOUT = 0.8
 LEARNING_RATE = 1e-3
 BETA = 0.001  # used for the L2 regularization loss function
 NORMALIZE_IMAGE = False
@@ -1085,7 +1085,7 @@ if __name__ == "__main__":
             #parse_function_test = _parse_function_slice_test
             BATCH_SIZE = BATCH_SIZE_TRAIN
             LOAD_MODEL = None
-            EPOCHS = 4
+            EPOCHS = 8
             run_param = fc_string + "_" + str(LAYER)
             run_string = run_name + "_" + run_param + "_train"
             print("RUN String = %s" % run_string)
