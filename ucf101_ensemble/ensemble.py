@@ -155,7 +155,7 @@ def read_file(filename_list):
   return all_data, all_labels
 
 train_data, train_labels = read_file(train_dataset)
-eval_data, eval_labels = read_file(train_dataset)
+eval_data, eval_labels = read_file(test_dataset)
 
 ##############################################
 # Run Model
@@ -222,7 +222,7 @@ with tf.Session() as sess:
     cp = sess.run([test_correct_pred], feed_dict=batch_data)
     
     correct += np.sum(cp)
-    total += len(cp)
+    total += len(cp[0])
 
     if(i % 1000 == 0):
       print("step: ", str(i)+'/'+str(num_iter), "cummulative_accuracy:", correct / float(total))
