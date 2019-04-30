@@ -35,6 +35,21 @@ window_size = [16,16,8,4,2,1]
 # Model Spec
 ##############################################
 
+def layered_model(features, c3d_depth):
+  #input layers
+  input_layer = tf.reshape(features["x_"+str(c3d_depth)], [-1, num_features[c3d_depth], window_size[c3d_depth], 1]) # batch_size, h, w, num_channels
+
+  #hidden layers
+  flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
+  dense1 = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
+
+  dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.leaky_relu)
+
+  dropout = tf.layers.dropout(dense2, rate=0.5, training=features["train"])
+
+  #output layers
+  return tf.layers.dense(inputs=dropout, units=num_classes)
+
 def model(features, c3d_depth):
   #input layers
   input_layer = tf.reshape(features["x_"+str(c3d_depth)], [-1, num_features[c3d_depth], window_size[c3d_depth], 1]) # batch_size, h, w, num_channels
@@ -88,7 +103,8 @@ for c3d_depth in range(6):
   if(c3d_depth < 3):
     logits = conv_model(ph, c3d_depth)
   else:
-    logits = model(ph, c3d_depth)
+    #logits = model(ph, c3d_depth)
+    logits = layered_model(ph, c3d_depth)
 
   # probabilities and associated weights
 
