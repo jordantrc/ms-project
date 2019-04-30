@@ -79,6 +79,7 @@ for c3d_depth in range(6):
 #################### Tensor Ops ##########################
 
 loss_arr, train_op_arr, predictions_arr, accuracy_arr = [], [], [], []
+weights = {}
 
 # for each model generate the tensor ops
 for c3d_depth in range(6):
@@ -93,13 +94,13 @@ for c3d_depth in range(6):
 
   probabilities = tf.nn.softmax(logits, name="softmax_tensor")
   if use_weights:
-    weight = tf.get_variable("weight", shape=(), initializer=tf.ones_initializer())
-    probabilities = tf.multiply(probabilities, weight, "probability_weight")
+    weights[c3d_depth] = tf.get_variable("weight", shape=(), initializer=tf.ones_initializer())
+    probabilities = tf.multiply(probabilities, weights[c3d_depth], "probability_weight")
 
   # functions for predicting class
   predictions = {
     "classes": tf.argmax(input=logits, axis=1),
-    "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+    "probabilities": probabilities
   }
 
   predictions_arr.append(predictions)
