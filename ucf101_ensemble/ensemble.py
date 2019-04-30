@@ -11,7 +11,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 16
+epochs = 2
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
@@ -144,7 +144,7 @@ all_preds = tf.transpose(all_preds, [1,2,0])
 
 
 # average over softmaxes
-print("all_preds shape = %s" % tf.shape(all_preds))
+test_prob_max = tf.argmax(test_prob, axis=1)
 test_prob = tf.reduce_mean(all_preds, axis = 2)
 
 test_class = tf.argmax(test_prob, axis = 1)
@@ -218,8 +218,9 @@ with tf.Session() as sess:
       batch_data[ph["train"]] = False
 
 
-      cp = sess.run([test_correct_pred], feed_dict=batch_data)
+      cp, prob_max = sess.run([test_correct_pred, test_prob_max], feed_dict=batch_data)
 
+      print("prob_max (shape = %s) = %s" % (prob_max.shape, prob_max))
       correct = np.sum(cp)
       total = len(cp[0])
       print("test:", correct / float(total))
