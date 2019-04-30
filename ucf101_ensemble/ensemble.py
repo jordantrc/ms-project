@@ -41,11 +41,11 @@ def layered_model(features, c3d_depth):
 
   #hidden layers
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
-  dense1 = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
+  dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
 
-  dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.leaky_relu)
+  #dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.leaky_relu)
 
-  dropout = tf.layers.dropout(dense2, rate=0.5, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -142,7 +142,9 @@ for c3d_depth in range(6):
 all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
 
+
 # average over softmaxes
+print("all_preds shape = %s" % tf.shape(all_preds))
 test_prob = tf.reduce_mean(all_preds, axis = 2)
 
 test_class = tf.argmax(test_prob, axis = 1)
