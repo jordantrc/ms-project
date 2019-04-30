@@ -14,7 +14,7 @@ batch_size = 15
 epochs = 16
 alpha = 1e-4
 model_name = "ensemble"
-use_weights = True
+use_weights = False
 
 #dataset specific
 dataset_size = 50
