@@ -144,8 +144,8 @@ all_preds = tf.transpose(all_preds, [1,2,0])
 
 
 # average over softmaxes
-test_prob_max = tf.argmax(test_prob, axis=1)
 test_prob = tf.reduce_mean(all_preds, axis = 2)
+test_prob_max = tf.argmax(test_prob, axis=1)
 
 test_class = tf.argmax(test_prob, axis = 1)
 test_correct_pred = tf.equal(test_class, ph["y"])
