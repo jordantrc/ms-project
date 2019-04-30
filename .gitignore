@@ -8,6 +8,7 @@
 *.log
 *.xlsx
 *.nb.html
+*.npz
 **/.ipynb_checkpoints
 **/sports1m_finetuning_ucf101.model
 ucf101/**/*.txt
