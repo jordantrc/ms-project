@@ -94,7 +94,7 @@ for c3d_depth in range(6):
 
   probabilities = tf.nn.softmax(logits, name="softmax_tensor")
   if use_weights:
-    weights[c3d_depth] = tf.get_variable("weight", shape=(), initializer=tf.ones_initializer())
+    weights[c3d_depth] = tf.get_variable("weight_%s" % c3d_depth, shape=(), initializer=tf.ones_initializer())
     probabilities = tf.multiply(probabilities, weights[c3d_depth], "probability_weight")
 
   # functions for predicting class
