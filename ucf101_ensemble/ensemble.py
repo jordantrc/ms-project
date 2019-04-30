@@ -14,6 +14,7 @@ batch_size = 15
 epochs = 16
 alpha = 1e-4
 model_name = "ensemble"
+use_weights = True
 
 #dataset specific
 dataset_size = 50
@@ -87,6 +88,13 @@ for c3d_depth in range(6):
     logits = conv_model(ph, c3d_depth)
   else:
     logits = model(ph, c3d_depth)
+
+  # probabilities and associated weights
+
+  probabilities = tf.nn.softmax(logits, name="softmax_tensor")
+  if use_weights:
+    weight = tf.get_variable("weight", shape=(), initializer=tf.ones_initializer())
+    probabilities = tf.multiply(probabilities, weight, "probability_weight")
 
   # functions for predicting class
   predictions = {
