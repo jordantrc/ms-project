@@ -16,6 +16,13 @@ alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
 
+# method to use to aggregate the results from the model,
+# options are:
+# average: take an average of the softmax values from all models, choose the largest response
+# most common: take the largest response from each model, the predicted class is the class most-commonly
+# associated with the largest response
+aggregate_method = "most_common"
+
 #dataset specific
 dataset_size = 50
 dataset_name = "ucf"
@@ -141,14 +148,19 @@ for c3d_depth in range(6):
 # combine all of the models together for the ensemble
 all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
-
-
-# average over softmaxes
 test_prob = tf.reduce_mean(all_preds, axis = 2)
-test_prob_max = tf.argmax(test_prob, axis=1)
 
-test_class = tf.argmax(test_prob, axis = 1)
+if aggregate_method == 'average':
+  # average over softmaxes
+  test_class = tf.argmax(test_prob, axis = 1)
+
+elif aggregate_method == 'most_common':
+  test_prob_max = tf.argmax(test_prob, axis=1)
+  test_class = tf.argmax(tf.bincount(test_prob_max))
+
+# verify if prediction is correct
 test_correct_pred = tf.equal(test_class, ph["y"])
+
 
 ##############################################
 # File IO
