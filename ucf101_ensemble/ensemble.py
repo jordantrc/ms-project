@@ -233,7 +233,7 @@ with tf.Session() as sess:
       batch_data[ph["train"]] = False
 
 
-      cp, ap = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
+      cp, ap = sess.run([test_correct_pred, all_preds], feed_dict=batch_data)
       print("all preds [shape = %s] = %s" % (ap.shape, ap))
       correct = np.sum(cp)
       total = len(cp[0])
