@@ -148,10 +148,10 @@ for c3d_depth in range(6):
 # combine all of the models together for the ensemble
 all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
-test_prob = tf.reduce_mean(all_preds, axis = 2)
 
 if aggregate_method == 'average':
   # average over softmaxes
+  test_prob = tf.reduce_mean(all_preds, axis = 2)
   test_class = tf.argmax(test_prob, axis=1, output_type=tf.int32)
 
 elif aggregate_method == 'most_common':
@@ -233,8 +233,8 @@ with tf.Session() as sess:
       batch_data[ph["train"]] = False
 
 
-      cp, tp = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
-      print("test prob [shape = %s] = %s" % (tp.shape, tp))
+      cp, ap = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
+      print("all preds [shape = %s] = %s" % (ap.shape, ap))
       correct = np.sum(cp)
       total = len(cp[0])
       print("test:", correct / float(total), "components:", correct, total)
