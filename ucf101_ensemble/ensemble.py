@@ -111,7 +111,7 @@ for c3d_depth in range(6):
     logits = conv_model(ph, c3d_depth)
   else:
     #logits = model(ph, c3d_depth)
-    logits = layered_model(ph, c3d_depth)
+    logits = model(ph, c3d_depth)
 
   # probabilities and associated weights
 
@@ -182,6 +182,7 @@ def read_file(filename_list):
     flat_data = np.reshape(all_data[i], (all_data[i].shape[0], -1, 1))
     grouped_data = np.concatenate((grouped_data, flat_data), axis = 1)
   all_data.append(grouped_data)
+  assert len(all_data) == len(all_labels), "data length does not match label length"
   return all_data, all_labels
 
 train_data, train_labels = read_file(train_dataset)
