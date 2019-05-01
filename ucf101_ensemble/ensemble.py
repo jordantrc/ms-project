@@ -122,7 +122,7 @@ for c3d_depth in range(6):
 
   # functions for predicting class
   predictions = {
-    "classes": tf.argmax(input=logits, axis=1),
+    "classes": tf.argmax(input=logits, axis=1, output_type=tf.int32),
     "probabilities": probabilities
   }
 
