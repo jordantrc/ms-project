@@ -50,9 +50,9 @@ def layered_model(features, c3d_depth):
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
 
-  #dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.leaky_relu)
+  dense2 = tf.layers.dense(inputs=dense, units=1024, activation=tf.nn.leaky_relu)
 
-  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
+  dropout = tf.layers.dropout(dense2, rate=0.5, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -111,7 +111,7 @@ for c3d_depth in range(6):
     logits = conv_model(ph, c3d_depth)
   else:
     #logits = model(ph, c3d_depth)
-    logits = model(ph, c3d_depth)
+    logits = layered_model(ph, c3d_depth)
 
   # probabilities and associated weights
 
