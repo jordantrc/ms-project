@@ -21,7 +21,7 @@ use_weights = False
 # average: take an average of the softmax values from all models, choose the largest response
 # most common: take the largest response from each model, the predicted class is the class most-commonly
 # associated with the largest response
-aggregate_method = "most_common"
+aggregate_method = "average"
 
 #dataset specific
 dataset_size = 50
