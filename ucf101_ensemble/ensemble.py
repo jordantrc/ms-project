@@ -245,7 +245,7 @@ with tf.Session() as sess:
   correct, total = 0,0
   num_iter = int(len(eval_labels) / test_batch_size)
 
-  for i in range(0, num_iter+1):
+  for i in range(0, num_iter):
     batch = range(i*test_batch_size, min(i*test_batch_size+test_batch_size, len(eval_labels)))
     batch_data = {}
     for d in range(6):
