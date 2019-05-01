@@ -155,8 +155,7 @@ if aggregate_method == 'average':
   test_class = tf.argmax(test_prob, axis=1, output_type=tf.int32)
 
 elif aggregate_method == 'most_common':
-  test_prob = tf.reduce_mean(all_preds, axis=1)
-  test_prob_max = tf.argmax(test_prob, axis=1, output_type=tf.int32)
+  test_prob_max = tf.argmax(all_preds, axis=1, output_type=tf.int32)
   test_class = tf.argmax(tf.bincount(test_prob_max), output_type=tf.int32)
 
 # verify if prediction is correct
@@ -234,8 +233,8 @@ with tf.Session() as sess:
       batch_data[ph["train"]] = False
 
 
-      cp, tp = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
-      print("test_prob [shape = %s] = %s" % (tp.shape, tp))
+      cp, tpm = sess.run([test_correct_pred, test_prob_max], feed_dict=batch_data)
+      print("test_prob_max [shape = %s] = %s" % (tpm.shape, tpm))
       correct = np.sum(cp)
       total = len(cp[0])
       print("test:", correct / float(total), "components:", correct, total)
