@@ -155,7 +155,7 @@ if aggregate_method == 'average':
   test_class = tf.argmax(test_prob, axis = 1)
 
 elif aggregate_method == 'most_common':
-  test_prob_max = tf.argmax(test_prob, axis=1)
+  test_prob_max = tf.argmax(test_prob, axis=1, dtype=tf.int32)
   test_class = tf.argmax(tf.bincount(test_prob_max), dtype=tf.int32)
 
 # verify if prediction is correct
