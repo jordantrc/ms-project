@@ -182,7 +182,7 @@ def read_file(filename_list):
     flat_data = np.reshape(all_data[i], (all_data[i].shape[0], -1, 1))
     grouped_data = np.concatenate((grouped_data, flat_data), axis = 1)
   all_data.append(grouped_data)
-  assert len(all_data) == len(all_labels), "data length does not match label length"
+  assert len(all_data) == len(all_labels), "data length %s does not match label length %s" % (len(all_data), len(all_labels))
   return all_data, all_labels
 
 train_data, train_labels = read_file(train_dataset)
