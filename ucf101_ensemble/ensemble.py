@@ -11,7 +11,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 2
+epochs = 16
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
@@ -241,12 +241,12 @@ with tf.Session() as sess:
       print("test:", correct / float(total), "components:", correct, total)
 
   #Test the finished network
+  test_batch_size = 1
   correct, total = 0,0
-  num_iter = int(len(eval_labels) / batch_size)
+  num_iter = int(len(eval_labels) / test_batch_size)
 
   for i in range(0, num_iter+1):
-    batch_size = 1
-    batch = range(i*batch_size, min(i*batch_size+batch_size, len(eval_labels)))
+    batch = range(i*test_batch_size, min(i*test_batch_size+test_batch_size, len(eval_labels)))
     batch_data = {}
     for d in range(6):
       batch_data[ph["x_"+str(d)]] = eval_data[d][batch]
