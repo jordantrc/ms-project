@@ -64,7 +64,7 @@ def model(features, c3d_depth):
   #hidden layers
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
-  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -237,7 +237,7 @@ with tf.Session() as sess:
 
       correct = np.sum(cp)
       total = len(cp[0])
-      print("test:", correct / float(total))
+      print("test:", correct / float(total), "components:", correct, total)
 
   #Test the finished network
   correct, total = 0,0
