@@ -90,7 +90,7 @@ def conv_model(features, c3d_depth):
   return tf.layers.dense(inputs=dropout, units=num_classes)
 
 #################### Placeholders ##########################
-ph = {  "y" : tf.placeholder(tf.int64, shape=(None)),
+ph = {  "y" : tf.placeholder(tf.int32, shape=(None)),
         "train" : tf.placeholder(tf.bool)   }
 
 for c3d_depth in range(6):
