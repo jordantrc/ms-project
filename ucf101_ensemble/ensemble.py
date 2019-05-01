@@ -21,7 +21,7 @@ use_weights = False
 # average: take an average of the softmax values from all models, choose the largest response
 # most common: take the largest response from each model, the predicted class is the class most-commonly
 # associated with the largest response
-aggregate_method = "average"
+aggregate_method = "most_common"
 
 #dataset specific
 dataset_size = 50
@@ -155,6 +155,7 @@ if aggregate_method == 'average':
   test_class = tf.argmax(test_prob, axis=1, output_type=tf.int32)
 
 elif aggregate_method == 'most_common':
+  test_prob = tf.reduce_mean(all_preds, axis=1)
   test_prob_max = tf.argmax(test_prob, axis=1, output_type=tf.int32)
   test_class = tf.argmax(tf.bincount(test_prob_max), output_type=tf.int32)
 
@@ -233,8 +234,8 @@ with tf.Session() as sess:
       batch_data[ph["train"]] = False
 
 
-      cp, ap = sess.run([test_correct_pred, all_preds], feed_dict=batch_data)
-      print("all preds [shape = %s] = %s" % (ap.shape, ap))
+      cp, tp = sess.run([test_correct_pred, all_preds], feed_dict=batch_data)
+      print("all preds [shape = %s] = %s" % (tp.shape, tp))
       correct = np.sum(cp)
       total = len(cp[0])
       print("test:", correct / float(total), "components:", correct, total)
