@@ -234,7 +234,7 @@ with tf.Session() as sess:
 
 
       cp, tp = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
-      print("test prob = %s" % tp)
+      print("test prob [shape = %s] = %s" % (tp.shape, tp))
       correct = np.sum(cp)
       total = len(cp[0])
       print("test:", correct / float(total), "components:", correct, total)
