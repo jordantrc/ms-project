@@ -152,7 +152,7 @@ test_prob = tf.reduce_mean(all_preds, axis = 2)
 
 if aggregate_method == 'average':
   # average over softmaxes
-  test_class = tf.argmax(test_prob, axis = 1)
+  test_class = tf.argmax(test_prob, axis=1, output_type=tf.int32)
 
 elif aggregate_method == 'most_common':
   test_prob_max = tf.argmax(test_prob, axis=1, output_type=tf.int32)
