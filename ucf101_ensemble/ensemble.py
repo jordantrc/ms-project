@@ -230,7 +230,7 @@ with tf.Session() as sess:
       batch_data[ph["train"]] = False
 
 
-      cp, prob_max = sess.run([test_correct_pred, test_prob_max], feed_dict=batch_data)
+      cp = sess.run([test_correct_pred], feed_dict=batch_data)
 
       print("prob_max (shape = %s) = %s" % (prob_max.shape, prob_max))
       correct = np.sum(cp)
