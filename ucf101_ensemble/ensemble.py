@@ -11,7 +11,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 16
+epochs = 1
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
@@ -99,6 +99,8 @@ def model_consensus(result):
   heuristic'''
   top_5_values = result[4]
   top_5_indices = result[5]
+
+  print("top_5_indices shape = %s" % top_5_indices.shape)
 
   if consensus_heuristic == 'top_5_count':
     counts = np.bincount(top_5_indices)
