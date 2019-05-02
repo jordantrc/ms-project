@@ -24,7 +24,7 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_5_confidence"
+consensus_heuristic = "top_5_confidence_discounted"
 
 
 #dataset specific
@@ -68,7 +68,7 @@ def model(features, c3d_depth):
   #hidden layers
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
-  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -88,7 +88,7 @@ def conv_model(features, c3d_depth):
     activation=tf.nn.leaky_relu)
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
-  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -99,9 +99,7 @@ def model_consensus(result):
   heuristic'''
   top_5_values = result[4].flatten()
   top_5_indices = result[5].flatten()
-  confidence_discount_layer = [0.2, 0.3, 0.4, 0.4, 0.4, 1.0]
-  confidence_discount_place = [1.0, 0.8, 0.6, 0.4, 0.2]
-  confidence_floor = 0.3  # anything below floor will be discarded
+  confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
   #print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
   if consensus_heuristic == 'top_5_count':
@@ -118,11 +116,8 @@ def model_consensus(result):
     confidence = [0.] * 101
     for i, v in enumerate(top_5_indices):
       confidence_band = int(i / 6)
-      confidence_position = i % 5
-      if top_5_values[i] < confidence_floor:
-        confidence[v] = 0.0
       else:
-        confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band] * confidence_discount_place[confidence_position]
+        confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band]
     consensus = np.argmax(confidence)
   return consensus
 
