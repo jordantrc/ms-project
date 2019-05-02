@@ -267,7 +267,7 @@ with tf.Session() as sess:
       if m == batch_data[ph["y"]]:
         model_correct[j] += 1
         row += "%s" % m
-        if j == len(result[3][0] - 1):
+        if j == len(result[3][0]) - 1:
           row += "\n"
         else:
           row += ","
