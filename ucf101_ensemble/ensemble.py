@@ -254,16 +254,16 @@ with tf.Session() as sess:
     batch_data[ph["y"]] = eval_labels[batch]
     
     batch_data[ph["train"]] = False
-    result = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
-    
-    # per_layer accuracy
-    print("tp = %s" % result[1])
+    result = sess.run([test_correct_pred, test_prob, all_preds], feed_dict=batch_data)
 
     correct += np.sum(result[0])
     total += len(result[0])
 
     if(i % 1000 == 0):
       print("step: ", str(i)+'/'+str(num_iter), "cummulative_accuracy:", correct / float(total))
+      # per_layer accuracy
+      print("ap = %s" % result[2])
+      print("tp = %s" % result[1])
 
   print("FINAL - accuracy:", correct/ float(total))
   print("Layer accuracy: ")
