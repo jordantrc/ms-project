@@ -257,10 +257,10 @@ with tf.Session() as sess:
     result = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
     
     # per_layer accuracy
-    print("tp = %s" % tp)
+    print("tp = %s" % result[1])
 
     correct += np.sum(result[0])
-    total += len(cp[0])
+    total += len(result[0])
 
     if(i % 1000 == 0):
       print("step: ", str(i)+'/'+str(num_iter), "cummulative_accuracy:", correct / float(total))
