@@ -146,7 +146,7 @@ for c3d_depth in range(6):
   accuracy_arr.append(accuracy)
 
 # combine all of the models together for the ensemble
-all_preds = tf.stack([x["probabilities"] for x in predictions_arr[1:]])
+all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
 
 model_preds = tf.transpose(all_preds, [0, 2, 1])
@@ -248,6 +248,8 @@ with tf.Session() as sess:
   correct, total = 0,0
   model_correct = [0, 0, 0, 0, 0, 0]
   num_iter = int(len(eval_labels) / test_batch_size)
+  model_data_fd = open("model_data.csv", 'w')
+  model_data_fd.write("true, model0, model1, model2, model3, model4, model5\n")
 
   for i in range(0, num_iter):
     batch = range(i*test_batch_size, min(i*test_batch_size+test_batch_size, len(eval_labels)))
@@ -260,9 +262,17 @@ with tf.Session() as sess:
     result = sess.run([test_correct_pred, test_prob, all_preds, model_preds], feed_dict=batch_data)
 
     # model correct
+    row = "%s," % batch_data[ph["y"]]
     for j, m in enumerate(result[3][0]):
       if m == batch_data[ph["y"]]:
         model_correct[j] += 1
+        row += "%s" % m
+        if j == len(result[3][0] - 1):
+          row += "\n"
+        else:
+          row += ","
+    model_data_fd.write(row)
+
 
     correct += np.sum(result[0])
     total += len(result[0])
@@ -273,7 +283,7 @@ with tf.Session() as sess:
       #print("ap [%s]= %s" % (result[2].shape, result[2]))
       #print("tp [%s]= %s" % (result[1].shape, result[1]))
       #print("mp [%s] = %s" % (result[3].shape, result[3]))
-
+  model_data_fd.close()
   print("FINAL - accuracy:", correct / float(total))
   print("Model accuracy: ")
   for i, c in enumerate(model_correct):
