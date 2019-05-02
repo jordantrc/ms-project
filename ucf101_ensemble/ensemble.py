@@ -264,13 +264,14 @@ with tf.Session() as sess:
     # model correct
     row = "%s," % batch_data[ph["y"]]
     for j, m in enumerate(result[3][0]):
+      row += "%s" % m
+      if j == len(result[3][0]) - 1:
+        row += "\n"
+      else:
+        row += ","
+
       if m == batch_data[ph["y"]]:
         model_correct[j] += 1
-        row += "%s" % m
-        if j == len(result[3][0]) - 1:
-          row += "\n"
-        else:
-          row += ","
     model_data_fd.write(row)
 
 
