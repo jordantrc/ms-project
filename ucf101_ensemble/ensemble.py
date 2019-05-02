@@ -254,7 +254,7 @@ with tf.Session() as sess:
     batch_data[ph["y"]] = eval_labels[batch]
     
     batch_data[ph["train"]] = False
-    result = sess.run([test_correct_pred, test_pred], feed_dict=batch_data)
+    result = sess.run([test_correct_pred, test_prob], feed_dict=batch_data)
     
     # per_layer accuracy
     print("tp = %s" % tp)
