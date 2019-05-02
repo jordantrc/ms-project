@@ -150,7 +150,7 @@ all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
 
 model_preds = tf.transpose(all_preds, [0, 2, 1])
-model_top_5 = tf.nn.top_k(model_preds, k=5)
+model_top_5_values, model_top_5_indices = tf.nn.top_k(model_preds, k=5)
 model_preds = tf.argmax(model_preds, axis=2, output_type=tf.int32)
 
 if aggregate_method == 'average':
@@ -260,7 +260,12 @@ with tf.Session() as sess:
     batch_data[ph["y"]] = eval_labels[batch]
     
     batch_data[ph["train"]] = False
-    result = sess.run([test_correct_pred, test_prob, all_preds, model_preds, model_top_5], feed_dict=batch_data)
+    result = sess.run([test_correct_pred, 
+                      test_prob, 
+                      all_preds, 
+                      model_preds, 
+                      model_top_5_values, 
+                      model_top_5_indices], feed_dict=batch_data)
 
     # model correct
     row = "%s," % batch_data[ph["y"]]
@@ -285,7 +290,8 @@ with tf.Session() as sess:
       #print("ap [%s]= %s" % (result[2].shape, result[2]))
       #print("tp [%s]= %s" % (result[1].shape, result[1]))
       #print("mp [%s] = %s" % (result[3].shape, result[3]))
-      print("top 5 [%s] = %s" % (result[4].shape, result[4]))
+      print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
+      print("top 5 indices [%s] = %s" % (result[5].shape, result[5]))
 
   model_data_fd.close()
   print("FINAL - accuracy:", correct / float(total))
