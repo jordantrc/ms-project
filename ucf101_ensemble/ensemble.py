@@ -99,8 +99,8 @@ def model_consensus(result):
   heuristic'''
   top_5_values = result[4].flatten()
   top_5_indices = result[5].flatten()
-  confidence_discount_layer = [0.44, 0.67, 0.79, 0.84, 0.84, 1.0]
-  confidence_discount_place = [1.0, 0.9, 0.8, 0.7, 0.6]
+  confidence_discount_layer = [0.2, 0.3, 0.4, 0.4, 0.4, 1.0]
+  confidence_discount_place = [1.0, 0.8, 0.6, 0.4, 0.2]
   #print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
   if consensus_heuristic == 'top_5_count':
