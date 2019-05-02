@@ -11,7 +11,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 16
+epochs = 2
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = True
@@ -155,7 +155,7 @@ if aggregate_method == 'average':
   test_class = tf.argmax(test_prob, axis=1, output_type=tf.int32)
 
 elif aggregate_method == 'most_common':
-  test_prob_max = tf.argmax(all_preds, axis=1, output_type=tf.int32)
+  test_prob = tf.argmax(all_preds, axis=1, output_type=tf.int32)
   test_class = tf.argmax(tf.bincount(test_prob_max), output_type=tf.int32)
 
 # verify if prediction is correct
@@ -243,6 +243,7 @@ with tf.Session() as sess:
   #Test the finished network
   test_batch_size = 1
   correct, total = 0,0
+  layer_correct = [0, 0, 0, 0, 0, 0]
   num_iter = int(len(eval_labels) / test_batch_size)
 
   for i in range(0, num_iter):
@@ -253,12 +254,18 @@ with tf.Session() as sess:
     batch_data[ph["y"]] = eval_labels[batch]
     
     batch_data[ph["train"]] = False
-    cp = sess.run([test_correct_pred], feed_dict=batch_data)
+    result = sess.run([test_correct_pred, test_pred], feed_dict=batch_data)
     
-    correct += np.sum(cp)
+    # per_layer accuracy
+    print("tp = %s" % tp)
+
+    correct += np.sum(result[0])
     total += len(cp[0])
 
     if(i % 1000 == 0):
       print("step: ", str(i)+'/'+str(num_iter), "cummulative_accuracy:", correct / float(total))
 
   print("FINAL - accuracy:", correct/ float(total))
+  print("Layer accuracy: ")
+  for i, c in layer_correct:
+    print("%s: %s" % (i + 1, c / float(total)))
