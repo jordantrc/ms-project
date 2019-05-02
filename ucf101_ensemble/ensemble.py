@@ -14,7 +14,7 @@ batch_size = 15
 epochs = 2
 alpha = 1e-4
 model_name = "ensemble"
-use_weights = True
+use_weights = False
 
 # method to use to aggregate the results from the model,
 # options are:
