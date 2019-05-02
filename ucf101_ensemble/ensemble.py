@@ -262,8 +262,8 @@ with tf.Session() as sess:
     if(i % 1000 == 0):
       print("step: ", str(i)+'/'+str(num_iter), "cummulative_accuracy:", correct / float(total))
       # per_layer accuracy
-      print("ap = %s" % result[2])
-      print("tp = %s" % result[1])
+      print("ap [%s]= %s" % (result[2].shape, result[2]))
+      print("tp [%s]= %s" % (result[1].shape, result[1]))
 
   print("FINAL - accuracy:", correct/ float(total))
   print("Layer accuracy: ")
