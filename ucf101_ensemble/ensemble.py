@@ -101,7 +101,7 @@ def model_consensus(result):
   top_5_indices = result[5].flatten()
   confidence_discount_layer = [0.2, 0.3, 0.4, 0.4, 0.4, 1.0]
   confidence_discount_place = [1.0, 0.8, 0.6, 0.4, 0.2]
-  confidence_floor = 0.2  # anything below floor will be discarded
+  confidence_floor = 0.3  # anything below floor will be discarded
   #print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
   if consensus_heuristic == 'top_5_count':
@@ -309,17 +309,17 @@ with tf.Session() as sess:
     ensemble_prediction = model_consensus(result)
 
     # model correct
-    #row = "%s," % batch_data[ph["y"]]
-    #for j, m in enumerate(result[3][0]):
-    #  row += "%s" % m
-    #  if j == len(result[3][0]) - 1:
-    #    row += "\n"
-    #  else:
-    #    row += ","
-    #  
-    #  if m == batch_data[ph["y"]]:
-    #    model_correct[j] += 1
-    #model_data_fd.write(row)
+    row = "%s," % batch_data[ph["y"]]
+    for j, m in enumerate(result[3][0]):
+      row += "%s" % m
+      if j == len(result[3][0]) - 1:
+        row += "\n"
+      else:
+        row += ","
+      
+      if m == batch_data[ph["y"]]:
+        model_correct[j] += 1
+    model_data_fd.write(row)
 
     if ensemble_prediction == batch_data[ph["y"]]:
       correct += 1
@@ -338,7 +338,7 @@ with tf.Session() as sess:
       #print("tp [%s]= %s" % (result[1].shape, result[1]))
       #print("mp [%s] = %s" % (result[3].shape, result[3]))
       #print("true class = %s" % batch_data[ph["y"]])
-      print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
+      #print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
       #print("top 5 indices [%s] = %s" % (result[5].shape, result[5]))
 
   model_data_fd.close()
