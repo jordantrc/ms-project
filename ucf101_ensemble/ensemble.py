@@ -246,7 +246,7 @@ with tf.Session() as sess:
   #Test the finished network
   test_batch_size = 1
   correct, total = 0,0
-  layer_correct = [0, 0, 0, 0, 0, 0]
+  model_correct = [0, 0, 0, 0, 0, 0]
   num_iter = int(len(eval_labels) / test_batch_size)
 
   for i in range(0, num_iter):
@@ -259,6 +259,11 @@ with tf.Session() as sess:
     batch_data[ph["train"]] = False
     result = sess.run([test_correct_pred, test_prob, all_preds, model_preds], feed_dict=batch_data)
 
+    # model correct
+    for i, m in enumerate(result[3][0]):
+      if m == batch_data[ph["y"]]:
+        model_correct[i] += 1
+
     correct += np.sum(result[0])
     total += len(result[0])
 
@@ -270,6 +275,6 @@ with tf.Session() as sess:
       print("mp [%s] = %s" % (result[3].shape, result[3]))
 
   print("FINAL - accuracy:", correct/ float(total))
-  print("Layer accuracy: ")
-  for i, c in layer_correct:
+  print("Model accuracy: ")
+  for i, c in model_correct:
     print("%s: %s" % (i + 1, c / float(total)))
