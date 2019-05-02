@@ -100,7 +100,7 @@ def model_consensus(result):
   top_5_values = result[4].flatten()
   top_5_indices = result[5].flatten()
 
-  print("top_5_indices shape = %s" % str(top_5_indices.shape))
+  #print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
   if consensus_heuristic == 'top_5_count':
     counts = np.bincount(top_5_indices)
