@@ -99,7 +99,8 @@ def model_consensus(result):
   heuristic'''
   top_5_values = result[4].flatten()
   top_5_indices = result[5].flatten()
-  confidence_discount = [0.44, 0.67, 0.79, 0.84, 0.84, 1.0]
+  confidence_discount_layer = [0.44, 0.67, 0.79, 0.84, 0.84, 1.0]
+  confidence_discount_place = [1.0, 0.9, 0.8, 0.7, 0.6]
   #print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
   if consensus_heuristic == 'top_5_count':
@@ -116,7 +117,8 @@ def model_consensus(result):
     confidence = [0.] * 101
     for i, v in enumerate(top_5_indices):
       confidence_band = int(i / 6)
-      confidence[v] +=  top_5_values[i] * confidence_discount[confidence_band]
+      confidence_position = i % 6
+      confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band] * confidence_discount_place[confidence_position]
     consensus = np.argmax(confidence)
   return consensus
 
