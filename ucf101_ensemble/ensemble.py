@@ -116,8 +116,7 @@ def model_consensus(result):
     confidence = [0.] * 101
     for i, v in enumerate(top_5_indices):
       confidence_band = int(i / 6)
-      else:
-        confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band]
+      confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band]
     consensus = np.argmax(confidence)
   return consensus
 
