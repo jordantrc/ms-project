@@ -119,7 +119,7 @@ def model_consensus(result):
     for i, v in enumerate(top_5_indices):
       confidence_band = int(i / 6)
       confidence_position = i % 5
-      if top_5_values[i] < 0.2:
+      if top_5_values[i] < confidence_floor:
         confidence[v] = 0.0
       else:
         confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band] * confidence_discount_place[confidence_position]
@@ -289,6 +289,7 @@ with tf.Session() as sess:
   num_iter = int(len(eval_labels) / test_batch_size)
   model_data_fd = open("model_data.csv", 'w')
   model_data_fd.write("true, model0, model1, model2, model3, model4, model5\n")
+  confidences = [0.] * 6
 
   for i in range(0, num_iter):
     batch = range(i*test_batch_size, min(i*test_batch_size+test_batch_size, len(eval_labels)))
@@ -323,6 +324,10 @@ with tf.Session() as sess:
     if ensemble_prediction == batch_data[ph["y"]]:
       correct += 1
 
+    # confidence collection
+    for j, row in enumerate(result[4][0]):
+      confidences[j] += np.max(row)
+
     # correct += np.sum(result[0])
     total += len(result[0])
 
@@ -333,11 +338,15 @@ with tf.Session() as sess:
       #print("tp [%s]= %s" % (result[1].shape, result[1]))
       #print("mp [%s] = %s" % (result[3].shape, result[3]))
       #print("true class = %s" % batch_data[ph["y"]])
-      #print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
+      print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
       #print("top 5 indices [%s] = %s" % (result[5].shape, result[5]))
 
   model_data_fd.close()
   print("FINAL - accuracy:", correct / float(total))
-  print("Model accuracy: ")
-  for i, c in enumerate(model_correct):
-    print("%s: %s" % (i, c / float(total)))
+  print("Model avg. confidence:")
+  for i, v in enumerate(confidences):
+    print("%s: %s" % (i, v / float(total)))
+
+  #print("Model accuracy: ")
+  #for i, c in enumerate(model_correct):
+  #  print("%s: %s" % (i, c / float(total)))
