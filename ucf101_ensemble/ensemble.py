@@ -24,7 +24,7 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_5_count"
+consensus_heuristic = "top_5_confidence"
 
 
 #dataset specific
@@ -106,6 +106,11 @@ def model_consensus(result):
     counts = np.bincount(top_5_indices)
     consensus = np.argmax(counts)
 
+  elif consensus_heuristic == 'top_5_confidence':
+    confidence = [0.] * 101
+    for i, v in enumerate(top_5_indices):
+      confidence[v] +=  top_5_values[i]
+    consensus = np.argmax(confidence)
   return consensus
 
 
