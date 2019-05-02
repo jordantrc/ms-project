@@ -64,7 +64,7 @@ def model(features, c3d_depth):
   #hidden layers
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
-  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -84,7 +84,7 @@ def conv_model(features, c3d_depth):
     activation=tf.nn.leaky_relu)
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
-  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -146,7 +146,7 @@ for c3d_depth in range(6):
   accuracy_arr.append(accuracy)
 
 # combine all of the models together for the ensemble
-all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
+all_preds = tf.stack([x["probabilities"] for x in predictions_arr[1:]])
 all_preds = tf.transpose(all_preds, [1,2,0])
 
 model_preds = tf.transpose(all_preds, [0, 2, 1])
@@ -260,7 +260,7 @@ with tf.Session() as sess:
     result = sess.run([test_correct_pred, test_prob, all_preds, model_preds], feed_dict=batch_data)
 
     # model correct
-    for i, m in enumerate(result[3][0]):
+    for j, m in enumerate(result[3][0]):
       if m == batch_data[ph["y"]]:
         model_correct[i] += 1
 
@@ -277,4 +277,4 @@ with tf.Session() as sess:
   print("FINAL - accuracy:", correct / float(total))
   print("Model accuracy: ")
   for i, c in enumerate(model_correct):
-    print("%s: %s" % (i + 1, c / float(total)))
+    print("%s: %s" % (i, c / float(total)))
