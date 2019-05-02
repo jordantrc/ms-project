@@ -11,7 +11,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 1
+epochs = 16
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
@@ -314,9 +314,9 @@ with tf.Session() as sess:
       #print("ap [%s]= %s" % (result[2].shape, result[2]))
       #print("tp [%s]= %s" % (result[1].shape, result[1]))
       #print("mp [%s] = %s" % (result[3].shape, result[3]))
-      print("true class = %s" % batch_data[ph["y"]])
-      print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
-      print("top 5 indices [%s] = %s" % (result[5].shape, result[5]))
+      #print("true class = %s" % batch_data[ph["y"]])
+      #print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
+      #print("top 5 indices [%s] = %s" % (result[5].shape, result[5]))
 
   model_data_fd.close()
   print("FINAL - accuracy:", correct / float(total))
