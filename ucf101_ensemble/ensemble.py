@@ -24,7 +24,7 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_5_confidence"
+consensus_heuristic = "top_5_confidence_discounted"
 
 
 #dataset specific
