@@ -262,7 +262,7 @@ with tf.Session() as sess:
     # model correct
     for j, m in enumerate(result[3][0]):
       if m == batch_data[ph["y"]]:
-        model_correct[i] += 1
+        model_correct[j] += 1
 
     correct += np.sum(result[0])
     total += len(result[0])
