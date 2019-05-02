@@ -149,6 +149,8 @@ for c3d_depth in range(6):
 all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
 
+model_preds = tf.transpose(all_preds, [0, 2, 1])
+
 if aggregate_method == 'average':
   # average over softmaxes
   test_prob = tf.reduce_mean(all_preds, axis = 2)
@@ -254,7 +256,7 @@ with tf.Session() as sess:
     batch_data[ph["y"]] = eval_labels[batch]
     
     batch_data[ph["train"]] = False
-    result = sess.run([test_correct_pred, test_prob, all_preds], feed_dict=batch_data)
+    result = sess.run([test_correct_pred, test_prob, all_preds, model_preds], feed_dict=batch_data)
 
     correct += np.sum(result[0])
     total += len(result[0])
@@ -264,6 +266,7 @@ with tf.Session() as sess:
       # per_layer accuracy
       print("ap [%s]= %s" % (result[2].shape, result[2]))
       print("tp [%s]= %s" % (result[1].shape, result[1]))
+      print("mp [%s] = %s" % (result[3].shape, result[3]))
 
   print("FINAL - accuracy:", correct/ float(total))
   print("Layer accuracy: ")
