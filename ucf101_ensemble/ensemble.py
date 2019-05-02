@@ -150,6 +150,7 @@ all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
 
 model_preds = tf.transpose(all_preds, [0, 2, 1])
+model_preds = tf.argmax(model_preds, axis=1, output_type=tf.int32)
 
 if aggregate_method == 'average':
   # average over softmaxes
