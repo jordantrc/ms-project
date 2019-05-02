@@ -97,8 +97,8 @@ def conv_model(features, c3d_depth):
 def model_consensus(result):
   '''return a prediction based on the ensemble model consensus
   heuristic'''
-  top_5_values = result[4]
-  top_5_indices = result[5]
+  top_5_values = result[4].flatten()
+  top_5_indices = result[5].flatten()
 
   print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
