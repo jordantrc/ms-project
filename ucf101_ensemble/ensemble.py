@@ -89,6 +89,14 @@ def conv_model(features, c3d_depth):
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
 
+
+def model_consensus(result):
+  '''return a prediction based on the ensemble model consensus
+  heuristic'''
+  top_5_values = result[4]
+  top_5_indices = result[5]
+
+
 #################### Placeholders ##########################
 ph = {  "y" : tf.placeholder(tf.int32, shape=(None)),
         "train" : tf.placeholder(tf.bool)   }
@@ -267,6 +275,8 @@ with tf.Session() as sess:
                       model_top_5_values, 
                       model_top_5_indices], feed_dict=batch_data)
 
+    ensemble_prediction = model_consensus(result)
+
     # model correct
     row = "%s," % batch_data[ph["y"]]
     for j, m in enumerate(result[3][0]):
@@ -290,6 +300,7 @@ with tf.Session() as sess:
       #print("ap [%s]= %s" % (result[2].shape, result[2]))
       #print("tp [%s]= %s" % (result[1].shape, result[1]))
       #print("mp [%s] = %s" % (result[3].shape, result[3]))
+      print("true class = %s" % batch_data[ph["y"]])
       print("top 5 values [%s] = %s" % (result[4].shape, result[4]))
       print("top 5 indices [%s] = %s" % (result[5].shape, result[5]))
 
