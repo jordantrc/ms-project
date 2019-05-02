@@ -11,7 +11,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 2
+epochs = 16
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
@@ -22,6 +22,10 @@ use_weights = False
 # most common: take the largest response from each model, the predicted class is the class most-commonly
 # associated with the largest response
 aggregate_method = "average"
+
+# consensus_heuristic
+consensus_heuristic = "top_5_count"
+
 
 #dataset specific
 dataset_size = 50
@@ -64,7 +68,7 @@ def model(features, c3d_depth):
   #hidden layers
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
-  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -84,7 +88,7 @@ def conv_model(features, c3d_depth):
     activation=tf.nn.leaky_relu)
   flatten = tf.reshape(input_layer, [-1, num_features[c3d_depth]*window_size[c3d_depth]])
   dense = tf.layers.dense(inputs=flatten, units=2048, activation=tf.nn.leaky_relu)
-  dropout = tf.layers.dropout(dense, rate=0.8, training=features["train"])
+  dropout = tf.layers.dropout(dense, rate=0.5, training=features["train"])
 
   #output layers
   return tf.layers.dense(inputs=dropout, units=num_classes)
@@ -95,6 +99,12 @@ def model_consensus(result):
   heuristic'''
   top_5_values = result[4]
   top_5_indices = result[5]
+
+  if consensus_heuristic == 'top_5_count':
+    counts = np.bincount(top_5_indices)
+    consensus = np.argmax(counts)
+
+  return consensus
 
 
 #################### Placeholders ##########################
@@ -278,20 +288,22 @@ with tf.Session() as sess:
     ensemble_prediction = model_consensus(result)
 
     # model correct
-    row = "%s," % batch_data[ph["y"]]
-    for j, m in enumerate(result[3][0]):
-      row += "%s" % m
-      if j == len(result[3][0]) - 1:
-        row += "\n"
-      else:
-        row += ","
+    #row = "%s," % batch_data[ph["y"]]
+    #for j, m in enumerate(result[3][0]):
+    #  row += "%s" % m
+    #  if j == len(result[3][0]) - 1:
+    #    row += "\n"
+    #  else:
+    #    row += ","
+    #  
+    #  if m == batch_data[ph["y"]]:
+    #    model_correct[j] += 1
+    #model_data_fd.write(row)
 
-      if m == batch_data[ph["y"]]:
-        model_correct[j] += 1
-    model_data_fd.write(row)
+    if ensemble_prediction == batch_data[ph["y"]]:
+      correct += 1
 
-
-    correct += np.sum(result[0])
+    # correct += np.sum(result[0])
     total += len(result[0])
 
     if(i % 1000 == 0):
