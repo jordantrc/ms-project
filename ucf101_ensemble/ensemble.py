@@ -1,5 +1,6 @@
 import tensorflow as tf 
 import numpy as np
+import csv
 
 # only run on one compute server GPU
 import os
@@ -94,14 +95,27 @@ def conv_model(features, c3d_depth):
   return tf.layers.dense(inputs=dropout, units=num_classes)
 
 
-def model_consensus(result):
+def model_consensus(result, csv_writer, true_class):
   '''return a prediction based on the ensemble model consensus
   heuristic'''
-  top_5_values = result[4].flatten()
-  top_5_indices = result[5].flatten()
+  confidences = result[4]
+  classes = result[5]
+  top_5_values = confidences.flatten()
+  top_5_indices = classes.flatten()
   confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
   #print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
+  # write csv data
+  # columns - ["true_class", "model", "place", "class", "confidence"]
+  for i, r in classes[0]:
+    # i is the model
+    for j, c in r:
+      # j is the place
+      # c is the class
+      row = [true_class, i, j, c, confidences[0][i][j]]
+      csv_writer.writerow(row)
+
+  # consensus heuristics
   if consensus_heuristic == 'top_5_count':
     counts = np.bincount(top_5_indices)
     consensus = np.argmax(counts)
@@ -281,8 +295,9 @@ with tf.Session() as sess:
   correct, total = 0,0
   model_correct = [0, 0, 0, 0, 0, 0]
   num_iter = int(len(eval_labels) / test_batch_size)
-  model_data_fd = open("model_data.csv", 'w')
-  model_data_fd.write("true, model0, model1, model2, model3, model4, model5\n")
+  model_data_fd = open("model_data.csv", 'wb')
+  model_csv = csv.writer(model_data_fd, dialect='excel')
+  model_csv.writerow(["true_class", "model", "place", "class", "confidence"])
   confidences = [0.] * 6
 
   for i in range(0, num_iter):
@@ -300,20 +315,12 @@ with tf.Session() as sess:
                       model_top_5_values, 
                       model_top_5_indices], feed_dict=batch_data)
 
-    ensemble_prediction = model_consensus(result)
+    ensemble_prediction = model_consensus(result, model_csv, batch_data[ph["y"]])
 
     # model correct
-    row = "%s," % batch_data[ph["y"]]
     for j, m in enumerate(result[3][0]):
-      row += "%s" % m
-      if j == len(result[3][0]) - 1:
-        row += "\n"
-      else:
-        row += ","
-      
       if m == batch_data[ph["y"]]:
         model_correct[j] += 1
-    model_data_fd.write(row)
 
     if ensemble_prediction == batch_data[ph["y"]]:
       correct += 1
