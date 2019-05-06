@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 30
+epochs = 1
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
