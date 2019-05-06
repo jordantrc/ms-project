@@ -107,9 +107,9 @@ def model_consensus(result, csv_writer, true_class):
 
   # write csv data
   # columns - ["true_class", "model", "place", "class", "confidence"]
-  for i, r in classes[0]:
+  for i, r in enumerate(classes[0]):
     # i is the model
-    for j, c in r:
+    for j, c in enumerate(r):
       # j is the place
       # c is the class
       row = [true_class, i, j, c, confidences[0][i][j]]
