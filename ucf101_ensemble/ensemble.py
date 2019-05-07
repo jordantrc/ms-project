@@ -25,7 +25,7 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_2_confidence"
+consensus_heuristic = "top_3_confidence_floored"
 
 
 #dataset specific
@@ -104,6 +104,14 @@ def model_consensus(result, csv_writer, true_class):
   top_5_values = confidences.flatten()
   top_5_indices = classes.flatten()
   confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
+  avg_confidences = [
+                    0.38178119,
+                    0.56168587,
+                    0.56371784,
+                    0.54200298,
+                    0.49888024,
+                    0.71540061
+                    ]
   #confidence_discount_layer = [1.0, 0.9, 0.9, 0.9, 0.7, 0.5]
   #for i, c in enumerate(confidences[0]):
   #  print("confidences[%s] = %s" % (i, c))
@@ -137,15 +145,17 @@ def model_consensus(result, csv_writer, true_class):
       confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band]
     consensus = np.argmax(confidence)
 
-  elif consensus_heuristic == 'top_3_confidence':
+  elif consensus_heuristic == 'top_3_confidence_floored':
     confidence = [0.] * 101
     for i, m in enumerate(confidences[0]):
       # i is the model
       for j, p in enumerate(m):
         # j is the place
         if j in range(3):
-          label = classes[0][i][j]
-          confidence[label] += p
+          # drop confidence if less than half average
+          if p < avg_confidences[i] / 2:
+            label = classes[0][i][j]
+            confidence[label] += p
     consensus = np.argmax(confidence)
 
   elif consensus_heuristic == 'top_2_confidence':
