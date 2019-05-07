@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 30
+epochs = 1
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
@@ -25,7 +25,7 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_3_confidence_floored"
+consensus_heuristic = "top_10_confidence"
 
 
 #dataset specific
@@ -101,8 +101,6 @@ def model_consensus(result, csv_writer, true_class):
   consensus = -1.
   confidences = result[4]
   classes = result[5]
-  top_5_values = confidences.flatten()
-  top_5_indices = classes.flatten()
   confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
   avg_confidences = [
                     0.38178119,
@@ -132,10 +130,26 @@ def model_consensus(result, csv_writer, true_class):
     counts = np.bincount(top_5_indices)
     consensus = np.argmax(counts)
 
+  elif consensus_heuristic == 'top_10_confidence':
+    confidence = [0.] * 101
+    for i, m in enumerate(confidences[0]):
+      # i is the model
+      for j, p in enumerate(m):
+        # j is the place
+        if j in range(10):
+          label = classes[0][i][j]
+          confidence[label] += p
+    consensus = np.argmax(confidence)
+
   elif consensus_heuristic == 'top_5_confidence':
     confidence = [0.] * 101
-    for i, v in enumerate(top_5_indices):
-      confidence[v] +=  top_5_values[i]
+    for i, m in enumerate(confidences[0]):
+      # i is the model
+      for j, p in enumerate(m):
+        # j is the place
+        if j in range(5):
+          label = classes[0][i][j]
+          confidence[label] += p
     consensus = np.argmax(confidence)
 
   elif consensus_heuristic == 'top_5_confidence_discounted':
@@ -254,7 +268,7 @@ all_preds = tf.stack([x["probabilities"] for x in predictions_arr])
 all_preds = tf.transpose(all_preds, [1,2,0])
 
 model_preds = tf.transpose(all_preds, [0, 2, 1])
-model_top_5_values, model_top_5_indices = tf.nn.top_k(model_preds, k=5)
+model_top_10_values, model_top_10_indices = tf.nn.top_k(model_preds, k=10)
 model_preds = tf.argmax(model_preds, axis=2, output_type=tf.int32)
 
 if aggregate_method == 'average':
@@ -370,8 +384,8 @@ with tf.Session() as sess:
                       test_prob, 
                       all_preds, 
                       model_preds, 
-                      model_top_5_values, 
-                      model_top_5_indices], feed_dict=batch_data)
+                      model_top_10_values, 
+                      model_top_10_indices], feed_dict=batch_data)
 
     ensemble_prediction = model_consensus(result, model_csv, batch_data[ph["y"]])
 
