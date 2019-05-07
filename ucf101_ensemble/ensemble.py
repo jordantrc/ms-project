@@ -112,7 +112,7 @@ def model_consensus(result, csv_writer, true_class):
     for j, c in enumerate(r):
       # j is the place
       # c is the class
-      row = [true_class, i, j, c, confidences[0][i][j]]
+      row = [true_class[0], i, j, c, confidences[0][i][j]]
       csv_writer.writerow(row)
 
   # consensus heuristics
