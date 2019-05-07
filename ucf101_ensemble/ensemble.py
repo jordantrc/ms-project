@@ -98,6 +98,7 @@ def conv_model(features, c3d_depth):
 def model_consensus(result, csv_writer, true_class):
   '''return a prediction based on the ensemble model consensus
   heuristic'''
+  consensus = -1.
   confidences = result[4]
   classes = result[5]
   top_5_values = confidences.flatten()
@@ -137,7 +138,7 @@ def model_consensus(result, csv_writer, true_class):
     consensus = np.argmax(confidence)
 
   if consensus_heuristic == 'decision_tree':
-    continue
+    print("decision_tree")
 
   return consensus
 
