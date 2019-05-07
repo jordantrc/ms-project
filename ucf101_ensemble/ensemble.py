@@ -25,7 +25,7 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_3_confidence"
+consensus_heuristic = "top_2_confidence"
 
 
 #dataset specific
@@ -144,6 +144,17 @@ def model_consensus(result, csv_writer, true_class):
       for j, p in enumerate(m):
         # j is the place
         if j in range(3):
+          label = classes[0][i][j]
+          confidence[label] += p
+    consensus = np.argmax(confidence)
+
+  elif consensus_heuristic == 'top_2_confidence':
+    confidence = [0.] * 101
+    for i, m in enumerate(confidences[0]):
+      # i is the model
+      for j, p in enumerate(m):
+        # j is the place
+        if j in range(2):
           label = classes[0][i][j]
           confidence[label] += p
     consensus = np.argmax(confidence)
