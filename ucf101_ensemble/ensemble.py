@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 #trial specific
 batch_size = 15
-epochs = 30
+epochs = 1
 alpha = 1e-4
 model_name = "ensemble"
 use_weights = False
@@ -102,7 +102,10 @@ def model_consensus(result, csv_writer, true_class):
   classes = result[5]
   top_5_values = confidences.flatten()
   top_5_indices = classes.flatten()
-  confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
+  #confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
+  confidence_discount_layer = [1.0, 0.9, 0.9, 0.9, 0.7, 0.5]
+  for i, c in enumerate(confidences[0]):
+    print("confidences[%s] = %s" % (i, c))
   #print("top_5_indices shape = %s" % str(top_5_indices.shape))
 
   # write csv data
@@ -132,6 +135,10 @@ def model_consensus(result, csv_writer, true_class):
       confidence_band = int(i / 6)
       confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band]
     consensus = np.argmax(confidence)
+
+  if consensus_heuristic == 'decision_tree':
+    continue
+
   return consensus
 
 
