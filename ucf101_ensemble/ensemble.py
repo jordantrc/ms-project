@@ -25,7 +25,7 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_5_confidence_discounted"
+consensus_heuristic = "top_3_confidence"
 
 
 #dataset specific
@@ -137,7 +137,18 @@ def model_consensus(result, csv_writer, true_class):
       confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band]
     consensus = np.argmax(confidence)
 
-  if consensus_heuristic == 'decision_tree':
+  elif consensus_heuristic == 'top_3_confidence':
+    confidence = [0.] * 101
+    for i, m in enumerate(confidences[0]):
+      # i is the model
+      for j, p in enumerate(m):
+        # j is the place
+        if j in range(3):
+          label = classes[0][i][j]
+          confidence[label] += p
+    consensus = np.argmax(confidence)
+
+  elif consensus_heuristic == 'decision_tree':
     # if model 0, position 0 has high confidence, return that class
     if confidences[0][0][0] > 0.742149:
       consensus = classes[0][0][0]
