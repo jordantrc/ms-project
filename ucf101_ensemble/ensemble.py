@@ -14,7 +14,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 batch_size = 15
 epochs = 1
 alpha = 1e-4
-model_name = "ensemble"
+model_name = "decision_tree"
 use_weights = False
 
 # method to use to aggregate the results from the model,
@@ -103,8 +103,8 @@ def model_consensus(result, csv_writer, true_class):
   classes = result[5]
   top_5_values = confidences.flatten()
   top_5_indices = classes.flatten()
-  #confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
-  confidence_discount_layer = [1.0, 0.9, 0.9, 0.9, 0.7, 0.5]
+  confidence_discount_layer = [0.5, 0.7, 0.9, 0.9, 0.9, 1.0]
+  #confidence_discount_layer = [1.0, 0.9, 0.9, 0.9, 0.7, 0.5]
   for i, c in enumerate(confidences[0]):
     print("confidences[%s] = %s" % (i, c))
   #print("top_5_indices shape = %s" % str(top_5_indices.shape))
@@ -138,7 +138,25 @@ def model_consensus(result, csv_writer, true_class):
     consensus = np.argmax(confidence)
 
   if consensus_heuristic == 'decision_tree':
-    print("decision_tree")
+    # if model 0, position 0 has high confidence, return that class
+    if confidences[0][0][0] > 0.742149:
+      consensus = classes[0][0][0]
+    elif confidences[0][1][0] > 0.9828919:
+      consensus = classes[0][1][0]
+    elif confidences[0][1][0] > 0.7392599:
+      consensus = classes[0][1][0]
+    elif confidences[0][4][0] > 0.9766794:
+      consensus = classes[0][4][0]
+    elif confidences[0][1][0] > 0.8155271:
+      consensus = classes[0][1][0]
+    elif confidences[0][3][0] > 0.9844545:
+      consensus = classes[0][3][0]
+    else:
+      # else average
+      confidence = [0.] * 101
+      for i, v in enumerate(top_5_indices):
+        confidence[v] +=  top_5_values[i]
+      consensus = np.argmax(confidence)
 
   return consensus
 
