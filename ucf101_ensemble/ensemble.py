@@ -25,11 +25,11 @@ use_weights = False
 aggregate_method = "average"
 
 # consensus_heuristic
-consensus_heuristic = "top_10_confidence"
+consensus_heuristic = "top_5_confidence_discounted"
 
 
 #dataset specific
-dataset_size = 50
+dataset_size = 25
 dataset_name = "ucf"
 num_classes = 101
 
@@ -154,9 +154,15 @@ def model_consensus(result, csv_writer, true_class):
 
   elif consensus_heuristic == 'top_5_confidence_discounted':
     confidence = [0.] * 101
-    for i, v in enumerate(top_5_indices):
-      confidence_band = int(i / 6)
-      confidence[v] +=  top_5_values[i] * confidence_discount_layer[confidence_band]
+    
+    for i, m in enumerate(confidences[0]):
+      # i is the model
+      for j, p in enumerate(m):
+        # j is the place
+        if j in range(5):
+          label = classes[0][i][j]
+          confidence[label] += p * confidence_discount_layer[i]
+
     consensus = np.argmax(confidence)
 
   elif consensus_heuristic == 'top_3_confidence_floored':
