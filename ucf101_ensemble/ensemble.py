@@ -29,7 +29,7 @@ consensus_heuristic = "top_5_confidence_discounted"
 
 
 #dataset specific
-dataset_size = 75
+dataset_size = 100
 dataset_name = "ucf"
 num_classes = 101
 
