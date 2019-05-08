@@ -29,8 +29,8 @@ consensus_heuristic = "top_5_confidence_discounted"
 
 
 #dataset specific
-dataset_size = 100
-dataset_name = "ucf"
+dataset_size = 25
+dataset_name = "hmdb"
 num_classes = 101
 
 train_dataset = []
