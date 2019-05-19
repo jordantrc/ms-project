@@ -30,8 +30,8 @@ consensus_heuristic = "top_5_confidence_discounted"
 
 #dataset specific
 dataset_size = 100
-dataset_name = "ntu"
-num_classes = 60
+dataset_name = "ucf"
+num_classes = 101
 
 train_dataset = []
 test_dataset = []
