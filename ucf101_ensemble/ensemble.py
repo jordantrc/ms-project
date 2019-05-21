@@ -29,7 +29,7 @@ consensus_heuristic = "top_5_confidence_discounted"
 
 
 #dataset specific
-dataset_size = 100
+dataset_size = 25
 dataset_name = "ucf"
 num_classes = 101
 
@@ -426,6 +426,6 @@ with tf.Session() as sess:
   for i, v in enumerate(confidences):
     print("%s: %s" % (i, v / float(total)))
 
-  #print("Model accuracy: ")
-  #for i, c in enumerate(model_correct):
-  #  print("%s: %s" % (i, c / float(total)))
+  print("Model accuracy: ")
+  for i, c in enumerate(model_correct):
+    print("%s: %s" % (i, c / float(total)))
