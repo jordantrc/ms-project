@@ -210,10 +210,10 @@ def model_consensus(result, csv_writer, true_class):
         confidence[v] +=  top_5_values[i]
       consensus = np.argmax(confidence)
 
-    # write csv record
-    # columns - ["true_class", "model", "place", "class", "confidence"]
-    row = [true_class[0], "ensemble", 0, consensus, confidence[consensus]]
-    csv_writer.writerow(row)
+  # write csv record
+  # columns - ["true_class", "model", "place", "class", "confidence"]
+  row = [true_class[0], "ensemble", 0, consensus, confidence[consensus]]
+  csv_writer.writerow(row)
 
   return consensus
 
