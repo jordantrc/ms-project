@@ -59,7 +59,7 @@ for r in predict_data:
             summary_class[true_class] = [1, 0, 0, 0, 0, 0, 0, 0]
 
         # only add to total once
-        if model == 0:
+        if model == '0':
             summary_class[true_class][0] += 1
 
         if pred_class == true_class:
@@ -69,7 +69,7 @@ for r in predict_data:
             summary_category[category] = [1, 0, 0, 0, 0, 0, 0, 0]
         
         # only add to total once
-        if model == 0:
+        if model == '0':
             summary_category[category][0] += 1
 
         if pred_class == true_class:
@@ -79,6 +79,7 @@ for r in predict_data:
 print("per-class accuracy:")
 print("class,model,accuracy")
 for k in sorted(summary_class.keys()):
+    #print("%s = %s" % (k, summary_class[k]))
     class_total = float(summary_class[k][0])
     for i, v in enumerate(summary_class[k][1:]):
         if i == 6:
@@ -90,6 +91,7 @@ for k in sorted(summary_class.keys()):
 print("\n\nper-category accuracy:")
 print("category,model,accuracy")
 for k in sorted(summary_category.keys()):
+    #print("%s = %s" % (k, summary_category[k]))
     category_total = float(summary_category[k][0])
     for i, v in enumerate(summary_category[k][1:]):
         if i == 6:
